@@ -1,0 +1,21 @@
+genFile
+	new
+	handle
+
+
+read
+
+
+read string from sr
+	prepend
+
+
+
+list
+
+
+list filter by letters
+
+
+
+Next level HPC on evolving workloads
