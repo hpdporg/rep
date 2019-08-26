@@ -4,7 +4,7 @@ include 'format/format.inc'
 format MS64 COFF
 
 include 'Exports.inc'
-
+include 'Include.inc'
 
 public start as 'start'
 
