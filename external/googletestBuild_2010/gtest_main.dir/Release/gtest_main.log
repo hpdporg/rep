@@ -1,0 +1,20 @@
+﻿Build started 9/11/2019 6:45:35 PM.
+     1>Project "C:\Users\lsall\datap\external\googletestBuild_2010\gtest_main.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "gtest_main.dir\Release\gtest_main.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       CustomBuild:
+         Building Custom Rule C:/Users/lsall/datap/external/googletest/CMakeLists.txt
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /IC:\Users\lsall\datap\external\googletest\include /IC:\Users\lsall\datap\external\googletest /Zi /nologo /W4 /WX /O2 /Ob2 /D WIN32 /D _WINDOWS /D NDEBUG /D _UNICODE /D UNICODE /D _WIN32 /D STRICT /D WIN32_LEAN_AND_MEAN /D _HAS_EXCEPTIONS=1 /D "CMAKE_INTDIR=\"Release\"" /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"gtest_main.dir\Release\\" /Fd"gtest_main.dir\Release\vc100.pdb" /Gd /TP /wd4275 /errorReport:prompt ..\googletest\src\gtest_main.cc  -J
+         gtest_main.cc
+       Lib:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\Lib.exe /OUT:"C:\Users\lsall\datap\external\googletestBuild_2010\Release\gtest_main.lib" /NOLOGO gtest_main.dir\Release\gtest_main.obj  /machine:x64
+         gtest_main.vcxproj -> C:\Users\lsall\datap\external\googletestBuild_2010\Release\gtest_main.lib
+       FinalizeBuildStatus:
+         Deleting file "gtest_main.dir\Release\gtest_main.unsuccessfulbuild".
+         Touching "gtest_main.dir\Release\gtest_main.lastbuildstate".
+     1>Done Building Project "C:\Users\lsall\datap\external\googletestBuild_2010\gtest_main.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.13
