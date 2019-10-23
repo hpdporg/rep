@@ -118,8 +118,6 @@
       <Command>copy $(SolutionDir)..\src\main\asm\rep.obj $(SolutionDir)\repTests\$(Platform)\$(Configuration)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

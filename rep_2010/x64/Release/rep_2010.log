@@ -1,4 +1,4 @@
-﻿Build started 10/22/2019 12:54:53 PM.
+﻿Build started 10/23/2019 5:39:35 PM.
      1>Project "C:\Users\lsall\rep\rep_2010\rep_2010.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "x64\Release\rep.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -6,15 +6,16 @@
          C:\Users\lsall\rep\rep_2010\..\src\main\asm\make.cmd
          :VCEnd
          flat assembler  version g.i4pue
-         4 passes, 2.5 seconds, 13303 bytes.
+         4 passes, 1.4 seconds, 13269 bytes.
        PostBuildEvent:
          copy C:\Users\lsall\rep\rep_2010\..\src\main\asm\rep.obj C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\
          :VCEnd
-         The system cannot find the file specified.
-     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppCommon.targets(113,5): error MSB3073: The command "copy C:\Users\lsall\rep\rep_2010\..\src\main\asm\rep.obj C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\
-C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppCommon.targets(113,5): error MSB3073: :VCEnd" exited with code 1.
-     1>Done Building Project "C:\Users\lsall\rep\rep_2010\rep_2010.vcxproj" (build target(s)) -- FAILED.
+                 1 file(s) copied.
+       FinalizeBuildStatus:
+         Deleting file "x64\Release\rep.unsuccessfulbuild".
+         Touching "x64\Release\rep.lastbuildstate".
+     1>Done Building Project "C:\Users\lsall\rep\rep_2010\rep_2010.vcxproj" (build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:03.68
+Time Elapsed 00:00:02.16
