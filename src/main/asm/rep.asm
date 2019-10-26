@@ -11,7 +11,7 @@ include 'rep.inc'
 
 
 
-public start as 'start'
+public startRep as 'startRep'
 
 section '.data' data readable writeable align 16
 
@@ -23,12 +23,14 @@ section '.text' code readable writeable executable align 16
 
 
 ;align 16
-start:
+startRep:
        push rbp
        mov rbp, rsp
        and rsp, -32
        sub rsp, 8*12;8;7;8;9
        and rsp, -32
+
+
 
 	;newFile filename1,[handAddr]
 	;writeFile [handAddr],entry1,4,[alloc3]
