@@ -1,6 +1,8 @@
-;public letters.numAsLetters as 'numAsLetters'
-;public letters.appendLetters as 'appendLetters'
-;public letters.letterLength as 'letterLength'
-;public letters.betweenListsIndices as 'lettersBetweenListsIndices'
-;public letters.betweenIndices as 'lettersBetweenIndices'
-;public letters.copyLetters as 'copyLetters'
+extrn '__imp_numAsLetters' as numAsLetters:qword
+extrn '__imp_appendLetters' as appendLetters:qword
+extrn '__imp_letterLength' as letterLength:qword
+extrn '__imp_lettersBetweenListsIndices' as lettersBetweenListsIndices:qword
+extrn '__imp_lettersBetweenIndices' as lettersBetweenIndices:qword
+extrn '__imp_copyLetters' as copyLetters:qword
+
+

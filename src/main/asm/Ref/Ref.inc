@@ -4,13 +4,14 @@
 section '.data' data readable writeable align 16
 
 
-	struc Parsing
+	struc Ref
 		label .
-		.delimiter dq 0		; Delimiter being used between rep items
-		.baseRepOffset dq 0	; Indentation offset used in Rep
-		.endDelimiter dq 0	; End of an entry delimiter i.e. newline
-		.index dq 0 		; Index of what is being parsed
-		.endIndex dq 0		; End of what is being parsed
+		.ref	dq 0		; Identifier: Letters or Numeric
+		.flags dq 0		; Flags
+		.unprocessed dq 0	; 0 or 1
+		.paramCount dq 0	; Defined Refs may have params
+		.repIndex dq 0		; Index into rep
+		.list dq 0		; Values, Refs list, Params
 	end struc
 
 
@@ -18,11 +19,15 @@ section '.data' data readable writeable align 16
 
 	; Used with address offsets
 	virtual at 0
-		Parsing Parsing
+		Ref Ref
 	end virtual
 
 	; ---- Structures
 	;element Element
+
+
+	;Flags 
+	;REF_DEFINED	REF_LIST	REF_VALUE
 
 
 	
@@ -32,9 +37,9 @@ section '.data' data readable writeable align 16
 section '.text' code readable writeable executable align 16
 
 
-parsing:
-namespace parsing
-parsing.new:
+ref:
+namespace ref
+ref.new:
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*2);+(8*0)
@@ -70,7 +75,7 @@ parsing.new:
 	
 
 	mov rcx, 0
-	add rcx, Parsing.subRangeEndIndex
+	add rcx, Ref.list
 	add rcx, 1000b
 
 	sub rsp, 8*4
@@ -85,26 +90,30 @@ parsing.new:
 
 
 	mov rbx, [new.handleAllocatedMemory]
-	add rbx, Parsing.flags
+	add rbx, Ref.ref
 	mov rax, 0
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]
-	add rbx, Parsing.transformFlags
+	add rbx, Ref.flags
 	mov rax, 0
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]
-	add rbx, Parsing.containsRangeList
+	add rbx, Ref.unprocessed
+	mov rax, 1
+	mov [rbx], rax
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, Ref.paramCount
+	mov rax, 0
+	mov [rbx], rax
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, Ref.repIndex
+	mov rax, 0
+	mov [rbx], rax
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, Ref.list
 	sub rsp, 8*8
-	call list.new
+	call [newList]
 	add rsp, 8*8
-	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
-	add rbx, Parsing.subRangeStartIndex
-	mov rax, 0
-	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
-	add rbx, Parsing.subRangeEndIndex
-	mov rax, 0
 	mov [rbx], rax
 	
 

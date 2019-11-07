@@ -14,6 +14,7 @@ section '.data' data readable writeable align 16
 
 section '.text' code readable writeable executable align 16
 
+;handle reservedword (parsing must categorize these flags)
 
 replacement:
 namespace replacement

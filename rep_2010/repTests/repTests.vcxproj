@@ -110,15 +110,18 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)\repTests\$(Platform)\$(Configuration)\;$(SolutionDir)..\external\googleTestBuild_2010\Release;$(SolutionDir)..\external\datap_2010</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtest.lib;datap.obj;rep.obj;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\test\cpp\AllocateTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\Main.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\ParsingTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\RunCyclesTests.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\test\cpp\AllocateTests.h" />
     <ClInclude Include="..\..\src\test\cpp\AsmIncludes.h" />
+    <ClInclude Include="..\..\src\test\cpp\ParsingTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\RunCyclesTests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

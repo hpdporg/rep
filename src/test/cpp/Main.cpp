@@ -1,5 +1,5 @@
 #include "gtest\gtest.h"
-#include "AllocateTests.h"
+#include "ParsingTests.h"
 
 
 int main(int argc, char **argv) {

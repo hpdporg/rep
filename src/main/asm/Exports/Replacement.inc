@@ -1,3 +1,2 @@
+extrn '__imp_replaceLettersWithList' as replaceLettersWithList:qword
 
-
-;public replacement.lettersWithList as 'replaceLettersWithList'

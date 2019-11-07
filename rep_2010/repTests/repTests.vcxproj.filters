@@ -15,18 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\test\cpp\AllocateTests.cpp">
+    <ClCompile Include="..\..\src\test\cpp\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\test\cpp\Main.cpp">
+    <ClCompile Include="..\..\src\test\cpp\ParsingTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\test\cpp\RunCyclesTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\test\cpp\AllocateTests.h">
+    <ClInclude Include="..\..\src\test\cpp\AsmIncludes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test\cpp\AsmIncludes.h">
+    <ClInclude Include="..\..\src\test\cpp\ParsingTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\test\cpp\RunCyclesTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

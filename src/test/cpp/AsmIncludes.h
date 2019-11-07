@@ -84,6 +84,26 @@ typedef enum ReplaceFlags{
 	REPLACE_INSERT = 2
 } ReplaceFlags;
 
+typedef struct Parsing{
+	char* delimiter;
+	_int64 baseRepOffset;
+	char* endDelimiter;
+	_int64 index;
+	_int64 endIndex;
+} Parsing;
+
+typedef struct RefRegistry{
+	List* list;
+	List* definedList;
+} RefRegistry;
+
+typedef struct RunCycles{
+	RefRegistry* refRegistry;
+	Parsing* parsing;
+	List* repRecordList;
+	char* repAllocation;	
+} RunCycles;
+
 
 ///extern char* pathSepLettersChar;
 extern "C" {
@@ -127,6 +147,16 @@ extern "C" {
 
 	//Replacement
 	char* replaceLettersWithList(ReplaceFlags flags, char* letters, List* list, List* matchResultsList);
+
+	//Parsing
+	Parsing* newParsing();
+	char* parseNext(Parsing* parsing, char* letters);
+	//parseRep();
+
+	//RunCycles
+	RunCycles* newRunCycles();
+
+	//parseRep();
 
 }
 
