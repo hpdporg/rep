@@ -1,0 +1,31 @@
+
+
+teststructureref
+	result
+	val
+	expected
+	description
+	actual
+
+
+
+
+Someone should just feed this in, this is really just a list of lists, teststructurerefs, or letters that become matched. Integrate with spreadsheet and spit out formatted? Charts too?
+	worklog?
+	suites, tabs
+	use folders in hierarchy?
+
+test1
+	pass
+	2.80
+	2.80
+	Should be the sum of each amount.
+	2.80
+
+
+test2
+	fail
+	2.78
+	2.78
+	Should be the exact value
+	2.78
