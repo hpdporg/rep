@@ -116,11 +116,14 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\test\cpp\Main.cpp" />
     <ClCompile Include="..\..\src\test\cpp\ParsingTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\RefTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\RunCyclesTest.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RunCyclesTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\test\cpp\AsmIncludes.h" />
     <ClInclude Include="..\..\src\test\cpp\ParsingTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\RefTests.h" />
     <ClInclude Include="..\..\src\test\cpp\RunCyclesTests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

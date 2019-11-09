@@ -4,6 +4,7 @@ extrn '__imp_retrieve' as retrieve:qword
 extrn '__imp_storeLetters' as storeLetters:qword
 extrn '__imp_restoreLetters' as restoreLetters:qword
 extrn '__imp_retrieveRecordNames' as retrieveRecordNames:qword
+extrn '__imp_retrieveRecordNamesExtension' as retrieveRecordNamesExtension:qword
 
 
 

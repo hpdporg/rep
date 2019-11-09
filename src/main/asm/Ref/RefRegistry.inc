@@ -228,7 +228,7 @@ refRegistry.newLastRegisteredDefinedRef:
 
 	mov [newLastRegisteredDefinedRef.refRegistryAddr], rcx
 	mov [newLastRegisteredDefinedRef.ref], rdx	
-
+	
 	and rsp, -32
 	push rbx 
 	push rbp 
@@ -245,7 +245,8 @@ refRegistry.newLastRegisteredDefinedRef:
 	mov rcx, 0
 	;mov [newLastRegisteredDefinedRef.lettersIndex], rcx		; Begin as 0
 
-	
+
+
 	sub rsp, 8*8
 	mov rdx, [newLastRegisteredDefinedRef.ref]
 	mov rbx, [newLastRegisteredDefinedRef.refRegistryAddr]
@@ -401,6 +402,16 @@ refRegistry.getRegisteredRef:
 	sub rsp, 8*8
 	cmp rax, 0
 	je getRegisteredRef.nextItem
+
+
+	mov rbx, [getRegisteredRef.nextRef]
+	add rbx, Ref.repIndex
+	mov rdx, [rbx]
+	mov rcx, [getRegisteredRef.repIndex]
+	cmp rcx, rdx
+	jne getRegisteredRef.nextItem
+
+
 
 
 	; return ref instead of 1?

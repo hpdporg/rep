@@ -26,7 +26,9 @@ section '.data' data readable writeable align 16
 
 
 
+	repFileExtensionLetters db '.rep',0
 	repFileExtensionLettersMatcher db '*.rep',0
+	currentDirRepFileExtensionLettersMatcher db '..\..\..\..\src\resources\*.rep',0
 
 
 	storeFileDefinedRefLetters db 'storeFile',0
@@ -313,13 +315,14 @@ runCycles.loadReps:
 
 	mov rbx, [loadReps.storageRecord]
 	add rbx, Record.location
-	mov r8, repFileExtensionLettersMatcher
+	mov r8, currentDirLetter;currentDirRepFileExtensionLettersMatcher
 	mov [rbx], r8
 	
 
 	sub rsp, 8*8
+	mov rdx, repFileExtensionLetters
 	mov rcx, [loadReps.storageRecord]
-	call [retrieveRecordNames]
+	call [retrieveRecordNamesExtension]
 	add rsp, 8*8
 	mov [loadReps.repRecordList], rax
 
@@ -327,6 +330,7 @@ runCycles.loadReps:
 	add rbx, RunCycles.repRecordList
 	mov rdx, [loadReps.repRecordList]
 	mov [rbx], rdx	
+
 
 
 	.endList:
@@ -428,7 +432,7 @@ runCycles.loadRepAllocation:
 
 	mov rbx, [loadRepAllocation.storageRecord]
 	add rbx, Record.builtLocation
-	mov r8, repFileExtensionLettersMatcher
+	mov r8, [loadRepAllocation.storageRecordName];repFileExtensionLettersMatcher		; TO-DO: Handle other base dirs
 	mov [rbx], r8
 	
 
@@ -439,10 +443,22 @@ runCycles.loadRepAllocation:
 	mov [loadRepAllocation.repRecordList], rax
 
 	
+	sub rsp, 8*8
+	mov rbx, [loadRepAllocation.repRecordList]
+	add rbx, Record.allocAddr
+	mov rdx, [rbx]
+	mov rbx, [loadRepAllocation.runCyclesAddr]
+	add rbx, RunCycles.repAllocation	
+	mov rcx, [rbx]
+	call [appendLetters]
+	add rsp, 8*8
+	mov rbx, [loadRepAllocation.runCyclesAddr]
+	add rbx, RunCycles.repAllocation	
+	mov [rbx], rax
 
 
-	;.repAllocation	;;;;;;;;;;;;;;;;;;;;;;;;;
 
+	jmp loadRepAllocation.nextRepRecord
 	.endList:
 
 
@@ -549,8 +565,8 @@ runCycles.loadRefRegistry:
 	mov [rbx], r9
 
 	sub rsp, 8*8
-	mov rdx, retrieveFileDefinedRefLetters
-	mov rcx, [loadRefRegistry.newRef]
+	mov rdx, [loadRefRegistry.newRef]
+	mov rcx, [loadRefRegistry.refRegistry]
 	call refRegistry.newLastRegisteredDefinedRef
 	add rsp, 8*8
 

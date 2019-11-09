@@ -92,6 +92,15 @@ typedef struct Parsing{
 	_int64 endIndex;
 } Parsing;
 
+typedef struct Ref{
+	char* ref;
+	_int64 flags;
+	_int64 unprocessed;
+	_int64 paramCount;
+	_int64 repIndex;
+	List* list;
+} Ref;
+
 typedef struct RefRegistry{
 	List* list;
 	List* definedList;
@@ -150,13 +159,25 @@ extern "C" {
 
 	//Parsing
 	Parsing* newParsing();
-	char* parseNext(Parsing* parsing, char* letters);
-	//parseRep();
+	char* getNextParsingValue(Parsing* parsing, char* letters);
+	char* parseRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
+	char* nextParsing(Parsing* parsing, char* letters, RefRegistry* refRegistry);
+	char* parseRef(Parsing* parsing, char* letters, RefRegistry* refRegistry);
+	char* buildRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
+
+	//Ref
+	Ref* newRef();
+	void newLastRegisteredRef(RefRegistry* refRegistry, Ref* ref);
+	void newLastRegisteredDefinedRef(RefRegistry* refRegistry, Ref* ref);
+	Ref* getRegisteredRef(RefRegistry* refRegistry, Ref* ref, _int64 repIndex);
+	RefRegistry* newRefRegistry();
 
 	//RunCycles
 	RunCycles* newRunCycles();
-
-	//parseRep();
+	void beginRunCycles(RunCycles* runCycles);
+	void loadRunCycleReps(RunCycles* runCycles);
+	void loadRunCycleRepAllocation(RunCycles* runCycles);	
+	void loadRunCycleRefRegistry(RunCycles* runCycles);
 
 }
 

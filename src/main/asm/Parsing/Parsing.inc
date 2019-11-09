@@ -11,6 +11,7 @@ section '.data' data readable writeable align 16
 		.endDelimiter dq 0	; End of an entry delimiter i.e. newline
 		.index dq 0 		; Index of what is being parsed
 		.parsingRef dq 0	; Ref being parsed, if any
+		.nestedParsingRef dq 0	; Nested Parsing ref, if any
 		.parsingDefinedRef dq 0	; Defined Ref being parsed, if any
 		.endIndex dq 0		; End of what is being parsed
 	end struc
@@ -111,6 +112,10 @@ parsing.new:
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]
 	add rbx, Parsing.parsingRef
+	mov rax, 0
+	mov [rbx], rax
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, Parsing.nestedParsingRef
 	mov rax, 0
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]
@@ -326,6 +331,89 @@ parsing.getNext:
 
 	retn 0
 
+
+; parseRep can call parseNext as many times as it needs in order to traverse the Rep
+; It also can call buildRep when there is a new Ref required
+parsing.parseRep:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*12);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label parseRep.heapAddress qword at rbp-8  
+	label parseRep.handleAllocatedMemory qword at rbp-16
+	label parseRep.parsing qword at rbp-24 
+	label parseRep.matchIndex qword at rbp-32
+	label parseRep.newRef qword at rbp-40
+	label parseRep.letters qword at rbp-48
+	label parseRep.nextNewlineIndex qword at rbp-56
+	label parseRep.parsedLetters qword at rbp-64
+	label parseRep.lettersIndex qword at rbp-72
+	label parseRep.refRegistry qword at rbp-80
+	label parseRep.newLineLetterLength qword at rbp-88
+	label parseRep.matchingStartIndex qword at rbp-96
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [parseRep.parsing], rcx
+	mov [parseRep.letters], rdx	
+	mov [parseRep.refRegistry], r8
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+
+	sub rsp, 8*8
+	mov r8, [parseRep.refRegistry]
+	mov rdx, [parseRep.letters]
+	mov rcx, [parseRep.parsing]
+	call next
+	add rsp, 8*8
+
+
+	;parseNext
+		; tab
+		; newline
+		; letters
+			; parseRef
+	;buildrep
+	
+
+
+	.end:
+
+	mov rax,0;[parseRep.parsedLetters]
+
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
 parsing.next:
 	push rbp 
 	mov rbp, rsp 
@@ -365,6 +453,35 @@ parsing.next:
 	push r14 
 	push r15
 	sub rsp, 8
+
+
+
+
+	; compareValNewline
+	; compareValTab
+	; valLetters
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	jmp next.end
 
 
 	mov rcx, 0
@@ -502,6 +619,8 @@ parsing.next:
 	.endParsedValue:
 
 
+	.end:
+
 	mov rax, 0;[next.parsedLetters]
 
 
@@ -522,12 +641,78 @@ parsing.next:
 
 	retn 0
 
+parsing.buildRep:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*12);+(8*6)
 
-;parseRef
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label buildRep.heapAddress qword at rbp-8  
+	label buildRep.handleAllocatedMemory qword at rbp-16
+	label buildRep.parsing qword at rbp-24 
+	label buildRep.matchIndex qword at rbp-32
+	label buildRep.newRef qword at rbp-40
+	label buildRep.letters qword at rbp-48
+	label buildRep.nextNewlineIndex qword at rbp-56
+	label buildRep.parsedLetters qword at rbp-64
+	label buildRep.lettersIndex qword at rbp-72
+	label buildRep.refRegistry qword at rbp-80
+	label buildRep.newLineLetterLength qword at rbp-88
+	label buildRep.matchingStartIndex qword at rbp-96
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [buildRep.parsing], rcx
+	mov [buildRep.letters], rdx	
+	mov [buildRep.refRegistry], r8
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+
+	
+
+
+	.end:
+
+	mov rax,0;[buildRep.parsedLetters]
+
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+
+
 parsing.parseRef:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*11);+(8*6)
+	sub rsp, (8*12);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -542,6 +727,7 @@ parsing.parseRef:
 	label parseRef.lettersIndex qword at rbp-72
 	label parseRef.refRegistry qword at rbp-80
 	label parseRef.newLineLetterLength qword at rbp-88
+	label parseRef.matchingStartIndex qword at rbp-96
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -566,6 +752,18 @@ parsing.parseRef:
 
 
 
+
+	jmp parseRef.end
+
+
+
+
+
+	mov rbx, [parseRef.parsing]
+	add rbx, Parsing.index
+	mov rcx, [rbx]
+	mov [parseRef.matchingStartIndex], rcx	; Cache use later
+
 	sub rsp, 8*8
 	mov rdx, [parseRef.letters]
 	mov rcx, [parseRef.parsing]
@@ -575,6 +773,7 @@ parsing.parseRef:
 
 
 	sub rsp, 8*8
+	mov r8, [parseRef.matchingStartIndex]	; Used with defined Refs only
 	mov rdx, [parseRef.parsedLetters]
 	mov rcx, [parseRef.refRegistry]
 	call refRegistry.getRegisteredRef
@@ -582,8 +781,11 @@ parsing.parseRef:
 	cmp rax, 0				; Already exists
 	je parseRef.newLastRegisteredRef
 	cmp rax, 1b
-	jne parseRef.newLastRegisteredRef		; Not defined ref
+	jne parseRef.parsingRefBlankOrStillParsing	; Already defined
 	
+
+	.newLastDefinedRef:
+
 
 	sub rsp, 8*8
 	call ref.new
@@ -594,6 +796,10 @@ parsing.parseRef:
 	add rbx, Ref.ref
 	mov r8, [parseRef.parsedLetters]
 	mov [rbx], r8
+	mov rbx, [parseRef.newRef]
+	add rbx, Ref.repIndex
+	mov rcx, [parseRef.matchingStartIndex]	; Index
+	mov [rbx], rcx
 
 	mov rbx, [parseRef.newRef]
 	add rbx, Ref.flags
@@ -603,7 +809,7 @@ parsing.parseRef:
 	sub rsp, 8*8
 	mov rdx, [parseRef.newRef]
 	mov rcx, [parseRef.refRegistry]
-	call refRegistry.newLastRegisteredRef
+	call refRegistry.newLastRegisteredRef	; Uses same list as non-defined
 	add rsp, 8*8
 
 
@@ -631,7 +837,7 @@ parsing.parseRef:
 
 
 
-	.parsingRefBlankOrStillParsing:
+	.parsingRefBlankOrStillParsing:		; Need to put Ref in Parsing also when not there
 	mov rdx, [parseRef.parsing]
 	add rdx, Parsing.parsingRef
 	mov r8, [rdx]
@@ -639,6 +845,8 @@ parsing.parseRef:
 	cmp r8, rcx
 	je parseRef.parsingRefBlank
 	
+
+	.parsingRefNotBlank:
 
 
 	.parsingRefBlank:
@@ -669,6 +877,8 @@ parsing.parseRef:
 
 	jmp parseRef.end
 
+	.existingRef:
+
 	;compare parsedLetters, parsingRef
 	;compare parsingRef list
 	; new last list item
@@ -676,7 +886,8 @@ parsing.parseRef:
 
 	.end:
 
-	mov rax,[parseRef.parsedLetters]
+	;mov rax,[parseRef.parsedLetters]	; Put back?
+	mov rax,0;[parseRef.parsedLetters]
 
 
 
@@ -696,6 +907,7 @@ parsing.parseRef:
 
 	retn 0
 
+;parseRefWithFlags calls below three parse calls
 ;getParsedLettersRefFlag?
 ;parserefvalue
 ;parsereflist

@@ -1,20 +1,64 @@
-﻿Build started 11/6/2019 10:20:40 PM.
-     1>Project "C:\Users\lsall\rep\rep_2010\repTests\repTests.vcxproj" on node 3 (build target(s)).
+﻿Build started 11/8/2019 11:18:25 PM.
+     1>Project "C:\Users\lsall\rep\rep_2010\repTests\repTests.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Touching "x64\Release\repTests.unsuccessfulbuild".
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /IC:\Users\lsall\rep\rep_2010\..\external\googletest_2010\include /Zi /nologo /W3 /WX- /O2 /Oi /GL /D _MBCS /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc100.pdb" /Gd /TP /errorReport:prompt ..\..\src\test\cpp\Main.cpp ..\..\src\test\cpp\ParsingTests.cpp ..\..\src\test\cpp\RunCyclesTests.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /IC:\Users\lsall\rep\rep_2010\..\external\googletest_2010\include /Zi /nologo /W3 /WX- /O2 /Oi /GL /D _MBCS /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc100.pdb" /Gd /TP /errorReport:prompt ..\..\src\test\cpp\Main.cpp ..\..\src\test\cpp\ParsingTests.cpp ..\..\src\test\cpp\RefTests.cpp ..\..\src\test\cpp\RunCyclesTest.cpp ..\..\src\test\cpp\RunCyclesTests.cpp
          Main.cpp
          ParsingTests.cpp
+         RefTests.cpp
+         RunCyclesTest.cpp
          RunCyclesTests.cpp
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\repTests.exe" /NOLOGO /LIBPATH:C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\ /LIBPATH:C:\Users\lsall\rep\rep_2010\..\external\googleTestBuild_2010\Release /LIBPATH:C:\Users\lsall\rep\rep_2010\..\external\datap_2010 gtest.lib datap.obj rep.obj kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"x64\Release\repTests.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\lsall\rep\rep_2010\repTests\x64\Release\repTests.pdb" /LARGEADDRESSAWARE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\repTests.lib" /MACHINE:X64 x64\Release\Main.obj
          x64\Release\ParsingTests.obj
+         x64\Release\RefTests.obj
+         x64\Release\RunCyclesTest.obj
          x64\Release\RunCyclesTests.obj
-     1>rep.obj : error LNK2001: unresolved external symbol __imp_hasMatch
-     1>C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\repTests.exe : fatal error LNK1120: 1 unresolved externals
-     1>Done Building Project "C:\Users\lsall\rep\rep_2010\repTests\repTests.vcxproj" (build target(s)) -- FAILED.
+         Generating code
+         Finished generating code
+     1>datap.obj : warning LNK4078: multiple '.data' sections found with different attributes (C03000C0)
+     1>gtest.lib(gtest-all.obj) : warning LNK4078: multiple '.text' sections found with different attributes (60501020)
+     1>rep.obj : warning LNK4049: locally defined symbol linearAllocate imported
+     1>rep.obj : warning LNK4049: locally defined symbol newList imported
+     1>rep.obj : warning LNK4049: locally defined symbol newLastItem imported
+     1>rep.obj : warning LNK4049: locally defined symbol getNextItem imported
+     1>rep.obj : warning LNK4049: locally defined symbol getNextItemNesting imported
+     1>rep.obj : warning LNK4049: locally defined symbol nextItemNesting imported
+     1>rep.obj : warning LNK4049: locally defined symbol resetIndex imported
+     1>rep.obj : warning LNK4049: locally defined symbol newNextItem imported
+     1>rep.obj : warning LNK4049: locally defined symbol getPriorItem imported
+     1>rep.obj : warning LNK4049: locally defined symbol getNextItemMatch imported
+     1>rep.obj : warning LNK4049: locally defined symbol getNextItemMatchComp imported
+     1>rep.obj : warning LNK4049: locally defined symbol numAsLetters imported
+     1>rep.obj : warning LNK4049: locally defined symbol appendLetters imported
+     1>rep.obj : warning LNK4049: locally defined symbol letterLength imported
+     1>rep.obj : warning LNK4049: locally defined symbol lettersBetweenListsIndices imported
+     1>rep.obj : warning LNK4049: locally defined symbol lettersBetweenIndices imported
+     1>rep.obj : warning LNK4049: locally defined symbol copyLetters imported
+     1>rep.obj : warning LNK4049: locally defined symbol newStorage imported
+     1>rep.obj : warning LNK4049: locally defined symbol defineRecordPath imported
+     1>rep.obj : warning LNK4049: locally defined symbol retrieve imported
+     1>rep.obj : warning LNK4049: locally defined symbol storeLetters imported
+     1>rep.obj : warning LNK4049: locally defined symbol restoreLetters imported
+     1>rep.obj : warning LNK4049: locally defined symbol retrieveRecordNames imported
+     1>rep.obj : warning LNK4049: locally defined symbol retrieveRecordNamesExtension imported
+     1>rep.obj : warning LNK4049: locally defined symbol newMatches imported
+     1>rep.obj : warning LNK4049: locally defined symbol processMatchFlags imported
+     1>rep.obj : warning LNK4049: locally defined symbol getMatches imported
+     1>rep.obj : warning LNK4049: locally defined symbol lettersSame imported
+     1>rep.obj : warning LNK4049: locally defined symbol lettersSameExact imported
+     1>rep.obj : warning LNK4049: locally defined symbol getNextMatchIndex imported
+     1>rep.obj : warning LNK4049: locally defined symbol hasMatch imported
+     1>rep.obj : warning LNK4049: locally defined symbol replaceLettersWithList imported
+         repTests.vcxproj -> C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\repTests.exe
+       Manifest:
+         c:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\repTests.exe;#1" /manifest x64\Release\repTests.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "x64\Release\repTests.unsuccessfulbuild".
+         Touching "x64\Release\repTests.lastbuildstate".
+     1>Done Building Project "C:\Users\lsall\rep\rep_2010\repTests\repTests.vcxproj" (build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:04.21
+Time Elapsed 00:00:15.26

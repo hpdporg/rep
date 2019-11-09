@@ -1,12 +1,12 @@
-﻿Build started 11/6/2019 10:20:40 PM.
-     1>Project "C:\Users\lsall\rep\rep_2010\rep_2010.vcxproj" on node 2 (build target(s)).
+﻿Build started 11/8/2019 11:18:25 PM.
+     1>Project "C:\Users\lsall\rep\rep_2010\rep_2010.vcxproj" on node 3 (build target(s)).
      1>InitializeBuildStatus:
          Creating "x64\Release\rep.unsuccessfulbuild" because "AlwaysCreate" was specified.
        PreBuildEvent:
          C:\Users\lsall\rep\rep_2010\..\src\main\asm\make.cmd
          :VCEnd
          flat assembler  version g.i4pue
-         4 passes, 0.5 seconds, 6632 bytes.
+         4 passes, 1.2 seconds, 7285 bytes.
        PostBuildEvent:
          copy C:\Users\lsall\rep\rep_2010\..\src\main\asm\rep.obj C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\
          :VCEnd
@@ -18,4 +18,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.23
+Time Elapsed 00:00:02.65
