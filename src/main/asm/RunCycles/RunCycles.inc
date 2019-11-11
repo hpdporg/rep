@@ -236,9 +236,49 @@ runCycles.begin:
 	add rsp, 8*8
 
 
-
+	.nextCycle:
+	mov rbx, [begin.runCyclesAddr]
+	add rbx, RunCycles.parsing
+	mov rdx, [rbx]
+	mov r8, rdx
+	add rdx, Parsing.index
+	add r8, Parsing.endIndex
+	mov rcx, [rdx]
+	mov r9, [r8]
+	cmp r9, 0
+	je begin.firstCycle
+	cmp rcx, r9
+	jnl begin.endCycles
 	
+	.firstCycle:	
 
+	sub rsp, 8*8
+	mov rbx, [begin.runCyclesAddr]
+	add rbx, RunCycles.refRegistry
+	mov r8, [rbx]
+	mov rbx, [begin.runCyclesAddr]
+	add rbx, RunCycles.repAllocation
+	mov rdx, [rbx]
+	mov rcx, [begin.parsing]
+	call parsing.parseRep
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [begin.runCyclesAddr]
+	add rbx, RunCycles.refRegistry
+	mov r8, [rbx]
+	mov rbx, [begin.runCyclesAddr]
+	add rbx, RunCycles.repAllocation
+	mov rdx, [rbx]
+	mov rcx, [begin.parsing]
+	call processing.processRep
+	add rsp, 8*8
+
+
+
+	jmp begin.nextCycle
+	
+	.endCycles:
 
 	.endList:
 
@@ -543,6 +583,11 @@ runCycles.loadRefRegistry:
 	mov r9, 10b
 	mov [rbx], r9
 
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.definedRefFlags			; definedRefFlags
+	mov r9, 1b
+	mov [rbx], r9
+
 	sub rsp, 8*8
 	mov rdx, [loadRefRegistry.newRef]
 	mov rcx, [loadRefRegistry.refRegistry]
@@ -561,6 +606,11 @@ runCycles.loadRefRegistry:
 
 	mov rbx, [loadRefRegistry.newRef]
 	add rbx, Ref.paramCount				; Param count
+	mov r9, 10b
+	mov [rbx], r9
+
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.definedRefFlags			; definedRefFlags
 	mov r9, 10b
 	mov [rbx], r9
 
@@ -585,6 +635,11 @@ runCycles.loadRefRegistry:
 	mov r9, 1b
 	mov [rbx], r9
 
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.definedRefFlags			; definedRefFlags
+	mov r9, 100b
+	mov [rbx], r9
+
 	sub rsp, 8*8
 	mov rdx, [loadRefRegistry.newRef]
 	mov rcx, [loadRefRegistry.refRegistry]
@@ -606,6 +661,11 @@ runCycles.loadRefRegistry:
 	mov r9, 11b
 	mov [rbx], r9
 
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.definedRefFlags			; definedRefFlags
+	mov r9, 1000b
+	mov [rbx], r9
+
 	sub rsp, 8*8
 	mov rdx, [loadRefRegistry.newRef]
 	mov rcx, [loadRefRegistry.refRegistry]
@@ -625,6 +685,11 @@ runCycles.loadRefRegistry:
 	mov rbx, [loadRefRegistry.newRef]
 	add rbx, Ref.paramCount				; Param count
 	mov r9, 1b
+	mov [rbx], r9
+
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.definedRefFlags			; definedRefFlags
+	mov r9, 10000b
 	mov [rbx], r9
 
 	sub rsp, 8*8

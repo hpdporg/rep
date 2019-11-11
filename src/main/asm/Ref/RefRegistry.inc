@@ -369,7 +369,7 @@ refRegistry.getRegisteredRef:
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	call [lettersSameExact]
-	sub rsp, 8*8
+	add rsp, 8*8
 	cmp rax, 0
 	je getRegisteredRef.nextItem
 
@@ -399,7 +399,7 @@ refRegistry.getRegisteredRef:
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	call [lettersSameExact]
-	sub rsp, 8*8
+	add rsp, 8*8	
 	cmp rax, 0
 	je getRegisteredRef.nextItem
 
@@ -409,7 +409,7 @@ refRegistry.getRegisteredRef:
 	mov rdx, [rbx]
 	mov rcx, [getRegisteredRef.repIndex]
 	cmp rcx, rdx
-	jne getRegisteredRef.nextItem
+	jne getRegisteredRef.nextDefinedItem
 
 
 
@@ -424,10 +424,128 @@ refRegistry.getRegisteredRef:
 
 
 
-	.end:
+	;.end:
 
 	mov rax, [getRegisteredRef.nextRef]
+	.end:;dbg
 
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+
+; used when we need the defined ref's flags
+refRegistry.getRegisteredDefinedRef:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*10);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label getRegisteredDefinedRef.heapAddress qword at rbp-8  
+	label getRegisteredDefinedRef.handleAllocatedMemory qword at rbp-16
+	label getRegisteredDefinedRef.list qword at rbp-24 
+	label getRegisteredDefinedRef.definedList qword at rbp-32
+	label getRegisteredDefinedRef.matches qword at rbp-40
+	label getRegisteredDefinedRef.refRegistryAddr qword at rbp-48
+	label getRegisteredDefinedRef.nextRef qword at rbp-56
+	label getRegisteredDefinedRef.ref qword at rbp-64
+	label getRegisteredDefinedRef.lettersIndex qword at rbp-72
+	label getRegisteredDefinedRef.repIndex qword at rbp-80
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [getRegisteredDefinedRef.refRegistryAddr], rcx
+	mov [getRegisteredDefinedRef.ref], rdx	
+	mov [getRegisteredDefinedRef.repIndex], r8
+
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+
+	mov rcx, 0
+	mov [getRegisteredDefinedRef.nextRef], rcx		; Begin as 0
+
+
+	
+
+	mov rbx, [getRegisteredDefinedRef.refRegistryAddr]
+	add rbx, RefRegistry.definedList
+	mov r8, [rbx]
+	mov [getRegisteredDefinedRef.definedList], r8
+
+	sub rsp, 8*8
+	mov rcx, [getRegisteredDefinedRef.definedList]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+
+	.nextDefinedItem:
+	mov rbx, [getRegisteredDefinedRef.definedList]
+	mov rdx, rbx
+	add rbx, List.index
+	add rdx, List.itemsCount
+	mov rcx, [rbx]
+	mov r8, [rdx]
+	cmp rcx, r8
+	jnl getRegisteredDefinedRef.end
+
+	sub rsp, 8*8
+	mov rcx, [getRegisteredDefinedRef.definedList]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [getRegisteredDefinedRef.nextRef], rax
+
+	sub rsp, 8*8
+	mov rdx, [getRegisteredDefinedRef.ref]
+	mov rbx, [getRegisteredDefinedRef.nextRef]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	call [lettersSameExact]
+	add rsp, 8*8	
+	cmp rax, 0
+	je getRegisteredDefinedRef.nextDefinedItem
+
+
+
+	mov [getRegisteredDefinedRef.nextRef], rax			; 1 when defined
+
+	
+
+
+
+
+	;.end:
+
+	mov rax, [getRegisteredDefinedRef.nextRef]
+	.end:;dbg
 
 
 	add rsp, 8	

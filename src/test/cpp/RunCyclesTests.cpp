@@ -41,12 +41,13 @@ TEST_F(RunCyclesTest, LoadsRefRegistry) {
 	loadRunCycleRefRegistry(runCycles);
 	fprintf(stdout, "\nLoading complete\n");
 	fprintf(stdout, "\nRunCycle Ref List count: %d\n", runCycles->refRegistry->list->itemsCount);
-	fprintf(stdout, "\nRunCycle Ref List count: %d\n", runCycles->refRegistry->definedList->itemsCount);
+	fprintf(stdout, "\nRunCycle Ref Defined List count: %d\n", runCycles->refRegistry->definedList->itemsCount);
 
 	EXPECT_EQ(5,runCycles->refRegistry->definedList->itemsCount);
 }
 
 TEST_F(RunCyclesTest, BeginsRunCycles) {
+	fprintf(stdout, "\nBeginning load \n");
 	RunCycles* runCycles = newRunCycles();
 	beginRunCycles(runCycles);
 		

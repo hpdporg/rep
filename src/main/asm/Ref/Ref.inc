@@ -11,6 +11,8 @@ section '.data' data readable writeable align 16
 		.unprocessed dq 0	; 0 or 1
 		.paramCount dq 0	; Defined Refs may have params
 		.repIndex dq 0		; Index into rep
+		.valueAlloc dq 0	; Processed Value alloc
+		.definedRefFlags dq 0	; Defined Refs may use flags
 		.list dq 0		; Values, Refs list, Params
 	end struc
 
@@ -27,9 +29,11 @@ section '.data' data readable writeable align 16
 
 
 	;Flags 
-	;REF_DEFINED	REF_LIST	REF_VALUE
+	;REF_FILTER	REF_DEFINED	REF_LIST	REF_VALUE
 
 
+	;definedRefFlags
+	;DEFINED_REF_SEPARATOR	DEFINED_REF_REPLACE_LETTERS_LIST	DEFINED_REF_LETTERS	DEFINED_REF_RETRIEVE_FILE	DEFINED_REF_STORE_FILE
 	
 
 	
@@ -107,6 +111,14 @@ ref.new:
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]
 	add rbx, Ref.repIndex
+	mov rax, 0
+	mov [rbx], rax
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, Ref.valueAlloc
+	mov rax, 0
+	mov [rbx], rax
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, Ref.definedRefFlags
 	mov rax, 0
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]

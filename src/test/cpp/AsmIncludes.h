@@ -84,13 +84,12 @@ typedef enum ReplaceFlags{
 	REPLACE_INSERT = 2
 } ReplaceFlags;
 
-typedef struct Parsing{
-	char* delimiter;
-	_int64 baseRepOffset;
-	char* endDelimiter;
-	_int64 index;
-	_int64 endIndex;
-} Parsing;
+typedef enum ParsingFlags{
+	PARSING_AT_NEWLINE = 1,
+	PARSING_AT_DELIMITER = 2,
+	PARSING_AT_LETTERS = 4
+} ParsingFlags;
+
 
 typedef struct Ref{
 	char* ref;
@@ -98,8 +97,25 @@ typedef struct Ref{
 	_int64 unprocessed;
 	_int64 paramCount;
 	_int64 repIndex;
+	void* valueAlloc;
+	_int64 definedRefFlags;
 	List* list;
 } Ref;
+
+typedef struct Parsing{
+	char* delimiter;
+	_int64 baseRepOffset;
+	_int64 repOffset;
+	char* endDelimiter;
+	_int64 index;
+	_int64 lineRefCount;
+	_int64 multilineRefCount;
+	List* parsingRefs;
+	List* nestedParsingRefs;
+	Ref* parsingDefinedRef;
+	_int64 flags;
+	_int64 endIndex;
+} Parsing;
 
 typedef struct RefRegistry{
 	List* list;
@@ -131,7 +147,11 @@ extern "C" {
 	List* newList();
 	void newLastItem(List* list, void* item);
 	void* getNextItem(List* list);
-	void* getNextItemNesting(List* list);
+	void* getLastDivergedItem(List* list);
+	void* getLastDivergedItemNesting(List* list);
+	_int64 getNextItemNesting(List* list);
+	_int64 getConvergedItemCount(List* list);
+	void* getNextTangentItem(List* list, _int64 nesting);
 	void* nextItemNesting(List* list, _int64 nesting);
 	void resetIndex(List* list);
 	void* newNextItem(List* list, void* item);
@@ -160,10 +180,14 @@ extern "C" {
 	//Parsing
 	Parsing* newParsing();
 	char* getNextParsingValue(Parsing* parsing, char* letters);
-	char* parseRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
+	char* getNextParsingValueOrDelimiter(Parsing* parsing, char* letters);
+	Ref* parseRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
 	char* nextParsing(Parsing* parsing, char* letters, RefRegistry* refRegistry);
 	char* parseRef(Parsing* parsing, char* letters, RefRegistry* refRegistry);
 	char* buildRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
+
+	//Processing
+	char* processRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
 
 	//Ref
 	Ref* newRef();
