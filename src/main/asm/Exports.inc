@@ -15,4 +15,4 @@ include 'Exports/Letters.inc'
 include 'Exports/Storage.inc'
 include 'Exports/Matching.inc'
 include 'Exports/Replacement.inc'
-
+include 'Exports/Processing.inc'

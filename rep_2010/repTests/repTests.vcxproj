@@ -116,6 +116,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\test\cpp\Main.cpp" />
     <ClCompile Include="..\..\src\test\cpp\ParsingTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\ProcessingTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RefTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RunCyclesTest.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RunCyclesTests.cpp" />
@@ -123,6 +124,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\test\cpp\AsmIncludes.h" />
     <ClInclude Include="..\..\src\test\cpp\ParsingTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\ProcessingTests.h" />
     <ClInclude Include="..\..\src\test\cpp\RefTests.h" />
     <ClInclude Include="..\..\src\test\cpp\RunCyclesTests.h" />
   </ItemGroup>

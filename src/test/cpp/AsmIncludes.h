@@ -188,6 +188,7 @@ extern "C" {
 
 	//Processing
 	char* processRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
+	void defineAsProcessed(Ref* ref);
 
 	//Ref
 	Ref* newRef();

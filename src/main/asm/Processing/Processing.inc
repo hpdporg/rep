@@ -7,6 +7,12 @@ section '.data' data readable writeable align 16
 
 
 
+
+
+	; Ref Base flags
+	; REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM	REF_BASE_ITEM_DEFINED_REF	REF_BASE_DEFINED_REF_FIRST_PARAM
+
+
 section '.text' code readable writeable executable align 16
 
 ;handle reservedword (parsing must categorize these flags)
@@ -75,8 +81,9 @@ processing.processRep:
 		;letters
 		;appending
 		;defineAsProcessed
+		;replaceletterslist?
 	;definedRefs	only when unprocessed
-		;storefile
+		;storefile	; param as list?
 			;getUnprocessedParams
 			;listAsVal
 			;defineAsProcessed
@@ -84,7 +91,6 @@ processing.processRep:
 			;getUnprocessedParams
 			;listAsVal
 			;defineAsProcessed
-	;
 
 	
 
@@ -197,7 +203,7 @@ processing.processRefValues:
 	mov rbx, [processRefValues.item]
 	add rbx, Ref.flags
 	mov r8, [rbx]
-	mov rdx, 1b
+	mov rdx, 1b						; REF_VALUE
 	cmp r8, rdx
 	jne processRefValues.nextRefItem			; Skip when not REF_VALUE
 
@@ -207,7 +213,7 @@ processing.processRefValues:
 	add rsp, 8*8
 	mov [processRefValues.unprocessedParamCount], rax
 	cmp rax, 0
-	jne processRefValues.hasUnprocessedParams
+	jne processRefValues.hasUnprocessedParams		; Process when any params are unprocessed (param count may have increased: reprocessed)
 
 	mov rbx, [processRefValues.item]
 	add rbx, Ref.unprocessed
@@ -347,12 +353,43 @@ processing.processDefinedRefs:
 	jne processDefinedRefs.nextRefItem			; Skip when not REF_DEFINED
 
 
+	sub rsp, 8*8
+	mov rcx, [processDefinedRefs.item]
+	call getUnprocessedParams
+	add rsp, 8*8
+	mov [processDefinedRefs.unprocessedParamCount], rax
+	cmp rax, 0
+	jne processDefinedRefs.hasUnprocessedParams		; Process when any params are unprocessed. Should not matter with defined refs, but maybe will with future changes.
+
 	mov rbx, [processDefinedRefs.item]
 	add rbx, Ref.unprocessed
 	mov r8, [rbx]
 	mov rdx, 1b
 	cmp r8, rdx
 	jne processDefinedRefs.nextRefItem			; Skip when already processed (not unprocessed)
+
+	.hasUnprocessedParams:					; More params (appending) may be needed with further processing
+
+	sub rsp, 8*8
+	mov r8, [processDefinedRefs.refRegistry]
+	mov rdx, [processDefinedRefs.nextRef]
+	mov rcx, [processDefinedRefs.parsing]
+	call processStoreFile
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov r8, [processDefinedRefs.refRegistry]
+	mov rdx, [processDefinedRefs.nextRef]
+	mov rcx, [processDefinedRefs.parsing]
+	;call processRetrieveFile
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov r8, [processDefinedRefs.refRegistry]
+	mov rdx, [processDefinedRefs.nextRef]
+	mov rcx, [processDefinedRefs.parsing]
+	;call processReplaceLettersList
+	add rsp, 8*8
 
 
 
@@ -757,9 +794,9 @@ processing.processAppending:
 	mov rbx, [processAppending.nextRef]
 	add rbx, Ref.definedRefFlags
 	mov rcx, [rbx]
-	mov rdx, 100b					; DEFINED_REF_LETTERS
+	mov rdx, 0b					; (Undefined, not DEFINED_REF_LETTERS)
 	cmp rcx, rdx
-	je processAppending.end				; Is Letters, not appending
+	jne processAppending.end			; Is Letters, not appending. Base item must be ref value also.
 	
 
 	sub rsp, 8*8
@@ -819,7 +856,7 @@ processing.processAppending:
 	add rsp, 8*8
 
 	mov rbx, [processAppending.item]
-	add rbx, Ref.valueAlloc
+	add rbx, Ref.valueAlloc				; Allocation goes in item Ref's value alloc
 	mov [rbx], rax
 
 	mov r8, [processAppending.processedCount]
@@ -869,6 +906,9 @@ processing.processAppending:
 	pop rbp
 
 	retn 0
+
+
+
 
 processing.processStoreFile:
 	push rbp 
@@ -934,6 +974,16 @@ processing.processStoreFile:
 	mov rcx, [processStoreFile.list]
 	call [resetIndex]
 	add rsp, 8*8
+
+
+	mov rbx, [processStoreFile.item]
+	add rbx, Ref.definedRefFlags
+	mov rcx, [rbx]
+	mov rdx, 1b					; DEFINED_REF_STORE_FILE
+	cmp rcx, rdx
+	jne processStoreFile.end			; Is not DEFINED_REF_STORE_FILE
+	
+
 
 
 
@@ -1172,6 +1222,154 @@ processing.defineAsProcessed:
 
 	.end:
 	mov rax, [defineAsProcessed.nextRef]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+; processRefItem
+	; is ref the defined ref or not that must be processed, skip otherwise
+	; is the param count sufficient, skip otherwise
+	; are the params unprocessed, skip otherwise
+		; processLetters
+		; processAppending
+	; define items and params as unprocessed
+
+processing.processRefItem:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*15);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label processRefItem.heapAddress qword at rbp-8  
+	label processRefItem.handleAllocatedMemory qword at rbp-16
+	label processRefItem.definedRefFlags qword at rbp-24 
+	label processRefItem.unprocessedCount qword at rbp-32
+	label processRefItem.newRef qword at rbp-40
+	label processRefItem.definedItemIndex qword at rbp-48
+	label processRefItem.nextNewlineIndex qword at rbp-56
+	label processRefItem.list qword at rbp-64
+	label processRefItem.prevItem qword at rbp-72
+	label processRefItem.refRegistry qword at rbp-80
+	label processRefItem.item qword at rbp-88
+	label processRefItem.unprocessedParamCount qword at rbp-96
+	label processRefItem.nextRef qword at rbp-104
+	label processRefItem.nesting qword at rbp-112
+	label processRefItem.minParamCount qword at rbp-120
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [processRefItem.item], rcx
+	mov [processRefItem.minParamCount], rdx	
+	mov [processRefItem.refBaseFlags], r8			; 
+	mov [processRefItem.definedRefFlags], r9		; Defined Ref flags
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+
+	sub rsp, 8*8
+	mov rcx, [processRefItem.item]
+	call getUnprocessedParams
+	add rsp, 8*8
+	mov [processRefItem.unprocessedParamCount], rax
+	cmp rax, 0
+	jne processRefItem.hasUnprocessedParams			; Can process
+
+	mov rbx, [processRefItem.item]
+	add rbx, Ref.unprocessed
+	mov r8, [rbx]
+	mov rdx, 1b
+	cmp r8, rdx
+	jne processRefItem.end					; Item itself also processed. No need to process
+
+
+	.hasUnprocessedParams:
+
+	
+	mov r8, [processRefItem.refBaseFlags]
+	mov rcx, 1b						; REF_BASE_DEFINED_REF_FIRST_PARAM
+	cmp r8, rcx
+	jne processRefItem.baseNotFirst
+
+
+	; letters
+
+
+	.baseNotFirst:
+	mov rcx, 10b						; REF_BASE_ITEM_DEFINED_RE
+	cmp r8, rcx
+	jne processRefItem.baseNotItem
+
+	; storefile retrievefile
+
+
+
+	.baseNotItem:
+	mov rcx, 100b						; REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM
+	cmp r8, rcx
+	jne processRefItem.end					; Handle other cases later
+
+
+	; appending
+
+
+
+
+
+
+
+	; each process should return count
+	mov [processRefItem.processedCount], rax
+
+
+
+	
+	mov rbx, [processRefItem.list]
+	add rbx, List.itemsCount
+	mov r9, [processRefItem.processedCount]
+	mov rcx, [rbx]
+	cmp rcx, r9
+	jne processRefItem.notReady
+
+	sub rsp, 8*8
+	mov rcx, [processRefItem.item]
+	call defineAsProcessed					; Done, refs processed
+	add rsp, 8*8
+
+
+	.notReady:
+
+
+
+
+	.end:
+	mov rax, [processRefItem.nextRef]
 
 
 	add rsp, 8	

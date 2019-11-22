@@ -1,4 +1,4 @@
 
 
-public processing.processRep as 'processRep'
+public processing.defineAsProcessed as 'defineAsProcessed'
 
