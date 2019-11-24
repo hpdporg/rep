@@ -1319,6 +1319,9 @@ processing.processRefItem:
 
 
 	; letters
+	; definedRefFlags ref compare
+	; param compare
+	; abstract use item versus use nth ref as param
 
 
 	.baseNotFirst:
@@ -1342,8 +1345,9 @@ processing.processRefItem:
 
 
 
-
-
+	sub rsp, 8*8
+	;call 
+	add rsp, 8*8
 	; each process should return count
 	mov [processRefItem.processedCount], rax
 
@@ -1370,6 +1374,104 @@ processing.processRefItem:
 
 	.end:
 	mov rax, [processRefItem.nextRef]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+
+processing.getBaseRefAtIndex:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*14);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label getBaseRefAtIndex.heapAddress qword at rbp-8  
+	label getBaseRefAtIndex.handleAllocatedMemory qword at rbp-16
+	label getBaseRefAtIndex.parsing qword at rbp-24 
+	label getBaseRefAtIndex.unprocessedCount qword at rbp-32
+	label getBaseRefAtIndex.newRef qword at rbp-40
+	label getBaseRefAtIndex.letters qword at rbp-48
+	label getBaseRefAtIndex.nextNewlineIndex qword at rbp-56
+	label getBaseRefAtIndex.list qword at rbp-64
+	label getBaseRefAtIndex.prevItem qword at rbp-72
+	label getBaseRefAtIndex.refRegistry qword at rbp-80
+	label getBaseRefAtIndex.item qword at rbp-88
+	label getBaseRefAtIndex.unprocessedParamCount qword at rbp-96
+	label getBaseRefAtIndex.nextRef qword at rbp-104
+	label getBaseRefAtIndex.nesting qword at rbp-112
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [getBaseRefAtIndex.item], rcx
+	mov [getBaseRefAtIndex.index], rdx	
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+	
+
+
+
+	mov rbx, [getBaseRefAtIndex.item]
+	add rbx, Ref.list
+	mov rcx, [rbx]
+	mov [getBaseRefAtIndex.list], rcx		; Cache
+
+	sub rsp, 8*8
+	mov rcx, [getBaseRefAtIndex.list]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+	.nextRefItem:
+	mov rbx, [getBaseRefAtIndex.list]
+	mov r8, rbx
+	add rbx, List.index
+	add r8, List.itemsCount
+	mov rcx, [rbx]
+	mov rdx, [r8]
+	cmp rcx, rdx
+	jnl getBaseRefAtIndex.endItemList
+
+
+	
+	sub rsp, 8*8
+	mov rcx, [getBaseRefAtIndex.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [getBaseRefAtIndex.nextRef], rax
+
+	
+
+	.end:
+	mov rax, [getBaseRefAtIndex.nextRef]
 
 
 	add rsp, 8	
