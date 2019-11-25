@@ -15,7 +15,7 @@ TEST(ParsingTest, ReturnsFirstParsedValue) {
 
 TEST(ParsingTest, ReturnsNextParsedValue) {
 	Parsing* parsing = newParsing();
-	char* letters = "FirstVal\tSecondVal\tThirdVal";
+	char* letters = (char*)"FirstVal\tSecondVal\tThirdVal";
 
 	char* parseVal = getNextParsingValue(parsing, letters);
 	fprintf(stdout, "\nNext parsed val: %s\n", parseVal);

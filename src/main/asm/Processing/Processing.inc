@@ -267,7 +267,7 @@ processing.processRefValues:
 processing.processDefinedRefs:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*14);+(8*6)
+	sub rsp, (8*15);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -285,6 +285,8 @@ processing.processDefinedRefs:
 	label processDefinedRefs.prevItemNesting qword at rbp-96
 	label processDefinedRefs.nextRef qword at rbp-104
 	label processDefinedRefs.nesting qword at rbp-112
+	label processDefinedRefs.unprocessedParamCount qword at rbp-120
+
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -1251,7 +1253,7 @@ processing.defineAsProcessed:
 processing.processRefItem:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*15);+(8*6)
+	sub rsp, (8*17);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -1270,6 +1272,9 @@ processing.processRefItem:
 	label processRefItem.nextRef qword at rbp-104
 	label processRefItem.nesting qword at rbp-112
 	label processRefItem.minParamCount qword at rbp-120
+	label processRefItem.refBaseFlags qword at rbp-128
+	label processRefItem.processedCount qword at rbp-136
+
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -1396,7 +1401,7 @@ processing.processRefItem:
 processing.getBaseRefAtIndex:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*14);+(8*6)
+	sub rsp, (8*15);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -1414,6 +1419,7 @@ processing.getBaseRefAtIndex:
 	label getBaseRefAtIndex.unprocessedParamCount qword at rbp-96
 	label getBaseRefAtIndex.nextRef qword at rbp-104
 	label getBaseRefAtIndex.nesting qword at rbp-112
+	label getBaseRefAtIndex.index qword at rbp-120
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -1434,8 +1440,22 @@ processing.getBaseRefAtIndex:
 	push r15
 	sub rsp, 8
 
-	
+	; Use definedRefFlags instead of index?
 
+	mov rdx, [getBaseRefAtIndex.index]
+	cmp rdx, 0
+	jne getBaseRefAtIndex.useParamList
+
+	mov rbx, [getBaseRefAtIndex.item]
+	mov [getBaseRefAtIndex.nextRef], rbx
+	
+	jmp getBaseRefAtIndex.end
+
+
+
+
+
+	.useParamList:
 
 
 	mov rbx, [getBaseRefAtIndex.item]
@@ -1448,6 +1468,9 @@ processing.getBaseRefAtIndex:
 	call [resetIndex]
 	add rsp, 8*8
 
+	mov rbx, [getBaseRefAtIndex.list]
+	add rbx, List.index
+	mov r8, [getBaseRefAtIndex.index]
 
 
 	.nextRefItem:
@@ -1468,7 +1491,8 @@ processing.getBaseRefAtIndex:
 	add rsp, 8*8
 	mov [getBaseRefAtIndex.nextRef], rax
 
-	
+
+	.endItemList:	
 
 	.end:
 	mov rax, [getBaseRefAtIndex.nextRef]
