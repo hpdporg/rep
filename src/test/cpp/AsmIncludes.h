@@ -91,6 +91,13 @@ typedef enum ParsingFlags{
 } ParsingFlags;
 
 
+typedef enum RefBaseFlags{
+	REF_BASE_DEFINED_REF_FIRST_PARAM = 1,
+	REF_BASE_ITEM_DEFINED_REF = 2,
+	REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM	 = 4
+} RefBaseFlags;
+
+
 typedef struct Ref{
 	char* ref;
 	_int64 flags;
@@ -189,6 +196,8 @@ extern "C" {
 	//Processing
 	char* processRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
 	void defineAsProcessed(Ref* ref);
+	Ref* getBaseRefAtIndex(Ref* item, _int64 index);
+	Ref* getBaseRefUsingFlags(Ref* item, _int64 refBaseFlags);
 
 	//Ref
 	Ref* newRef();

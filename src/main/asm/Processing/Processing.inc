@@ -224,19 +224,39 @@ processing.processRefValues:
 
 	.hasUnprocessedParams:					; More params (appending) may be needed with further processing
 
+
+	;definedRefFlags
+	;DEFINED_REF_SEPARATOR	DEFINED_REF_REPLACE_LETTERS_LIST	DEFINED_REF_LETTERS	DEFINED_REF_RETRIEVE_FILE	DEFINED_REF_STORE_FILE
+
+
+	; Ref Base flags
+	; REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM	REF_BASE_ITEM_DEFINED_REF	REF_BASE_DEFINED_REF_FIRST_PARAM
+
+	; letters
+
 	sub rsp, 8*8
-	mov r8, [processRefValues.refRegistry]
-	mov rdx, [processRefValues.nextRef]
-	mov rcx, [processRefValues.parsing]
-	call processLetters
+	mov r11, [processRefValues.refRegistry]
+	mov qword [rsp+5*8], r11
+	mov r10, [processRefValues.parsing]
+	mov qword [rsp+4*8], r10
+	mov r9, 100b						; definedRefFlags	DEFINED_REF_LETTERS
+	mov r8,	1b						; refBaseFlags		REF_BASE_DEFINED_REF_FIRST_PARAM
+	mov rdx, 10b						; minParamCount
+	mov rcx, [processRefValues.nextRef]
+	call processRefItem
 	add rsp, 8*8
 
-
+	; appending
 	sub rsp, 8*8
-	mov r8, [processRefValues.refRegistry]
-	mov rdx, [processRefValues.nextRef]
-	mov rcx, [processRefValues.parsing]
-	call processAppending
+	mov r11, [processRefValues.refRegistry]
+	mov qword [rsp+5*8], r11
+	mov r10, [processRefValues.parsing]
+	mov qword [rsp+4*8], r10
+	mov r9, ???						; definedRefFlags
+	mov r8,	100b						; refBaseFlags		REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM
+	mov rdx, 1b 						; minParamCount	
+	mov rcx, [processRefValues.nextRef]
+	call processRefItem
 	add rsp, 8*8
 
 
@@ -1254,6 +1274,9 @@ processing.processRefItem:
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*17);+(8*6)
+	
+	mov r10, [rsp+8*6]
+	mov r11, [rsp+8*7]
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -1261,11 +1284,11 @@ processing.processRefItem:
 	label processRefItem.handleAllocatedMemory qword at rbp-16
 	label processRefItem.definedRefFlags qword at rbp-24 
 	label processRefItem.unprocessedCount qword at rbp-32
-	label processRefItem.newRef qword at rbp-40
+	label processRefItem.baseRef qword at rbp-40
 	label processRefItem.definedItemIndex qword at rbp-48
 	label processRefItem.nextNewlineIndex qword at rbp-56
 	label processRefItem.list qword at rbp-64
-	label processRefItem.prevItem qword at rbp-72
+	label processRefItem.parsing qword at rbp-72
 	label processRefItem.refRegistry qword at rbp-80
 	label processRefItem.item qword at rbp-88
 	label processRefItem.unprocessedParamCount qword at rbp-96
@@ -1284,6 +1307,8 @@ processing.processRefItem:
 	mov [processRefItem.minParamCount], rdx	
 	mov [processRefItem.refBaseFlags], r8			; 
 	mov [processRefItem.definedRefFlags], r9		; Defined Ref flags
+	mov [processRefItem.parsing], r10
+	mov [processRefItem.refRegistry], r11
 
 	and rsp, -32
 	push rbx 
@@ -1317,54 +1342,75 @@ processing.processRefItem:
 	.hasUnprocessedParams:
 
 	
-	mov r8, [processRefItem.refBaseFlags]
-	mov rcx, 1b						; REF_BASE_DEFINED_REF_FIRST_PARAM
+	sub rsp, 8*8
+	mov rdx, [processRefItem.refBaseFlags]
+	mov rcx, [processRefItem.item]
+	call getBaseRefUsingFlags
+	add rsp, 8*8
+	mov [processRefItem.baseRef], rax
+
+
+	mov r8, [processRefItem.baseRef]
+	add r8, Ref.definedRefFlags
+	mov r10, [r8]
+	mov r9, [processRefItem.definedRefFlags]
+	add r9, Ref.definedRefFlags
+	mov r11, [r9]
+	cmp r10, r11
+	jne processRefItem.end					; Not same, skip
+
+
+	mov rbx, [processRefItem.item]
+	add rbx, Ref.list
+	mov rdx, [rbx]
+	add rdx, List.itemsCount
+	mov r8, [rdx]
+	mov rcx, [processRefItem.minParamCount]
 	cmp r8, rcx
-	jne processRefItem.baseNotFirst
-
-
-	; letters
-	; definedRefFlags ref compare
-	; param compare
-	; abstract use item versus use nth ref as param
-
-
-	.baseNotFirst:
-	mov rcx, 10b						; REF_BASE_ITEM_DEFINED_RE
-	cmp r8, rcx
-	jne processRefItem.baseNotItem
-
-	; storefile retrievefile
-
-
-
-	.baseNotItem:
-	mov rcx, 100b						; REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM
-	cmp r8, rcx
-	jne processRefItem.end					; Handle other cases later
-
-
-	; appending
-
-
+	jnge processRefItem.end					; Insufficient params, skip
 
 
 
 	sub rsp, 8*8
-	;call 
+	mov r8, [processRefItem.refRegistry]
+	mov rdx, [processRefItem.item]
+	mov rcx, [processRefItem.parsing]
+	call processLetters					
 	add rsp, 8*8
-	; each process should return count
-	mov [processRefItem.processedCount], rax
+
+	sub rsp, 8*8
+	mov r8, [processRefItem.refRegistry]
+	mov rdx, [processRefItem.item]
+	mov rcx, [processRefItem.parsing]
+	call processAppending				
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov r8, [processRefItem.refRegistry]
+	mov rdx, [processRefItem.item]
+	mov rcx, [processRefItem.parsing]
+	call processStoreFile	
+	add rsp, 8*8
 
 
+	sub rsp, 8*8
+	mov r8, [processRefItem.refRegistry]
+	mov rdx, [processRefItem.item]
+	mov rcx, [processRefItem.parsing]
+	;call processRetrieveFile			
+	add rsp, 8*8
 
+
+	sub rsp, 8*8
+	mov rcx, [processRefItem.item]
+	call getUnprocessedParams
+	add rsp, 8*8
+	mov [processRefItem.unprocessedParamCount], rax
 	
-	mov rbx, [processRefItem.list]
-	add rbx, List.itemsCount
-	mov r9, [processRefItem.processedCount]
-	mov rcx, [rbx]
-	cmp rcx, r9
-	jne processRefItem.notReady
+	mov r9,[processRefItem.unprocessedParamCount]
+	mov rcx, 0
+	cmp r9, rcx
+	jg processRefItem.notReady				; Still has unprocessed params
 
 	sub rsp, 8*8
 	mov rcx, [processRefItem.item]
@@ -1398,6 +1444,10 @@ processing.processRefItem:
 	retn 0
 
 
+
+; item index is 0
+; item's list first Ref index is 1
+; Next item is last plus 1
 processing.getBaseRefAtIndex:
 	push rbp 
 	mov rbp, rsp 
@@ -1440,7 +1490,10 @@ processing.getBaseRefAtIndex:
 	push r15
 	sub rsp, 8
 
-	; Use definedRefFlags instead of index?
+		
+	mov rcx, 0
+	mov [getBaseRefAtIndex.nextRef], rcx				; Begin as 0
+
 
 	mov rdx, [getBaseRefAtIndex.index]
 	cmp rdx, 0
@@ -1471,6 +1524,8 @@ processing.getBaseRefAtIndex:
 	mov rbx, [getBaseRefAtIndex.list]
 	add rbx, List.index
 	mov r8, [getBaseRefAtIndex.index]
+	sub r8, 1b					; Item was included in index, so List would not include it
+	mov [rbx], r8
 
 
 	.nextRefItem:
@@ -1496,6 +1551,121 @@ processing.getBaseRefAtIndex:
 
 	.end:
 	mov rax, [getBaseRefAtIndex.nextRef]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+
+processing.getBaseRefUsingFlags:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*16);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label getBaseRefUsingFlags.heapAddress qword at rbp-8  
+	label getBaseRefUsingFlags.handleAllocatedMemory qword at rbp-16
+	label getBaseRefUsingFlags.parsing qword at rbp-24 
+	label getBaseRefUsingFlags.unprocessedCount qword at rbp-32
+	label getBaseRefUsingFlags.newRef qword at rbp-40
+	label getBaseRefUsingFlags.letters qword at rbp-48
+	label getBaseRefUsingFlags.nextNewlineIndex qword at rbp-56
+	label getBaseRefUsingFlags.list qword at rbp-64
+	label getBaseRefUsingFlags.prevItem qword at rbp-72
+	label getBaseRefUsingFlags.refRegistry qword at rbp-80
+	label getBaseRefUsingFlags.item qword at rbp-88
+	label getBaseRefUsingFlags.unprocessedParamCount qword at rbp-96
+	label getBaseRefUsingFlags.nextRef qword at rbp-104
+	label getBaseRefUsingFlags.refIndex qword at rbp-112
+	label getBaseRefUsingFlags.index qword at rbp-120
+	label getBaseRefUsingFlags.flags qword at rbp-128
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [getBaseRefUsingFlags.item], rcx
+	mov [getBaseRefUsingFlags.flags], rdx	
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+
+	mov rcx, 0
+	mov [getBaseRefUsingFlags.nextRef], rcx				; Begin as 0
+	mov [getBaseRefUsingFlags.refIndex], rcx
+
+	; Ref Base flags
+	; REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM	REF_BASE_ITEM_DEFINED_REF	REF_BASE_DEFINED_REF_FIRST_PARAM
+
+	mov rcx, [getBaseRefUsingFlags.flags]
+	cmp rcx, 1b
+	jne getBaseRefUsingFlags.notFirst
+
+
+	mov rdx, 1b
+	mov [getBaseRefUsingFlags.refIndex], rdx
+
+
+	jmp getBaseRefUsingFlags.getIndex
+	.notFirst:
+
+	mov rcx, [getBaseRefUsingFlags.flags]
+	cmp rcx, 10b
+	jne getBaseRefUsingFlags.notItem
+
+	mov rdx, 0b
+	mov [getBaseRefUsingFlags.refIndex], rdx
+
+	jmp getBaseRefUsingFlags.getIndex
+	.notItem:
+
+
+	mov rcx, [getBaseRefUsingFlags.flags]
+	cmp rcx, 100b
+	jne getBaseRefUsingFlags.end					; Should not get here
+
+	mov rdx, 0b
+	mov [getBaseRefUsingFlags.refIndex], rdx
+
+
+
+	.getIndex:
+
+	sub rsp, 8*8
+	mov rdx, [getBaseRefUsingFlags.refIndex]
+	mov rcx, [getBaseRefUsingFlags.item]
+	call getBaseRefAtIndex
+	add rsp, 8*8
+	mov [getBaseRefUsingFlags.nextRef], rax
+
+
+
+	.end:
+	mov rax, [getBaseRefUsingFlags.nextRef]
 
 
 	add rsp, 8	

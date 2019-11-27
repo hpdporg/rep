@@ -1,13 +1,19 @@
-﻿Build started 11/11/2019 12:05:25 PM.
+﻿Build started 11/26/2019 10:42:22 AM.
      1>Project "C:\Users\lsall\rep\rep_2010\repTests\repTests.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "x64\Release\repTests.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /IC:\Users\lsall\rep\rep_2010\..\external\googletest_2010\include /Zi /nologo /W3 /WX- /O2 /Oi /GL /D _MBCS /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc100.pdb" /Gd /TP /errorReport:prompt ..\..\src\test\cpp\RunCyclesTests.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /IC:\Users\lsall\rep\rep_2010\..\external\googletest_2010\include /Zi /nologo /W3 /WX- /O2 /Oi /GL /D _MBCS /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc100.pdb" /Gd /TP /errorReport:prompt ..\..\src\test\cpp\Main.cpp ..\..\src\test\cpp\ParsingTests.cpp ..\..\src\test\cpp\ProcessingTests.cpp ..\..\src\test\cpp\RefTests.cpp ..\..\src\test\cpp\RunCyclesTest.cpp ..\..\src\test\cpp\RunCyclesTests.cpp
+         Main.cpp
+         ParsingTests.cpp
+         ProcessingTests.cpp
+         RefTests.cpp
+         RunCyclesTest.cpp
          RunCyclesTests.cpp
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\repTests.exe" /NOLOGO /LIBPATH:C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\ /LIBPATH:C:\Users\lsall\rep\rep_2010\..\external\googleTestBuild_2010\Release /LIBPATH:C:\Users\lsall\rep\rep_2010\..\external\datap_2010 gtest.lib datap.obj rep.obj kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"x64\Release\repTests.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\lsall\rep\rep_2010\repTests\x64\Release\repTests.pdb" /LARGEADDRESSAWARE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\lsall\rep\rep_2010\\repTests\x64\Release\repTests.lib" /MACHINE:X64 x64\Release\Main.obj
          x64\Release\ParsingTests.obj
+         x64\Release\ProcessingTests.obj
          x64\Release\RefTests.obj
          x64\Release\RunCyclesTest.obj
          x64\Release\RunCyclesTests.obj
@@ -62,4 +68,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.67
+Time Elapsed 00:00:13.67
