@@ -233,7 +233,6 @@ processing.processRefValues:
 	; REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM	REF_BASE_ITEM_DEFINED_REF	REF_BASE_DEFINED_REF_FIRST_PARAM
 
 	; letters
-
 	sub rsp, 8*8
 	mov r11, [processRefValues.refRegistry]
 	mov qword [rsp+5*8], r11
@@ -252,7 +251,7 @@ processing.processRefValues:
 	mov qword [rsp+5*8], r11
 	mov r10, [processRefValues.parsing]
 	mov qword [rsp+4*8], r10
-	mov r9, ???						; definedRefFlags
+	mov r9, 0						; definedRefFlags	No defined ref
 	mov r8,	100b						; refBaseFlags		REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM
 	mov rdx, 1b 						; minParamCount	
 	mov rcx, [processRefValues.nextRef]
@@ -392,26 +391,49 @@ processing.processDefinedRefs:
 
 	.hasUnprocessedParams:					; More params (appending) may be needed with further processing
 
+
+
+	; processStoreFile
 	sub rsp, 8*8
-	mov r8, [processDefinedRefs.refRegistry]
-	mov rdx, [processDefinedRefs.nextRef]
-	mov rcx, [processDefinedRefs.parsing]
-	call processStoreFile
+	mov r11, [processDefinedRefs.refRegistry]
+	mov qword [rsp+5*8], r11
+	mov r10, [processDefinedRefs.parsing]
+	mov qword [rsp+4*8], r10
+	mov r9, 100b						; definedRefFlags	DEFINED_REF_LETTERS
+	mov r8,	1b						; refBaseFlags		REF_BASE_DEFINED_REF_FIRST_PARAM
+	mov rdx, 10b						; minParamCount
+	mov rcx, [processDefinedRefs.nextRef]
+	call processRefItem
 	add rsp, 8*8
 
+	; processRetrieveFile
 	sub rsp, 8*8
-	mov r8, [processDefinedRefs.refRegistry]
-	mov rdx, [processDefinedRefs.nextRef]
-	mov rcx, [processDefinedRefs.parsing]
-	;call processRetrieveFile
+	mov r11, [processDefinedRefs.refRegistry]
+	mov qword [rsp+5*8], r11
+	mov r10, [processDefinedRefs.parsing]
+	mov qword [rsp+4*8], r10
+	mov r9, 0						; definedRefFlags
+	mov r8,	100b						; refBaseFlags		REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM
+	mov rdx, 1b 						; minParamCount	
+	mov rcx, [processDefinedRefs.nextRef]
+	call processRefItem
 	add rsp, 8*8
 
+
+
+	; processReplaceLettersList
 	sub rsp, 8*8
-	mov r8, [processDefinedRefs.refRegistry]
-	mov rdx, [processDefinedRefs.nextRef]
-	mov rcx, [processDefinedRefs.parsing]
-	;call processReplaceLettersList
+	mov r11, [processDefinedRefs.refRegistry]
+	mov qword [rsp+5*8], r11
+	mov r10, [processDefinedRefs.parsing]
+	mov qword [rsp+4*8], r10
+	mov r9, 0						; definedRefFlags
+	mov r8,	100b						; refBaseFlags		REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM
+	mov rdx, 1b 						; minParamCount	
+	mov rcx, [processDefinedRefs.nextRef]
+	call processRefItem
 	add rsp, 8*8
+
 
 
 
@@ -557,7 +579,7 @@ processing.getUnprocessedParams:
 processing.processLetters:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*14);+(8*6)
+	sub rsp, (8*15);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -575,6 +597,7 @@ processing.processLetters:
 	label processLetters.unprocessedParamCount qword at rbp-96
 	label processLetters.nextRef qword at rbp-104
 	label processLetters.nesting qword at rbp-112
+	label processLetters.definedRefFlags qword at rbp-120
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -583,6 +606,7 @@ processing.processLetters:
 	mov [processLetters.parsing], rcx
 	mov [processLetters.item], rdx	
 	mov [processLetters.refRegistry], r8
+	mov [processLetters.definedRefFlags], r9
 
 	and rsp, -32
 	push rbx 
@@ -598,15 +622,12 @@ processing.processLetters:
 
 	
 
-	mov rcx, 0
-	mov [processLetters.unprocessedParamCount], rcx			; Begin as 0
 
+	mov rcx, [processLetters.definedRefFlags]
+	mov r9, 100b						; definedRefFlags	DEFINED_REF_LETTERS
+	cmp rcx, r9 
+	jne processLetters.end
 
-	sub rsp, 8*8
-	mov rcx, [processLetters.item]
-	call getUnprocessedParams
-	add rsp, 8*8
-	mov [processLetters.unprocessedParamCount], rax
 
 
 	mov rbx, [processLetters.item]
@@ -724,7 +745,7 @@ processing.processLetters:
 processing.processAppending:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*14);+(8*6)
+	sub rsp, (8*15);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -742,6 +763,7 @@ processing.processAppending:
 	label processAppending.unprocessedParamCount qword at rbp-96
 	label processAppending.nextRef qword at rbp-104
 	label processAppending.nesting qword at rbp-112
+	label processAppending.definedRefFlags qword at rbp-120
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -764,6 +786,13 @@ processing.processAppending:
 	sub rsp, 8
 
 	
+
+
+	mov rcx, [processAppending.definedRefFlags]
+	mov r9, 0b						; definedRefFlags	None
+	cmp rcx, r9 
+	jne processAppending.end
+
 
 	mov rcx, 0
 	mov [processAppending.unprocessedParamCount], rcx			; Begin as 0
@@ -1372,6 +1401,7 @@ processing.processRefItem:
 
 
 	sub rsp, 8*8
+	mov r9, [processRefItem.definedRefFlags]
 	mov r8, [processRefItem.refRegistry]
 	mov rdx, [processRefItem.item]
 	mov rcx, [processRefItem.parsing]
@@ -1379,6 +1409,7 @@ processing.processRefItem:
 	add rsp, 8*8
 
 	sub rsp, 8*8
+	mov r9, [processRefItem.definedRefFlags]
 	mov r8, [processRefItem.refRegistry]
 	mov rdx, [processRefItem.item]
 	mov rcx, [processRefItem.parsing]
@@ -1386,6 +1417,7 @@ processing.processRefItem:
 	add rsp, 8*8
 
 	sub rsp, 8*8
+	mov r9, [processRefItem.definedRefFlags]
 	mov r8, [processRefItem.refRegistry]
 	mov rdx, [processRefItem.item]
 	mov rcx, [processRefItem.parsing]
@@ -1394,6 +1426,7 @@ processing.processRefItem:
 
 
 	sub rsp, 8*8
+	mov r9, [processRefItem.definedRefFlags]
 	mov r8, [processRefItem.refRegistry]
 	mov rdx, [processRefItem.item]
 	mov rcx, [processRefItem.parsing]
