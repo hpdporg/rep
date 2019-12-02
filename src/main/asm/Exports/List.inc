@@ -13,7 +13,7 @@ extrn '__imp_newNextItem' as newNextItem:qword
 extrn '__imp_getPriorItem' as getPriorItem:qword
 extrn '__imp_getNextItemMatch' as getNextItemMatch:qword
 extrn '__imp_getNextItemMatchComp' as getNextItemMatchComp:qword
-
+extrn '__imp_extendList' as extendList:qword
 
 
 

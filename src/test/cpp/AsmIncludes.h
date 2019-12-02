@@ -97,6 +97,20 @@ typedef enum RefBaseFlags{
 	REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM	 = 4
 } RefBaseFlags;
 
+typedef enum RefFlags {
+	REF_VALUE = 1,
+	REF_LIST = 2,
+	REF_DEFINED = 4,
+	REF_FILTER = 8
+} RefFlags;
+
+typedef enum DefinedRefFlags {
+	DEFINED_REF_STORE_FILE = 1,
+	DEFINED_REF_RETRIEVE_FILE = 2,
+	DEFINED_REF_LETTERS = 4,
+	DEFINED_REF_REPLACE_LETTERS_LIST = 8,
+	DEFINED_REF_SEPARATOR = 16
+} DefinedRefFlags;
 
 typedef struct Ref{
 	char* ref;
@@ -105,6 +119,7 @@ typedef struct Ref{
 	_int64 paramCount;
 	_int64 repIndex;
 	void* valueAlloc;
+	List* listAlloc;
 	_int64 definedRefFlags;
 	List* list;
 } Ref;
@@ -195,9 +210,16 @@ extern "C" {
 
 	//Processing
 	char* processRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
+	Ref* processLetters(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
+	Ref* processAppending(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
+	Ref* processStoreFile(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
+	Ref* processRetrieveFile(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
+	Ref* processReplaceLettersList(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
 	void defineAsProcessed(Ref* ref);
 	Ref* getBaseRefAtIndex(Ref* item, _int64 index);
 	Ref* getBaseRefUsingFlags(Ref* item, _int64 refBaseFlags);
+	char* getRefLettersAlloc(Ref* item);
+	_int64 getUnprocessedRegisteredParams(Ref* item, RefRegistry* refRegistry);
 
 	//Ref
 	Ref* newRef();

@@ -12,6 +12,7 @@ section '.data' data readable writeable align 16
 		.paramCount dq 0	; Defined Refs may have params
 		.repIndex dq 0		; Index into rep
 		.valueAlloc dq 0	; Processed Value alloc
+		.listAlloc dq 0		; List alloc. Used by Lists
 		.definedRefFlags dq 0	; Defined Refs may use flags
 		.list dq 0		; Values, Refs list, Params
 	end struc
@@ -115,6 +116,9 @@ ref.new:
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]
 	add rbx, Ref.valueAlloc
+	mov rax, 0
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, Ref.listAlloc
 	mov rax, 0
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]

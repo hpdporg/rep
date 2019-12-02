@@ -392,6 +392,14 @@ processing.processDefinedRefs:
 	.hasUnprocessedParams:					; More params (appending) may be needed with further processing
 
 
+	;definedRefFlags
+	;DEFINED_REF_SEPARATOR	DEFINED_REF_REPLACE_LETTERS_LIST	DEFINED_REF_LETTERS	DEFINED_REF_RETRIEVE_FILE	DEFINED_REF_STORE_FILE
+
+
+	; Ref Base flags
+	; REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM	REF_BASE_ITEM_DEFINED_REF	REF_BASE_DEFINED_REF_FIRST_PARAM
+
+
 
 	; processStoreFile
 	sub rsp, 8*8
@@ -399,8 +407,8 @@ processing.processDefinedRefs:
 	mov qword [rsp+5*8], r11
 	mov r10, [processDefinedRefs.parsing]
 	mov qword [rsp+4*8], r10
-	mov r9, 100b						; definedRefFlags	DEFINED_REF_LETTERS
-	mov r8,	1b						; refBaseFlags		REF_BASE_DEFINED_REF_FIRST_PARAM
+	mov r9, 1b						; definedRefFlags	DEFINED_REF_STORE_FILE
+	mov r8,	10b						; refBaseFlags		REF_BASE_ITEM_DEFINED_REF
 	mov rdx, 10b						; minParamCount
 	mov rcx, [processDefinedRefs.nextRef]
 	call processRefItem
@@ -412,8 +420,8 @@ processing.processDefinedRefs:
 	mov qword [rsp+5*8], r11
 	mov r10, [processDefinedRefs.parsing]
 	mov qword [rsp+4*8], r10
-	mov r9, 0						; definedRefFlags
-	mov r8,	100b						; refBaseFlags		REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM
+	mov r9, 10b						; definedRefFlags	DEFINED_REF_RETRIEVE_FILE
+	mov r8,	10b						; refBaseFlags		REF_BASE_ITEM_DEFINED_REF
 	mov rdx, 1b 						; minParamCount	
 	mov rcx, [processDefinedRefs.nextRef]
 	call processRefItem
@@ -427,9 +435,9 @@ processing.processDefinedRefs:
 	mov qword [rsp+5*8], r11
 	mov r10, [processDefinedRefs.parsing]
 	mov qword [rsp+4*8], r10
-	mov r9, 0						; definedRefFlags
-	mov r8,	100b						; refBaseFlags		REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM
-	mov rdx, 1b 						; minParamCount	
+	mov r9, 1000b						; definedRefFlags	DEFINED_REF_REPLACE_LETTERS_LIST
+	mov r8,	1b						; refBaseFlags		REF_BASE_DEFINED_REF_FIRST_PARAM
+	mov rdx, 100b 						; minParamCount	
 	mov rcx, [processDefinedRefs.nextRef]
 	call processRefItem
 	add rsp, 8*8
@@ -576,6 +584,132 @@ processing.getUnprocessedParams:
 
 	retn 0
 
+processing.getUnprocessedRegisteredParams:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*14);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label getUnprocessedRegisteredParams.heapAddress qword at rbp-8  
+	label getUnprocessedRegisteredParams.handleAllocatedMemory qword at rbp-16
+	label getUnprocessedRegisteredParams.parsing qword at rbp-24 
+	label getUnprocessedRegisteredParams.unprocessedCount qword at rbp-32
+	label getUnprocessedRegisteredParams.list qword at rbp-40
+	label getUnprocessedRegisteredParams.letters qword at rbp-48
+	label getUnprocessedRegisteredParams.nextNewlineIndex qword at rbp-56
+	label getUnprocessedRegisteredParams.parsingRefsList qword at rbp-64
+	label getUnprocessedRegisteredParams.prevItem qword at rbp-72
+	label getUnprocessedRegisteredParams.refRegistry qword at rbp-80
+	label getUnprocessedRegisteredParams.item qword at rbp-88
+	label getUnprocessedRegisteredParams.prevItemNesting qword at rbp-96
+	label getUnprocessedRegisteredParams.nextRef qword at rbp-104
+	label getUnprocessedRegisteredParams.nesting qword at rbp-112
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [getUnprocessedRegisteredParams.item], rcx
+	mov [getUnprocessedRegisteredParams.refRegistry], rdx
+
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+	
+
+	mov rcx, 0
+	mov [getUnprocessedRegisteredParams.unprocessedCount], rcx			; Begin as 0
+
+
+
+	mov rbx, [getUnprocessedRegisteredParams.item]
+	add rbx, Ref.list
+	mov rcx, [rbx]
+	mov [getUnprocessedRegisteredParams.list], rcx		; Cache
+
+	sub rsp, 8*8
+	mov rcx, [getUnprocessedRegisteredParams.list]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+	.nextRefItem:
+	mov rbx, [getUnprocessedRegisteredParams.list]
+	mov r8, rbx
+	add rbx, List.index
+	add r8, List.itemsCount
+	mov rcx, [rbx]
+	mov rdx, [r8]
+	cmp rcx, rdx
+	jnl getUnprocessedRegisteredParams.endItemList
+
+
+	
+	sub rsp, 8*8
+	mov rcx, [getUnprocessedRegisteredParams.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [getUnprocessedRegisteredParams.nextRef], rax
+
+	sub rsp, 8*8
+	mov r8, 0
+	mov rbx, [getUnprocessedRegisteredParams.nextRef]
+	add rbx, Ref.ref
+	mov rdx, [rbx]
+	mov rcx, [getUnprocessedRegisteredParams.refRegistry]
+	call refRegistry.getRegisteredRef
+	add rsp, 8*8
+	mov [getUnprocessedRegisteredParams.nextRef], rax
+	cmp rax, 0
+	je getUnprocessedRegisteredParams.nextRefItem
+	add rax, Ref.unprocessed
+	mov rcx, [rax]
+	mov rdx, 1b
+	cmp rcx, rdx
+	jne getUnprocessedRegisteredParams.nextRefItem			; Skip when already processed (not unprocessed)
+
+	mov rcx, [getUnprocessedRegisteredParams.unprocessedCount]
+	add rcx, 1b
+	mov [getUnprocessedRegisteredParams.unprocessedCount], rcx	; Increment when unprocessed
+
+
+	jmp getUnprocessedRegisteredParams.nextRefItem
+	.endItemList:
+
+
+	.end:
+	mov rax, [getUnprocessedRegisteredParams.unprocessedCount]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+
 processing.processLetters:
 	push rbp 
 	mov rbp, rsp 
@@ -626,7 +760,7 @@ processing.processLetters:
 	mov rcx, [processLetters.definedRefFlags]
 	mov r9, 100b						; definedRefFlags	DEFINED_REF_LETTERS
 	cmp rcx, r9 
-	jne processLetters.end
+	jne processLetters.end					; Only attempt processing letters
 
 
 
@@ -641,8 +775,13 @@ processing.processLetters:
 	add rsp, 8*8
 
 
+	mov rbx, [processLetters.list]
+	add rbx, List.index
+	mov rcx, 1b
+	mov [rbx], rcx				; Param after lettersRef
 
-	.nextRefItem:
+
+	.nextRefItem:				; Just ensure end is not reached
 	mov rbx, [processLetters.list]
 	mov r8, rbx
 	add rbx, List.index
@@ -660,51 +799,12 @@ processing.processLetters:
 	add rsp, 8*8
 	mov [processLetters.nextRef], rax
 
-	mov rbx, [processLetters.list]
-	add rbx, List.index
-	mov rdx, [rbx]
-	cmp rdx, 1b
-	jne processLetters.notFirstIndex
-	
-	.firstParam:
-	mov rbx, [processLetters.nextRef]
-	add rbx, Ref.definedRefFlags
-	mov rcx, [rbx]
-	mov rdx, 100b					; DEFINED_REF_LETTERS
-	cmp rcx, rdx
-	jne processLetters.end				; Not Letters
-	
-	mov rbx, [processLetters.nextRef]
-	add rbx, Ref.paramCount
-	mov r8, [rbx]
-	mov rbx, [processLetters.list]
-	add rbx, List.itemsCount
-	mov rcx, [rbx]
-	sub rcx, 1b
-	cmp rcx, r8
-	jne processLetters.end				; Do not have sufficient params yet
-	mov r8, [processLetters.unprocessedParamCount]
-	cmp r8, 0
-	jne processLetters.nextRefItem			; Continue processing
-
-	sub rsp, 8*8
-	mov rcx, [processLetters.item]
-	call defineAsProcessed				; Done, letters was not marked as processed, should not occur
-	add rsp, 8*8
-
-	jmp processLetters.endItemList
-	.notFirstIndex:
 
 	sub rsp, 8*8
 	mov rbx, [processLetters.nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
-	call [letterLength]
-	add rsp, 8*8
-
-	sub rsp, 8*8
-	mov rcx,rax
-	call [linearAllocate]
+	call [copyLetters]				
 	add rsp, 8*8
 
 	mov rbx, [processLetters.item]
@@ -772,6 +872,7 @@ processing.processAppending:
 	mov [processAppending.parsing], rcx
 	mov [processAppending.item], rdx	
 	mov [processAppending.refRegistry], r8
+	mov [processAppending.definedRefFlags], r9
 
 	and rsp, -32
 	push rbx 
@@ -787,23 +888,22 @@ processing.processAppending:
 
 	
 
+	
 
 	mov rcx, [processAppending.definedRefFlags]
 	mov r9, 0b						; definedRefFlags	None
 	cmp rcx, r9 
-	jne processAppending.end
-
-
-	mov rcx, 0
-	mov [processAppending.unprocessedParamCount], rcx			; Begin as 0
-	mov [processAppending.processedCount], rcx
+	jne processAppending.end				; Only attempt processing letters
 
 	sub rsp, 8*8
+	mov rdx, [processAppending.refRegistry]
 	mov rcx, [processAppending.item]
-	call getUnprocessedParams
+	call getUnprocessedRegisteredParams
 	add rsp, 8*8
-	mov [processAppending.unprocessedParamCount], rax
+	cmp rax, 0
+	jne processAppending.end				; Appending depends on param registeredRefs being processed, not just the param
 
+	
 
 	mov rbx, [processAppending.item]
 	add rbx, Ref.list
@@ -817,7 +917,7 @@ processing.processAppending:
 
 
 
-	.nextRefItem:
+	.nextRefItem:						; Ensure end is not reached
 	mov rbx, [processAppending.list]
 	mov r8, rbx
 	add rbx, List.index
@@ -840,25 +940,6 @@ processing.processAppending:
 	mov rdx, [rbx]
 	cmp rdx, 1b
 	jne processAppending.notFirstIndex
-	
-	.firstParam:
-	mov rbx, [processAppending.nextRef]
-	add rbx, Ref.definedRefFlags
-	mov rcx, [rbx]
-	mov rdx, 0b					; (Undefined, not DEFINED_REF_LETTERS)
-	cmp rcx, rdx
-	jne processAppending.end			; Is Letters, not appending. Base item must be ref value also.
-	
-
-	sub rsp, 8*8
-	mov rcx, [processAppending.nextRef]
-	call refRegistry.getRegisteredRef
-	add rsp, 8*8
-	mov [processAppending.nextRef], rax
-	add rax, Ref.unprocessed
-	mov rcx, [rax]
-	cmp rcx, 1b
-	je processAppending.endItemList			; Param refs not ready yet
 
 	sub rsp, 8*8
 	mov rbx, [processAppending.nextRef]
@@ -872,23 +953,11 @@ processing.processAppending:
 	add rbx, Ref.valueAlloc
 	mov [rbx], rax
 
-	mov r8, [processAppending.processedCount]
-	add r8, 1b					; Increment
-	mov [processAppending.processedCount], r8
 
+	
 	jmp processAppending.nextRefItem
 	
 	.notFirstIndex:
-
-	sub rsp, 8*8
-	mov rcx, [processAppending.nextRef]
-	call refRegistry.getRegisteredRef
-	add rsp, 8*8
-	mov [processAppending.nextRef], rax
-	add rax, Ref.unprocessed
-	mov rcx, [rax]
-	cmp rcx, 1b
-	je processAppending.endItemList			; Param refs not ready yet
 
 	sub rsp, 8*8
 	mov rbx, [processAppending.nextRef]
@@ -910,9 +979,6 @@ processing.processAppending:
 	add rbx, Ref.valueAlloc				; Allocation goes in item Ref's value alloc
 	mov [rbx], rax
 
-	mov r8, [processAppending.processedCount]
-	add r8, 1b					; Increment
-	mov [processAppending.processedCount], r8
 
 
 
@@ -920,14 +986,6 @@ processing.processAppending:
 	jmp processAppending.nextRefItem
 	.endItemList:
 
-
-
-	mov rbx, [processAppending.list]
-	add rbx, List.itemsCount
-	mov r9, [processAppending.processedCount]
-	mov rcx, [rbx]
-	cmp rcx, r9
-	jne processAppending.notReady
 
 	sub rsp, 8*8
 	mov rcx, [processAppending.item]
@@ -939,7 +997,7 @@ processing.processAppending:
 
 
 	.end:
-	mov rax, [processAppending.nextRef]
+	;mov rax, [processAppending.nextRef]
 
 
 	add rsp, 8	
@@ -964,7 +1022,7 @@ processing.processAppending:
 processing.processStoreFile:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*14);+(8*6)
+	sub rsp, (8*16);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -982,6 +1040,8 @@ processing.processStoreFile:
 	label processStoreFile.unprocessedParamCount qword at rbp-96
 	label processStoreFile.nextRef qword at rbp-104
 	label processStoreFile.nesting qword at rbp-112
+	label processStoreFile.definedRefFlags qword at rbp-120
+	label processStoreFile.record qword at rbp-128
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -990,6 +1050,7 @@ processing.processStoreFile:
 	mov [processStoreFile.parsing], rcx
 	mov [processStoreFile.item], rdx	
 	mov [processStoreFile.refRegistry], r8
+	mov [processStoreFile.definedRefFlags], r9
 
 	and rsp, -32
 	push rbx 
@@ -1005,15 +1066,20 @@ processing.processStoreFile:
 
 	
 
-	mov rcx, 0
-	mov [processStoreFile.unprocessedParamCount], rcx			; Begin as 0
-	mov [processStoreFile.processedCount], rcx
+
+	mov rcx, [processStoreFile.definedRefFlags]
+	mov r9, 1b						; definedRefFlags	DEFINED_REF_STORE_FILE
+	cmp rcx, r9 
+	jne processStoreFile.end				; Only attempt processing this definedRef
 
 	sub rsp, 8*8
+	mov rdx, [processStoreFile.refRegistry]
 	mov rcx, [processStoreFile.item]
-	call getUnprocessedParams
+	call getUnprocessedRegisteredParams
 	add rsp, 8*8
-	mov [processStoreFile.unprocessedParamCount], rax
+	cmp rax, 0
+	jne processStoreFile.end				; This definedRef depends on param registeredRefs being processed, not just the param
+
 
 
 	mov rbx, [processStoreFile.item]
@@ -1027,18 +1093,8 @@ processing.processStoreFile:
 	add rsp, 8*8
 
 
-	mov rbx, [processStoreFile.item]
-	add rbx, Ref.definedRefFlags
-	mov rcx, [rbx]
-	mov rdx, 1b					; DEFINED_REF_STORE_FILE
-	cmp rcx, rdx
-	jne processStoreFile.end			; Is not DEFINED_REF_STORE_FILE
-	
 
-
-
-
-	.nextRefItem:
+	.nextRefItem:						; Ensure end is not reached
 	mov rbx, [processStoreFile.list]
 	mov r8, rbx
 	add rbx, List.index
@@ -1056,99 +1112,43 @@ processing.processStoreFile:
 	add rsp, 8*8
 	mov [processStoreFile.nextRef], rax
 
-	mov rbx, [processStoreFile.list]
-	add rbx, List.index
-	mov rdx, [rbx]
-	cmp rdx, 1b
-	jne processStoreFile.notFirstIndex
-	
-	.firstParam:	; this should be ref itself
-	mov rbx, [processStoreFile.nextRef]
-	add rbx, Ref.definedRefFlags
-	mov rcx, [rbx]
-	mov rdx, 100b					; DEFINED_REF_LETTERS
-	cmp rcx, rdx
-	je processStoreFile.end				; Is Letters, not appending
-	
+
+	sub rsp, 8*8
+	call [newStorage]
+	add rsp, 8*8
+	mov [processStoreFile.record], rax
 
 	sub rsp, 8*8
 	mov rcx, [processStoreFile.nextRef]
-	call refRegistry.getRegisteredRef
+	call getRefLettersAlloc
 	add rsp, 8*8
-	mov [processStoreFile.nextRef], rax
-	add rax, Ref.unprocessed
-	mov rcx, [rax]
-	cmp rcx, 1b
-	je processStoreFile.endItemList			; Param refs not ready yet
 
-	sub rsp, 8*8
-	mov rbx, [processStoreFile.nextRef]
-	add rbx, Ref.valueAlloc
-	mov rcx, [rbx]
-	call [copyLetters]				; allocate first, do not append
-	add rsp, 8*8
-	
-
-	mov rbx, [processStoreFile.item]
-	add rbx, Ref.valueAlloc
+	mov rbx, [processStoreFile.record]
+	add rbx, Record.location
 	mov [rbx], rax
 
-	mov r8, [processStoreFile.processedCount]
-	add r8, 1b					; Increment
-	mov [processStoreFile.processedCount], r8
 
-	jmp processStoreFile.nextRefItem
-	
-	.notFirstIndex:
+	sub rsp, 8*8
+	mov rcx, [processStoreFile.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processStoreFile.nextRef], rax
+
 
 	sub rsp, 8*8
 	mov rcx, [processStoreFile.nextRef]
-	call refRegistry.getRegisteredRef
+	call getRefLettersAlloc
 	add rsp, 8*8
-	mov [processStoreFile.nextRef], rax
-	add rax, Ref.unprocessed
-	mov rcx, [rax]
-	cmp rcx, 1b
-	je processStoreFile.endItemList			; Param refs not ready yet
 
 	sub rsp, 8*8
-	mov rbx, [processStoreFile.nextRef]
-	add rbx, Ref.valueAlloc
-	mov rcx, [rbx]
-	call [copyLetters]				; allocate first, do not append
-	add rsp, 8*8
-	
-
-	sub rsp, 8*8
-	mov rdx,rax
-	mov rbx, [processStoreFile.item]
-	add rbx, Ref.valueAlloc
-	mov rcx, [rbx]
-	call [appendLetters]				; Append
+	mov rdx, rax 
+	mov rcx, [processStoreFile.record]
+	call [storeLetters]
 	add rsp, 8*8
 
-	mov rbx, [processStoreFile.item]
-	add rbx, Ref.valueAlloc
-	mov [rbx], rax
-
-	mov r8, [processStoreFile.processedCount]
-	add r8, 1b					; Increment
-	mov [processStoreFile.processedCount], r8
-
-
-
-
-	jmp processStoreFile.nextRefItem
+	;jmp processStoreFile.nextRefItem
 	.endItemList:
 
-
-
-	mov rbx, [processStoreFile.list]
-	add rbx, List.itemsCount
-	mov r9, [processStoreFile.processedCount]
-	mov rcx, [rbx]
-	cmp rcx, r9
-	jne processStoreFile.notReady
 
 	sub rsp, 8*8
 	mov rcx, [processStoreFile.item]
@@ -1178,6 +1178,360 @@ processing.processStoreFile:
 	pop rbp
 
 	retn 0
+
+
+processing.processRetrieveFile:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*16);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label processRetrieveFile.heapAddress qword at rbp-8  
+	label processRetrieveFile.handleAllocatedMemory qword at rbp-16
+	label processRetrieveFile.parsing qword at rbp-24 
+	label processRetrieveFile.unprocessedCount qword at rbp-32
+	label processRetrieveFile.newRef qword at rbp-40
+	label processRetrieveFile.letters qword at rbp-48
+	label processRetrieveFile.processedCount qword at rbp-56
+	label processRetrieveFile.list qword at rbp-64
+	label processRetrieveFile.prevItem qword at rbp-72
+	label processRetrieveFile.refRegistry qword at rbp-80
+	label processRetrieveFile.item qword at rbp-88
+	label processRetrieveFile.unprocessedParamCount qword at rbp-96
+	label processRetrieveFile.nextRef qword at rbp-104
+	label processRetrieveFile.nesting qword at rbp-112
+	label processRetrieveFile.definedRefFlags qword at rbp-120
+	label processRetrieveFile.record qword at rbp-128
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [processRetrieveFile.parsing], rcx
+	mov [processRetrieveFile.item], rdx	
+	mov [processRetrieveFile.refRegistry], r8
+	mov [processRetrieveFile.definedRefFlags], r9
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+	
+
+
+	mov rcx, [processRetrieveFile.definedRefFlags]
+	mov r9, 10b						; definedRefFlags	DEFINED_REF_RETRIEVE_FILE
+	cmp rcx, r9 
+	jne processRetrieveFile.end				; Only attempt processing this definedRef
+
+	sub rsp, 8*8
+	mov rdx, [processRetrieveFile.refRegistry]
+	mov rcx, [processRetrieveFile.item]
+	call getUnprocessedRegisteredParams
+	add rsp, 8*8
+	cmp rax, 0
+	jne processRetrieveFile.end				; This definedRef depends on param registeredRefs being processed, not just the param
+
+
+
+	mov rbx, [processRetrieveFile.item]
+	add rbx, Ref.list
+	mov rcx, [rbx]
+	mov [processRetrieveFile.list], rcx		; Cache
+
+	sub rsp, 8*8
+	mov rcx, [processRetrieveFile.list]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+	.nextRefItem:						; Ensure end is not reached
+	mov rbx, [processRetrieveFile.list]
+	mov r8, rbx
+	add rbx, List.index
+	add r8, List.itemsCount
+	mov rcx, [rbx]
+	mov rdx, [r8]
+	cmp rcx, rdx
+	jnl processRetrieveFile.endItemList
+
+
+	
+	sub rsp, 8*8
+	mov rcx, [processRetrieveFile.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processRetrieveFile.nextRef], rax
+
+
+	sub rsp, 8*8
+	call [newStorage]
+	add rsp, 8*8
+	mov [processRetrieveFile.record], rax
+
+	sub rsp, 8*8
+	mov rcx, [processRetrieveFile.nextRef]
+	call getRefLettersAlloc
+	add rsp, 8*8
+
+	mov rbx, [processRetrieveFile.record]
+	add rbx, Record.location
+	mov [rbx], rax
+
+
+	sub rsp, 8*8
+	mov rcx, [processRetrieveFile.record]
+	call [retrieve]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rcx, [processRetrieveFile.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processRetrieveFile.nextRef], rax
+
+
+
+	mov rbx, [processRetrieveFile.record]
+	add rbx, Record.allocAddr
+	mov rdx, [processRetrieveFile.nextRef]
+	add rdx, Ref.valueAlloc
+	mov r8, [rbx]
+	mov [rdx], r8
+
+
+
+
+
+	;jmp processRetrieveFile.nextRefItem
+	.endItemList:
+
+
+	sub rsp, 8*8
+	mov rcx, [processRetrieveFile.item]
+	call defineAsProcessed				; Done, refs processed
+	add rsp, 8*8
+
+
+	.notReady:
+
+
+	.end:
+	mov rax, [processRetrieveFile.nextRef]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+processing.processReplaceLettersList:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*19);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label processReplaceLettersList.heapAddress qword at rbp-8  
+	label processReplaceLettersList.handleAllocatedMemory qword at rbp-16
+	label processReplaceLettersList.parsing qword at rbp-24 
+	label processReplaceLettersList.unprocessedCount qword at rbp-32
+	label processReplaceLettersList.newRef qword at rbp-40
+	label processReplaceLettersList.letters qword at rbp-48
+	label processReplaceLettersList.processedCount qword at rbp-56
+	label processReplaceLettersList.list qword at rbp-64
+	label processReplaceLettersList.prevItem qword at rbp-72
+	label processReplaceLettersList.refRegistry qword at rbp-80
+	label processReplaceLettersList.item qword at rbp-88
+	label processReplaceLettersList.unprocessedParamCount qword at rbp-96
+	label processReplaceLettersList.nextRef qword at rbp-104
+	label processReplaceLettersList.nesting qword at rbp-112
+	label processReplaceLettersList.definedRefFlags qword at rbp-120
+	label processReplaceLettersList.record qword at rbp-128
+	label processReplaceLettersList.param1 qword at rbp-136
+	label processReplaceLettersList.param2 qword at rbp-144
+	label processReplaceLettersList.param3 qword at rbp-152
+
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [processReplaceLettersList.parsing], rcx
+	mov [processReplaceLettersList.item], rdx	
+	mov [processReplaceLettersList.refRegistry], r8
+	mov [processReplaceLettersList.definedRefFlags], r9
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+	
+
+
+	mov rcx, [processReplaceLettersList.definedRefFlags]
+	mov r9, 1000b						; definedRefFlags	DEFINED_REF_REPLACE_LETTERS_LIST
+	cmp rcx, r9 
+	jne processReplaceLettersList.end				; Only attempt processing this definedRef
+
+	sub rsp, 8*8
+	mov rdx, [processReplaceLettersList.refRegistry]
+	mov rcx, [processReplaceLettersList.item]
+	call getUnprocessedRegisteredParams
+	add rsp, 8*8
+	cmp rax, 1b
+	jnle processReplaceLettersList.end				; Separator can be unprocessed? This definedRef depends on param registeredRefs being processed, not just the param
+
+
+
+	mov rbx, [processReplaceLettersList.item]
+	add rbx, Ref.list
+	mov rcx, [rbx]
+	mov [processReplaceLettersList.list], rcx		; Cache
+
+	sub rsp, 8*8
+	mov rcx, [processReplaceLettersList.list]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+	.nextRefItem:						; Ensure end is not reached
+	mov rbx, [processReplaceLettersList.list]
+	mov r8, rbx
+	add rbx, List.index
+	add r8, List.itemsCount
+	mov rcx, [rbx]
+	mov rdx, [r8]
+	cmp rcx, rdx
+	jnl processReplaceLettersList.endItemList
+
+
+	
+	sub rsp, 8*8
+	mov rcx, [processReplaceLettersList.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processReplaceLettersList.nextRef], rax	; replaceLettersLisst
+
+
+	sub rsp, 8*8
+	mov rcx, [processReplaceLettersList.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processReplaceLettersList.nextRef], rax	; letters
+
+	sub rsp, 8*8
+	mov rcx, [processReplaceLettersList.nextRef]
+	call getRefLettersAlloc
+	add rsp, 8*8
+	mov [processReplaceLettersList.param1], rax	; letters
+
+
+	sub rsp, 8*8
+	mov rcx, [processReplaceLettersList.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processReplaceLettersList.nextRef], rax	; list
+	sub rsp, 8*8
+	mov rcx, [processReplaceLettersList.nextRef]
+	call getRefLettersList
+	add rsp, 8*8
+	mov [processReplaceLettersList.param2], rax	; letters
+
+
+	sub rsp, 8*8
+	mov rcx, [processReplaceLettersList.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processReplaceLettersList.nextRef], rax	; containsLetters
+
+	mov rbx, [processReplaceLettersList.nextRef]
+	add rbx, Ref.ref
+	sub rsp, 8*8
+	mov rcx, [rbx]
+	call [copyLetters]
+	add rsp, 8*8
+	mov [processReplaceLettersList.param3], rax	; containsLetters
+
+
+	sub rsp, 8*8
+	mov r8, [processReplaceLettersList.param3]
+	mov rdx, [processReplaceLettersList.param2]
+	mov rcx, [processReplaceLettersList.param1]
+	call [replaceContainsLettersWithList]
+	add rsp, 8*8
+
+	mov rdx, [processReplaceLettersList.item]
+	add rdx, Ref.valueAlloc
+	mov [rdx], rax
+
+
+
+
+
+	;jmp processReplaceLettersList.nextRefItem
+	.endItemList:
+
+
+	sub rsp, 8*8
+	mov rcx, [processReplaceLettersList.item]
+	call defineAsProcessed				; Done, refs processed
+	add rsp, 8*8
+
+
+	.notReady:
+
+
+	.end:
+	mov rax, [processReplaceLettersList.nextRef]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
 
 processing.defineAsProcessed:
 	push rbp 
@@ -1430,7 +1784,15 @@ processing.processRefItem:
 	mov r8, [processRefItem.refRegistry]
 	mov rdx, [processRefItem.item]
 	mov rcx, [processRefItem.parsing]
-	;call processRetrieveFile			
+	call processRetrieveFile			
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov r9, [processRefItem.definedRefFlags]
+	mov r8, [processRefItem.refRegistry]
+	mov rdx, [processRefItem.item]
+	mov rcx, [processRefItem.parsing]
+	call processReplaceLettersList			
 	add rsp, 8*8
 
 
@@ -1699,6 +2061,366 @@ processing.getBaseRefUsingFlags:
 
 	.end:
 	mov rax, [getBaseRefUsingFlags.nextRef]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+; Assumes Refs are Processed
+processing.getRefLettersAlloc:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*16);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label getRefLettersAlloc.heapAddress qword at rbp-8  
+	label getRefLettersAlloc.handleAllocatedMemory qword at rbp-16
+	label getRefLettersAlloc.parsing qword at rbp-24 
+	label getRefLettersAlloc.unprocessedCount qword at rbp-32
+	label getRefLettersAlloc.newRef qword at rbp-40
+	label getRefLettersAlloc.letters qword at rbp-48
+	label getRefLettersAlloc.nextNewlineIndex qword at rbp-56
+	label getRefLettersAlloc.list qword at rbp-64
+	label getRefLettersAlloc.prevItem qword at rbp-72
+	label getRefLettersAlloc.refRegistry qword at rbp-80
+	label getRefLettersAlloc.item qword at rbp-88
+	label getRefLettersAlloc.unprocessedParamCount qword at rbp-96
+	label getRefLettersAlloc.nextRef qword at rbp-104
+	label getRefLettersAlloc.refIndex qword at rbp-112
+	label getRefLettersAlloc.index qword at rbp-120
+	label getRefLettersAlloc.flags qword at rbp-128
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [getRefLettersAlloc.item], rcx
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+
+	mov rcx, 0
+	mov [getRefLettersAlloc.nextRef], rcx				; Begin as 0
+	mov [getRefLettersAlloc.letters], rcx
+
+	mov rbx, [getRefLettersAlloc.item]
+	add rbx, Ref.list
+	mov rdx, [rbx]
+	mov [getRefLettersAlloc.list], rdx				; Cache
+
+
+	mov rbx, [getRefLettersAlloc.item]
+	add rbx, Ref.flags
+	mov rdx, [rbx]
+	cmp rdx, 1b							; REF_VALUE
+	jne getRefLettersAlloc.refList
+
+	mov rbx, [getRefLettersAlloc.item]
+	add rbx, Ref.valueAlloc
+	mov rdx, [rbx]
+	mov rax, rdx
+	
+
+	jmp getRefLettersAlloc.end
+	.refList:
+
+
+	sub rsp, 8*8
+	mov rcx, [getRefLettersAlloc.list]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+	.nextRefItem:				; Just ensure end is not reached
+	mov rbx, [getRefLettersAlloc.list]
+	mov r8, rbx
+	add rbx, List.index
+	add r8, List.itemsCount
+	mov rcx, [rbx]
+	mov rdx, [r8]
+	cmp rcx, rdx
+	jnl getRefLettersAlloc.endItemList
+
+
+	
+	sub rsp, 8*8
+	mov rcx, [getRefLettersAlloc.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [getRefLettersAlloc.nextRef], rax
+
+
+	sub rsp, 8*8
+	mov rcx, [getRefLettersAlloc.nextRef]
+	call getRefLettersAlloc
+	add rsp, 8*8
+
+	mov rbx, [getRefLettersAlloc.item]
+	add rbx, Ref.valueAlloc
+	mov rdx, [rbx]
+	cmp rdx, 0
+	jne getRefLettersAlloc.notFirstAlloc
+
+	sub rsp, 8*8
+	mov rbx, [getRefLettersAlloc.nextRef]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	call [copyLetters]				; allocate first, do not append
+	add rsp, 8*8
+	mov rbx, [getRefLettersAlloc.item]
+	add rbx, Ref.valueAlloc
+	mov [rbx], rax
+	
+
+	jmp getRefLettersAlloc.nextRefItem
+
+	.notFirstAlloc:
+
+	sub rsp, 8*8
+	mov rbx, [getRefLettersAlloc.nextRef]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	call [copyLetters]				; allocate first, do not append
+	add rsp, 8*8
+	
+
+	sub rsp, 8*8
+	mov rdx,rax
+	mov rbx, [getRefLettersAlloc.item]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	call [appendLetters]				; Append
+	add rsp, 8*8
+
+	mov rbx, [getRefLettersAlloc.item]
+	add rbx, Ref.valueAlloc				; Allocation goes in item Ref's value alloc
+	mov [rbx], rax
+
+
+
+	jmp getRefLettersAlloc.nextRefItem
+	.endItemList:
+
+	.end:
+	mov rbx, [getRefLettersAlloc.item]
+	add rbx, Ref.valueAlloc
+	mov rax, [rbx]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+; Assumes Ref Items in List are Processed
+processing.getRefLettersList:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*16);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label getRefLettersList.heapAddress qword at rbp-8  
+	label getRefLettersList.handleAllocatedMemory qword at rbp-16
+	label getRefLettersList.parsing qword at rbp-24 
+	label getRefLettersList.unprocessedCount qword at rbp-32
+	label getRefLettersList.newRef qword at rbp-40
+	label getRefLettersList.letters qword at rbp-48
+	label getRefLettersList.nextNewlineIndex qword at rbp-56
+	label getRefLettersList.list qword at rbp-64
+	label getRefLettersList.prevItem qword at rbp-72
+	label getRefLettersList.refRegistry qword at rbp-80
+	label getRefLettersList.item qword at rbp-88
+	label getRefLettersList.unprocessedParamCount qword at rbp-96
+	label getRefLettersList.nextRef qword at rbp-104
+	label getRefLettersList.refIndex qword at rbp-112
+	label getRefLettersList.index qword at rbp-120
+	label getRefLettersList.flags qword at rbp-128
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [getRefLettersList.item], rcx
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+
+	mov rcx, 0
+	mov [getRefLettersList.nextRef], rcx				; Begin as 0
+	mov [getRefLettersList.letters], rcx
+
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.list
+	mov rdx, [rbx]
+	mov [getRefLettersList.list], rdx				; Cache
+
+
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.flags
+	mov rdx, [rbx]
+	cmp rdx, 1b							; REF_VALUE
+	jne getRefLettersList.refList
+
+	
+	sub rsp, 8*8
+	call [newList]
+	add rsp, 8*8
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.valueAlloc
+	mov [rbx], rax
+
+
+	sub rsp, 8*8
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	call [copyLetters]				; allocate first, do not append
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rdx, rax
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	call [newLastItem]
+	add rsp, 8*8
+
+
+	jmp getRefLettersList.end
+	.refList:
+
+
+	sub rsp, 8*8
+	mov rcx, [getRefLettersList.list]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+	.nextRefItem:				; Just ensure end is not reached
+	mov rbx, [getRefLettersList.list]
+	mov r8, rbx
+	add rbx, List.index
+	add r8, List.itemsCount
+	mov rcx, [rbx]
+	mov rdx, [r8]
+	cmp rcx, rdx
+	jnl getRefLettersList.endItemList
+
+
+	
+	sub rsp, 8*8
+	mov rcx, [getRefLettersList.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [getRefLettersList.nextRef], rax
+
+
+	sub rsp, 8*8
+	mov rcx, [getRefLettersList.nextRef]
+	call getRefLettersList
+	add rsp, 8*8
+
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.valueAlloc
+	mov rdx, [rbx]
+	cmp rdx, 0
+	jne getRefLettersList.notFirstAlloc
+
+
+	sub rsp, 8*8
+	call [newList]
+	add rsp, 8*8
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.valueAlloc
+	mov [rbx], rax
+
+
+	sub rsp, 8*8
+	mov rbx, [getRefLettersList.nextRef]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	call [extendList]
+	add rsp, 8*8
+	
+
+	jmp getRefLettersList.nextRefItem
+
+	.notFirstAlloc:
+
+	sub rsp, 8*8
+	mov rbx, [getRefLettersList.nextRef]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	call [extendList]
+	add rsp, 8*8
+	
+
+
+
+
+
+
+	jmp getRefLettersList.nextRefItem
+	.endItemList:
+
+	.end:
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.valueAlloc
+	mov rax, [rbx]
 
 
 	add rsp, 8	

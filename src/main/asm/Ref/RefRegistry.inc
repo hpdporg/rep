@@ -282,6 +282,7 @@ refRegistry.newLastRegisteredDefinedRef:
 
 
 ; Existing Ref returned when exists, 0 when non-existent, 1 when defined match
+; Takes Ref.ref not ref address as second param
 refRegistry.getRegisteredRef:
 	push rbp 
 	mov rbp, rsp 
@@ -373,6 +374,8 @@ refRegistry.getRegisteredRef:
 	cmp rax, 0
 	je getRegisteredRef.nextItem
 
+	mov rax, [getRegisteredRef.nextRef]
+
 	jmp getRegisteredRef.end			; Found
 
 	.endList:
@@ -423,11 +426,10 @@ refRegistry.getRegisteredRef:
 
 
 
-
-	;.end:
-
 	mov rax, [getRegisteredRef.nextRef]
-	.end:;dbg
+
+	.end:
+
 
 
 	add rsp, 8	
