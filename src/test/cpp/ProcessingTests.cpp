@@ -69,6 +69,37 @@ TEST(ProcessingTest, ProcessesAppending) {
 
 }
 
+TEST(ProcessingTest, ProcessesStoreFile) {
+	Ref* ref = newRef();
+	ref->flags = REF_VALUE;
+	ref->definedRefFlags = DEFINED_REF_STORE_FILE;
+	char* refLetters = "adf12";
+	
+	Ref* ref2 = newRef();
+	ref2->flags = REF_VALUE;
+	ref2->valueAlloc = "fileName3.txt";
+	
+	Ref* ref3 = newRef();
+	ref3->flags = REF_VALUE;
+	ref3->valueAlloc = "ABC281";
+
+	newLastItem(ref->list, ref2);
+	newLastItem(ref->list, ref3);
+
+	Parsing* parsing = newParsing();
+	RefRegistry* refRegistry = newRefRegistry();
+	fprintf(stdout, "\nRef2 letters: %s\n", (char*)ref2->valueAlloc);
+
+	processStoreFile(parsing, ref, refRegistry,DEFINED_REF_STORE_FILE);
+
+	//fprintf(stdout, "\nRef1 letters: %s\n", (char*)ref->valueAlloc);
+
+
+
+	//EXPECT_STREQ("adf12", (char*)ref->valueAlloc);
+
+}
+
 TEST(ProcessingTest, GetsUnprocessedRegisteredParams) {
 	Ref* ref = newRef();
 
