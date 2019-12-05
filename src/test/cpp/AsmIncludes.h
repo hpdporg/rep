@@ -188,6 +188,7 @@ extern "C" {
 	Record* storeLetters(Record* record, char* letters);
 	Record* restoreLetters(Record* record, char* letters);
 	List* retrieveRecordNames(Record* record);
+	void removeRecord(Record* record);
 
 	//Matches
 	Matches* newMatches();
@@ -219,6 +220,7 @@ extern "C" {
 	Ref* getBaseRefAtIndex(Ref* item, _int64 index);
 	Ref* getBaseRefUsingFlags(Ref* item, _int64 refBaseFlags);
 	char* getRefLettersAlloc(Ref* item);
+	List* getRefLettersList(Ref* item);
 	_int64 getUnprocessedRegisteredParams(Ref* item, RefRegistry* refRegistry);
 
 	//Ref

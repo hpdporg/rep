@@ -1124,7 +1124,7 @@ processing.processStoreFile:
 	add rsp, 8*8
 
 	mov rbx, [processStoreFile.record]
-	add rbx, Record.location
+	add rbx, Record.builtLocation
 	mov [rbx], rax
 
 
@@ -1145,6 +1145,7 @@ processing.processStoreFile:
 	mov rcx, [processStoreFile.record]
 	call [storeLetters]
 	add rsp, 8*8
+
 
 	;jmp processStoreFile.nextRefItem
 	.endItemList:
@@ -1238,8 +1239,8 @@ processing.processRetrieveFile:
 	mov rcx, [processRetrieveFile.item]
 	call getUnprocessedRegisteredParams
 	add rsp, 8*8
-	cmp rax, 0
-	jne processRetrieveFile.end				; This definedRef depends on param registeredRefs being processed, not just the param
+	cmp rax, 1b						; Second param can be unprocessed. TO-DO: improve.
+	jnle processRetrieveFile.end				; This definedRef depends on param registeredRefs being processed, not just the param
 
 
 
@@ -1285,7 +1286,7 @@ processing.processRetrieveFile:
 	add rsp, 8*8
 
 	mov rbx, [processRetrieveFile.record]
-	add rbx, Record.location
+	add rbx, Record.builtLocation
 	mov [rbx], rax
 
 
@@ -1408,8 +1409,8 @@ processing.processReplaceLettersList:
 	mov rcx, [processReplaceLettersList.item]
 	call getUnprocessedRegisteredParams
 	add rsp, 8*8
-	cmp rax, 1b
-	jnle processReplaceLettersList.end				; Separator can be unprocessed? This definedRef depends on param registeredRefs being processed, not just the param
+	cmp rax, 10b
+	jnle processReplaceLettersList.end				; Separator, replaceLettersList definedref can be unprocessed? This definedRef depends on param registeredRefs being processed, not just the param
 
 
 
@@ -2313,7 +2314,7 @@ processing.getRefLettersList:
 	call [newList]
 	add rsp, 8*8
 	mov rbx, [getRefLettersList.item]
-	add rbx, Ref.valueAlloc
+	add rbx, Ref.listAlloc
 	mov [rbx], rax
 
 
@@ -2327,7 +2328,7 @@ processing.getRefLettersList:
 	sub rsp, 8*8
 	mov rdx, rax
 	mov rbx, [getRefLettersList.item]
-	add rbx, Ref.valueAlloc
+	add rbx, Ref.listAlloc
 	mov rcx, [rbx]
 	call [newLastItem]
 	add rsp, 8*8
@@ -2385,8 +2386,8 @@ processing.getRefLettersList:
 
 	sub rsp, 8*8
 	mov rbx, [getRefLettersList.nextRef]
-	add rbx, Ref.valueAlloc
-	mov rcx, [rbx]
+	add rbx, Ref.listAlloc
+	mov rdx, [rbx]
 	mov rbx, [getRefLettersList.item]
 	add rbx, Ref.valueAlloc
 	mov rcx, [rbx]
@@ -2400,8 +2401,8 @@ processing.getRefLettersList:
 
 	sub rsp, 8*8
 	mov rbx, [getRefLettersList.nextRef]
-	add rbx, Ref.valueAlloc
-	mov rcx, [rbx]
+	add rbx, Ref.listAlloc
+	mov rdx, [rbx]
 	mov rbx, [getRefLettersList.item]
 	add rbx, Ref.valueAlloc
 	mov rcx, [rbx]
