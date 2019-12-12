@@ -1,0 +1,122 @@
+﻿  ProcessingTests.cpp
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(257): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(257): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(257): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(257): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(274): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(274): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(274): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(274): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(278): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(278): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(278): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(278): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(295): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(295): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(295): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(295): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(296): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(296): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(296): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(296): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(299): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(299): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(299): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(299): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(312): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(312): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(312): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(312): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(313): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(313): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(313): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(313): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(316): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(316): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(316): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(316): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(331): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(331): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(331): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(331): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(332): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(332): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(332): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(332): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(335): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(335): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(335): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(335): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(348): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(348): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(348): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(348): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(349): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(349): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(349): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(349): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(352): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(352): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(352): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(352): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(365): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(365): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(365): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(365): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(366): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(366): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(366): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(366): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(369): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(369): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(369): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(369): note: consider using '%I64d' in the format string
+datap.obj : warning LNK4078: multiple '.data' sections found with different attributes (C03000C0)
+gtest.lib(gtest-all.obj) : warning LNK4078: multiple '.text' sections found with different attributes (60501020)
+  Generating code
+  1 of 741 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+rep.obj : warning LNK4049: locally defined symbol linearAllocate imported
+rep.obj : warning LNK4049: locally defined symbol newList imported
+rep.obj : warning LNK4049: locally defined symbol newLastItem imported
+rep.obj : warning LNK4049: locally defined symbol getNextItem imported
+rep.obj : warning LNK4049: locally defined symbol getLastDivergedItem imported
+rep.obj : warning LNK4049: locally defined symbol getLastDivergedItemNesting imported
+rep.obj : warning LNK4049: locally defined symbol getNextItemNesting imported
+rep.obj : warning LNK4049: locally defined symbol getConvergedItemCount imported
+rep.obj : warning LNK4049: locally defined symbol getNextTangentItem imported
+rep.obj : warning LNK4049: locally defined symbol nextItemNesting imported
+rep.obj : warning LNK4049: locally defined symbol lastItemNesting imported
+rep.obj : warning LNK4049: locally defined symbol resetIndex imported
+rep.obj : warning LNK4049: locally defined symbol newNextItem imported
+rep.obj : warning LNK4049: locally defined symbol getPriorItem imported
+rep.obj : warning LNK4049: locally defined symbol getNextItemMatch imported
+rep.obj : warning LNK4049: locally defined symbol getNextItemMatchComp imported
+rep.obj : warning LNK4049: locally defined symbol extendList imported
+rep.obj : warning LNK4049: locally defined symbol numAsLetters imported
+rep.obj : warning LNK4049: locally defined symbol appendLetters imported
+rep.obj : warning LNK4049: locally defined symbol letterLength imported
+rep.obj : warning LNK4049: locally defined symbol lettersBetweenListsIndices imported
+rep.obj : warning LNK4049: locally defined symbol lettersBetweenIndices imported
+rep.obj : warning LNK4049: locally defined symbol copyLetters imported
+rep.obj : warning LNK4049: locally defined symbol newStorage imported
+rep.obj : warning LNK4049: locally defined symbol defineRecordPath imported
+rep.obj : warning LNK4049: locally defined symbol retrieve imported
+rep.obj : warning LNK4049: locally defined symbol storeLetters imported
+rep.obj : warning LNK4049: locally defined symbol restoreLetters imported
+rep.obj : warning LNK4049: locally defined symbol retrieveRecordNames imported
+rep.obj : warning LNK4049: locally defined symbol retrieveRecordNamesExtension imported
+rep.obj : warning LNK4049: locally defined symbol removeRecord imported
+rep.obj : warning LNK4049: locally defined symbol newMatches imported
+rep.obj : warning LNK4049: locally defined symbol processMatchFlags imported
+rep.obj : warning LNK4049: locally defined symbol getMatches imported
+rep.obj : warning LNK4049: locally defined symbol lettersSame imported
+rep.obj : warning LNK4049: locally defined symbol lettersSameExact imported
+rep.obj : warning LNK4049: locally defined symbol getNextMatchIndex imported
+rep.obj : warning LNK4049: locally defined symbol hasMatch imported
+rep.obj : warning LNK4049: locally defined symbol replaceLettersWithList imported
+rep.obj : warning LNK4049: locally defined symbol replaceContainsLettersWithList imported
+gtest.lib(gtest-all.obj) : warning LNK4099: PDB 'gtest.pdb' was not found with 'gtest.lib(gtest-all.obj)' or at 'C:\Users\lewis\rep\rep_2017\repTests\x64\Release\gtest.pdb'; linking object as if no debug info
+  repTests.vcxproj -> C:\Users\lewis\rep\rep_2017\\repTests\x64\Release\repTests.exe
