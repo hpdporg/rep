@@ -49,10 +49,19 @@ section '.data' data readable writeable align 16
 
 	; Debug msgs
 	buildingRepMsg db 'Building Rep..',0
-	baseRepOffsetAtLettersMsg db 'Base Rep Offset at Letters..',0
+	baseRepOffsetAtLettersMsg db 'Base Rep Offset is at Letters..',0
 	buildNestedRepListMsg db 'Building nested rep List..',0
 	refAsParamMsg db 'Ref as param',0
-	
+	indexMsg db 'Index:',0
+	endIndexMsg db 'EndIndex:',0
+	parsedLettersMsg db 'Parsed letters:',0	
+	startingParseRefMsg db 'ParseRef starting..',0
+	lastRefMsg db 'Last ref:',0
+	repOffsetMsg db 'Rep offset:',0
+	baseRepOffsetMsg db 'Base Rep offset:',0
+	atNewLineMsg db 'At newline.',0
+	atDelimiterMsg db 'At delimiter',0
+	atLettersMsg db 'At letters.',0
 
 section '.text' code readable writeable executable align 16
 
@@ -613,6 +622,10 @@ parsing.parseRep:
 	cmp rcx, r8
 	jnle parseRep.end				; Don't go past end
 
+	sub rsp, 8*8
+	mov rcx, indexMsg
+	call [debugLetters]
+	add rsp, 8*8
 
 
 	sub rsp, 8*8
@@ -847,6 +860,11 @@ parsing.next:
 	.atNewLine:
 
 	sub rsp, 8*8
+	mov rcx, atNewLineMsg
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
 	mov rcx, newlineWinLetters
 	call [letterLength]
 	add rsp, 8*8
@@ -861,6 +879,11 @@ parsing.next:
 	jmp next.increaseIndex
 
 	.atDelimiter:
+
+	sub rsp, 8*8
+	mov rcx, atDelimiterMsg
+	call [debugNumMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov r8, [next.parsing]
@@ -879,6 +902,11 @@ parsing.next:
 	jmp next.increaseIndex
 	
 	.atLetters:
+
+	sub rsp, 8*8
+	mov rcx, atLettersMsg
+	call [debugNumMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, [next.parsedLetters]
@@ -1395,6 +1423,31 @@ parsing.buildNestedRepList:
 	add rbx, Parsing.baseRepOffset
 	mov [rbx], rcx					; Also increase baseRepOffset if needed when first
 	
+
+	sub rsp, 8*8
+	mov rcx, repOffsetMsg
+	call [debugLetters]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [buildNestedRepList.parsing]
+	add rbx, Parsing.repOffset
+	mov rcx, [rbx]
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rcx, baseRepOffsetMsg
+	call [debugLetters]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [buildNestedRepList.parsing]
+	add rbx, Parsing.baseRepOffset
+	mov rcx, [rbx]					; Also increase baseRepOffset if needed when first
+	call [debugNumMsg]
+	add rsp, 8*8
+
 	.notFirstRef:
 
 	sub rsp, 8*8
@@ -1430,6 +1483,16 @@ parsing.buildNestedRepList:
 	call getLastRef
 	add rsp, 8*8
 	mov [buildNestedRepList.lastRef], rax
+
+	sub rsp, 8*8
+	mov rcx, lastRefMsg
+	call [debugLetters]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rcx, [buildNestedRepList.lastRef]
+	call [debugNumMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rdx, [buildNestedRepList.nextRef]
@@ -2105,8 +2168,8 @@ parsing.parseRef:
 
 
 	sub rsp, 8*8
-	mov rcx, 563353
-	call [debugNumMsg]
+	mov rcx, startingParseRefMsg
+	call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -2116,18 +2179,13 @@ parsing.parseRef:
 	add rsp, 8*8
 	mov [parseRef.parsedLetters], rax
 
-sub rsp, 8*8
-	mov rcx, 2443353
-	call [debugNumMsg]
+	
+	sub rsp, 8*8
+	mov rcx, parsedLettersMsg
+	call [debugLetters]
 	add rsp, 8*8
 
-
-sub rsp, 8*8
-	mov rcx, [parseRef.letters]
-	call [debugLettersMsg]
-	add rsp, 8*8	
-
-sub rsp, 8*8
+	sub rsp, 8*8
 	mov rcx, [parseRef.parsedLetters]
 	call [debugLettersMsg]
 	add rsp, 8*8

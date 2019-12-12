@@ -29,10 +29,13 @@ TEST_F(ParsingRepFromFileTest, ParsingRefValuesAndRetrieveFile) {
 		while (parsing->parsingRefs->index < parsing->parsingRefs->itemsCount) {
 			Ref* nextRef = (Ref*)getNextItem(parsing->parsingRefs);
 			fprintf(stdout, "\nRep name: %s\n", (char*)nextRef->ref);
+			fprintf(stdout, "\nRep flags: %d\n", nextRef->flags);
 			resetIndex(nextRef->list);
 			while (nextRef->list->index < nextRef->list->itemsCount) {
 				Ref* paramRef = (Ref*)getNextItem(nextRef->list);
 				fprintf(stdout, "\nparamRep name: %s\n", (char*)paramRef->ref);
+				fprintf(stdout, "\nparamRep flags: %d\n", paramRef->flags);
+				fprintf(stdout, "\nparamRep index: %d\n", paramRef->repIndex);
 			}
 			resetIndex(nextRef->list);
 		
