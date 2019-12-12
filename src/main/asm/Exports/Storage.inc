@@ -6,7 +6,8 @@ extrn '__imp_restoreLetters' as restoreLetters:qword
 extrn '__imp_retrieveRecordNames' as retrieveRecordNames:qword
 extrn '__imp_retrieveRecordNamesExtension' as retrieveRecordNamesExtension:qword
 extrn '__imp_removeRecord' as removeRecord:qword
-
+extrn '__imp_debugNum' as debugNum:qword
+extrn '__imp_debugLetters' as debugLetters:qword
 
 
 
