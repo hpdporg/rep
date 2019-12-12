@@ -46,6 +46,12 @@ section '.data' data readable writeable align 16
 	; Flags
 	; PARSING_AT_LETTERS	PARSING_AT_DELIMITER	PARSING_AT_NEWLINE
 
+
+	; Debug msgs
+	buildingRepMsg db 'Building Rep..',0
+	baseRepOffsetAtLettersMsg db 'Base Rep Offset at Letters..',0
+	buildNestedRepListMsg db 'Building nested rep List..',0
+	refAsParamMsg db 'Ref as param',0
 	
 
 section '.text' code readable writeable executable align 16
@@ -567,12 +573,25 @@ parsing.parseRep:
 	sub rsp, 8
 
 
+	sub rsp, 8*8
+	mov rcx, 189
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rcx, [parseRep.letters]
+	call [debugLettersMsg]
+	add rsp, 8*8
+
 	mov rbx, [parseRep.parsing]
 	add rbx, Parsing.endIndex
 	mov rcx, [rbx]
 	mov rdx, 0
 	cmp rcx, rdx
 	jne parseRep.endIndexExists			; Define Parsing endIndex
+
+
+
 
 	sub rsp, 8*8
 	mov rcx, [parseRep.letters]
@@ -595,6 +614,16 @@ parsing.parseRep:
 	jnle parseRep.end				; Don't go past end
 
 
+
+	sub rsp, 8*8
+	mov rbx, [parseRep.parsing]
+	mov rdx, rbx
+	add rdx, Parsing.index
+	mov rcx, [rdx]
+	call [debugNumMsg]
+	add rsp, 8*8
+
+
 	sub rsp, 8*8
 	mov r8, [parseRep.refRegistry]
 	mov rdx, [parseRep.letters]
@@ -602,6 +631,12 @@ parsing.parseRep:
 	call next
 	add rsp, 8*8
 	mov [parseRep.nextRef], rax
+
+
+	sub rsp, 8*8
+	mov rcx, 1222489
+	call [debugNumMsg]
+	add rsp, 8*8
 
 
 	sub rsp, 8*8
@@ -694,6 +729,7 @@ parsing.next:
 	mov [next.nextRef], rcx			; Begin as 0
 
 
+	
 	sub rsp, 8*8
 	mov rdx, newlineWinLetters
 	mov rcx, [next.letters]
@@ -708,6 +744,12 @@ parsing.next:
 	cmp rdx, rcx	
 	je next.notAtNewLine			; No newline
 
+
+	sub rsp, 8*8
+	mov rcx, 73
+	call [debugNumMsg]
+	add rsp, 8*8
+
 	sub rsp, 8*8
 	mov rdx, newlineWinLetters
 	mov rcx, [next.letters]
@@ -720,12 +762,23 @@ parsing.next:
 	mov [next.nextNewlineIndex], rax
 
 
+	sub rsp, 8*8
+	mov rcx, 733
+	call [debugNumMsg]
+	add rsp, 8*8
+
 	mov rcx, 0
 	mov rdx, [next.nextNewlineIndex]
 	cmp rdx, rcx				; At newline
 	je next.atNewLine
 
 	.notAtNewLine:
+
+	sub rsp, 8*8
+	mov rcx, 153
+	call [debugNumMsg]
+	add rsp, 8*8
+
 
 	sub rsp, 8*8
 	mov r8, [next.parsing]
@@ -742,6 +795,11 @@ parsing.next:
 	mov rdx, rax
 	cmp rdx, rcx	
 	je next.notAtDelimiter			; No delimiter
+
+	sub rsp, 8*8
+	mov rcx, 553
+	call [debugNumMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov r8, [next.parsing]
@@ -764,12 +822,24 @@ parsing.next:
 
 
 	sub rsp, 8*8
+	mov rcx, 5653
+	call [debugNumMsg]
+	add rsp, 8*8
+
+
+
+	sub rsp, 8*8
 	mov r8, [next.refRegistry]
 	mov rdx, [next.letters]
 	mov rcx, [next.parsing]
 	call parseRef
 	add rsp, 8*8
 	mov [next.nextRef], rax
+
+	sub rsp, 8*8
+	mov rcx, 99653
+	call [debugNumMsg]
+	add rsp, 8*8
 
 
 	jmp next.atLetters
@@ -971,6 +1041,12 @@ parsing.buildRep:
 
 
 	sub rsp, 8*8
+	mov rcx, buildingRepMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
+
+
+	sub rsp, 8*8
 	mov r8, [buildRep.refRegistry]
 	mov rdx, [buildRep.nextRef]
 	mov rcx, [buildRep.parsing]
@@ -1122,11 +1198,28 @@ parsing.buildBaseRepOffset:
 	jmp buildBaseRepOffset.end
 	.atLetters:
 
+	sub rsp, 8*8
+	mov rcx, baseRepOffsetAtLettersMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
+
 	mov rbx, [buildBaseRepOffset.parsing]
 	add rbx, Parsing.lineRefCount
 	mov rcx, [rbx]
 	add rcx, 1b
 	mov [rbx], rcx
+
+	sub rsp, 8*8
+	mov rcx, rcx
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [buildBaseRepOffset.parsing]
+	add rbx, Parsing.lineRefCount
+	mov rcx, [rbx]
+	call [debugNumMsg]
+	add rsp, 8*8
 
 	; TO-DO: Multiline
 
@@ -1263,6 +1356,16 @@ parsing.buildNestedRepList:
 	push r15
 	sub rsp, 8
 
+	sub rsp, 8*8
+	mov rcx, buildNestedRepListMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
+
+
+	sub rsp, 8*8
+	mov rcx, [buildNestedRepList.nextRef]
+	call [debugNumMsg]
+	add rsp, 8*8
 
 	mov rdx, [buildNestedRepList.nextRef]
 	cmp rdx, 0
@@ -1314,6 +1417,11 @@ parsing.buildNestedRepList:
 
 	jmp buildNestedRepList.end
 	.refAsParam:
+
+	sub rsp, 8*8
+	mov rcx, refAsParamMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov r8, [buildNestedRepList.refRegistry]
@@ -1995,13 +2103,34 @@ parsing.parseRef:
 	sub rsp, 8
 
 
+
+	sub rsp, 8*8
+	mov rcx, 563353
+	call [debugNumMsg]
+	add rsp, 8*8
+
 	sub rsp, 8*8
 	mov rdx, [parseRef.letters]
 	mov rcx, [parseRef.parsing]
 	call getNextMatchOrDelimiter
 	add rsp, 8*8
 	mov [parseRef.parsedLetters], rax
-	
+
+sub rsp, 8*8
+	mov rcx, 2443353
+	call [debugNumMsg]
+	add rsp, 8*8
+
+
+sub rsp, 8*8
+	mov rcx, [parseRef.letters]
+	call [debugLettersMsg]
+	add rsp, 8*8	
+
+sub rsp, 8*8
+	mov rcx, [parseRef.parsedLetters]
+	call [debugLettersMsg]
+	add rsp, 8*8
 
 
 	sub rsp, 8*8

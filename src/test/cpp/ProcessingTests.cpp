@@ -2,16 +2,16 @@
 #include "ProcessingTests.h"
 
 
+TEST(ProcessingTest, ProcessesARep) {
 
-TEST(ProcessingTest, ProcessesLetters) {
 	Ref* ref = newRef();
 	ref->flags = REF_VALUE;
-	ref->definedRefFlags = DEFINED_REF_LETTERS;
 	char* refLetters = "adf12";
-	
+
 	Ref* ref2 = newRef();
+	ref2->definedRefFlags = DEFINED_REF_LETTERS;
 	ref2->flags = REF_DEFINED;
-	
+
 	Ref* ref3 = newRef();
 	ref3->ref = refLetters;
 
@@ -21,7 +21,10 @@ TEST(ProcessingTest, ProcessesLetters) {
 	Parsing* parsing = newParsing();
 	RefRegistry* refRegistry = newRefRegistry();
 
-	processLetters(parsing, ref, refRegistry,DEFINED_REF_LETTERS);
+	newLastItem(parsing->parsingRefs, ref);
+
+	char* letters = "";
+	processRep(parsing, letters, refRegistry);
 
 	fprintf(stdout, "\nRef1 letters: %s\n", (char*)ref->valueAlloc);
 
@@ -29,206 +32,74 @@ TEST(ProcessingTest, ProcessesLetters) {
 
 	EXPECT_STREQ("adf12", (char*)ref->valueAlloc);
 
+
 }
 
-TEST(ProcessingTest, ProcessesAppending) {
+TEST(ProcessingTest, ProcessesRefItem) {
 	Ref* ref = newRef();
 	ref->flags = REF_VALUE;
-	ref->definedRefFlags = 0;
 	char* refLetters = "adf12";
-	char* refLetters2 = "9zdf77";
-	
+
 	Ref* ref2 = newRef();
-	ref2->ref = (char*)"ref2";
-	ref2->flags = REF_VALUE;
-	ref2->valueAlloc = refLetters;
-	ref2->unprocessed = 0;
+	ref2->definedRefFlags = DEFINED_REF_LETTERS;
+	ref2->flags = REF_DEFINED;
 
 	Ref* ref3 = newRef();
-	ref3->ref = (char*)"ref3";
-	ref3->flags = REF_VALUE;
-	ref3->valueAlloc = refLetters2;
-	ref3->unprocessed = 0;
+	ref3->ref = refLetters;
 
 	newLastItem(ref->list, ref2);
 	newLastItem(ref->list, ref3);
 
 	Parsing* parsing = newParsing();
 	RefRegistry* refRegistry = newRefRegistry();
-	newLastRegisteredRef(refRegistry, ref2);
-	newLastRegisteredRef(refRegistry, ref3);
 
-
-	processAppending(parsing, ref, refRegistry, (DefinedRefFlags)0);
+	processRefItem(ref, 2, REF_BASE_DEFINED_REF_FIRST_PARAM, DEFINED_REF_LETTERS, parsing,  refRegistry);
 
 	fprintf(stdout, "\nRef1 letters: %s\n", (char*)ref->valueAlloc);
 
 
 
-	EXPECT_STREQ("adf129zdf77", (char*)ref->valueAlloc);
+	EXPECT_STREQ("adf12", (char*)ref->valueAlloc);
+
+
+
 
 }
 
-TEST(ProcessingTest, ProcessesStoreFile) {
+TEST(ProcessingTest, GetsUnprocessedParams) {
 	Ref* ref = newRef();
-	ref->flags = REF_DEFINED;
-	ref->definedRefFlags = DEFINED_REF_STORE_FILE;
-	
-	Ref* ref2 = newRef();
 
-	ref2->flags = REF_VALUE;
+	Ref* ref2 = newRef();
 	ref2->ref = (char*)"ref2";
-	ref2->unprocessed = 0;
-	ref2->valueAlloc = "fileName3.txt";
-	
+	ref2->flags = REF_VALUE;
+	ref2->unprocessed = 1;
+
 	Ref* ref3 = newRef();
 	ref3->ref = (char*)"ref3";
 	ref3->flags = REF_VALUE;
 	ref3->unprocessed = 0;
-	ref3->valueAlloc = "ABC281";
 
 	newLastItem(ref->list, ref2);
 	newLastItem(ref->list, ref3);
 
 	Parsing* parsing = newParsing();
-	RefRegistry* refRegistry = newRefRegistry();
-	newLastRegisteredRef(refRegistry, ref2);
-	newLastRegisteredRef(refRegistry, ref3);
+	
 
-	fprintf(stdout, "\nRef2 letters: %s\n", (char*)ref2->valueAlloc);
 
-	processStoreFile(parsing, ref, refRegistry, DEFINED_REF_STORE_FILE);
+	_int64 unprocessedCount = getUnprocessedParams(ref);
 
-	Record* record = newStorage();
-	record->builtLocation = "fileName3.txt";
-	retrieve(record);
-	fprintf(stdout, "\nRecord letters: %s\n", (char*)record->allocAddr);
+	fprintf(stdout, "\nunprocessedCount: %d\n", unprocessedCount);
 
 
 
-	EXPECT_STREQ("ABC281", (char*)record->allocAddr);
+	EXPECT_EQ(1, unprocessedCount);
 
-	removeRecord(record);
+
+
+
 
 }
 
-TEST(ProcessingTest, ProcessesRetrieveFile) {
-
-	Record* record = newStorage();
-	record->builtLocation = "fileName4.txt";
-	storeLetters(record, (char*)"ABC281");
-
-	Ref* ref = newRef();
-	ref->flags = REF_DEFINED;
-	ref->definedRefFlags = DEFINED_REF_RETRIEVE_FILE;
-
-	Ref* ref2 = newRef();
-
-	ref2->flags = REF_VALUE;
-	ref2->ref = (char*)"ref2";
-	ref2->unprocessed = 0;
-	ref2->valueAlloc = "fileName4.txt";
-
-	Ref* ref3 = newRef();
-	ref3->ref = (char*)"ref3";
-	ref3->flags = REF_VALUE;
-	
-
-
-	newLastItem(ref->list, ref2);
-	newLastItem(ref->list, ref3);
-
-	Parsing* parsing = newParsing();
-	RefRegistry* refRegistry = newRefRegistry();
-	newLastRegisteredRef(refRegistry, ref2);
-	newLastRegisteredRef(refRegistry, ref3);
-
-	fprintf(stdout, "\nRecord letters: %s\n", (char*)"ABC281");
-
-	processRetrieveFile(parsing, ref, refRegistry, DEFINED_REF_RETRIEVE_FILE);
-
-	fprintf(stdout, "\nRef3 letters: %s\n", (char*)ref3->valueAlloc);
-
-	
-
-
-	EXPECT_STREQ("ABC281", (char*)ref3->valueAlloc);
-
-	removeRecord(record);
-
-}
-
-TEST(ProcessingTest, ProcessesReplaceLettersList) {
-	
-	Ref* ref = newRef();
-	ref->flags = REF_VALUE;
-	ref->ref = (char*)"ref";
-	ref->unprocessed = 1;
-	
-	Ref* ref2 = newRef();
-	ref2->ref = "replaceLettersList";
-	ref2->flags = REF_DEFINED;
-	ref2->definedRefFlags = DEFINED_REF_REPLACE_LETTERS_LIST;
-
-	Ref* ref3 = newRef();
-	ref3->ref = (char*)"ref3";
-	ref3->flags = REF_VALUE;
-	ref3->valueAlloc = "2fdsepValsal lssepValdafj 11";
-	ref3->unprocessed = 0;
-
-	Ref* ref4 = newRef();
-	ref4->ref = (char*)"ref4";
-	ref4->flags = REF_LIST;
-	ref4->unprocessed = 0;
-
-	Ref* ref5 = newRef();
-	ref5->ref = (char*)"sepVal";
-	ref5->flags = REF_VALUE;
-
-	Ref* ref6 = newRef();
-	ref6->ref = (char*)"ref6";
-	ref6->flags = REF_VALUE;
-	ref6->valueAlloc = "A2R4";
-	ref6->unprocessed = 0;
-	
-	Ref* ref7 = newRef();
-	ref7->ref = (char*)"ref7";
-	ref7->flags = REF_VALUE;
-	ref7->valueAlloc = "Aab4";
-	ref7->unprocessed = 0;
-
-	newLastItem(ref4->list, ref6);
-	newLastItem(ref4->list, ref7);
-
-	newLastItem(ref->list, ref2);
-	newLastItem(ref->list, ref3);
-	newLastItem(ref->list, ref4);
-	newLastItem(ref->list, ref5);
-
-	Parsing* parsing = newParsing();
-	RefRegistry* refRegistry = newRefRegistry();
-	//newLastRegisteredRef(refRegistry, ref2);
-	newLastRegisteredRef(refRegistry, ref3);
-	newLastRegisteredRef(refRegistry, ref4);
-	newLastRegisteredRef(refRegistry, ref5);
-	newLastRegisteredRef(refRegistry, ref6);
-	newLastRegisteredRef(refRegistry, ref7);
-
-	fprintf(stdout, "\nLetters: %s\n", (char*)"2fdsepValsal lssepValdafj 11");
-
-
-	processReplaceLettersList(parsing, ref, refRegistry, DEFINED_REF_REPLACE_LETTERS_LIST);
-	
-	
-	fprintf(stdout, "\nRef letters: %s\n", (char*)ref->valueAlloc);
-
-
-
-
-	EXPECT_STREQ("2fdA2R4sal lsAab4dafj 11", (char*)ref->valueAlloc);
-
-	
-}
 
 TEST(ProcessingTest, GetsUnprocessedRegisteredParams) {
 	Ref* ref = newRef();

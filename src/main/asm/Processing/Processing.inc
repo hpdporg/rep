@@ -22,7 +22,7 @@ namespace processing
 processing.processRep:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*13);+(8*6)
+	sub rsp, (8*14);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -39,6 +39,7 @@ processing.processRep:
 	label processRep.newLineLetterLength qword at rbp-88
 	label processRep.matchingStartIndex qword at rbp-96
 	label processRep.nextRef qword at rbp-104
+	label processRep.parsingRefs qword at rbp-112
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -60,6 +61,33 @@ processing.processRep:
 	push r15
 	sub rsp, 8
 
+
+	mov rbx, [processRep.parsing]
+	add rbx, Parsing.parsingRefs
+	mov r10, [rbx]
+	mov [processRep.parsingRefs], r10
+
+	sub rsp, 8*8
+	mov rcx, [processRep.parsingRefs]
+	call [resetIndex]
+	add rsp, 8*8
+
+	.nextRepItem:
+	mov rbx, [processRep.parsingRefs]
+	mov rdx, rbx
+	add rbx, List.index
+	add rdx, List.itemsCount
+	mov rcx, [rbx]
+	mov r8, [rdx]
+	cmp rcx, r8
+	jnl processRep.endList
+
+
+	sub rsp, 8*8
+	mov rcx, [processRep.parsingRefs]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processRep.nextRef], rax
 
 	
 	sub rsp, 8*8
@@ -92,7 +120,8 @@ processing.processRep:
 			;listAsVal
 			;defineAsProcessed
 
-	
+	jmp processRep.nextRepItem
+	.endList:	
 
 
 	.end:
@@ -160,7 +189,7 @@ processing.processRefValues:
 	push r15
 	sub rsp, 8
 
-	
+
 
 	mov rcx, 0
 	mov [processRefValues.prevItem], rcx			; Begin as 0
@@ -178,6 +207,7 @@ processing.processRefValues:
 	mov rcx, [processRefValues.parsingRefsList]
 	call [resetIndex]
 	add rsp, 8*8
+
 
 
 
@@ -232,6 +262,9 @@ processing.processRefValues:
 	; Ref Base flags
 	; REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM	REF_BASE_ITEM_DEFINED_REF	REF_BASE_DEFINED_REF_FIRST_PARAM
 
+
+
+
 	; letters
 	sub rsp, 8*8
 	mov r11, [processRefValues.refRegistry]
@@ -244,6 +277,8 @@ processing.processRefValues:
 	mov rcx, [processRefValues.nextRef]
 	call processRefItem
 	add rsp, 8*8
+
+
 
 	; appending
 	sub rsp, 8*8
@@ -1657,10 +1692,14 @@ processing.defineAsProcessed:
 processing.processRefItem:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*17);+(8*6)
-	
+
+
 	mov r10, [rsp+8*6]
 	mov r11, [rsp+8*7]
+
+	sub rsp, (8*17);+(8*6)
+	
+
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -1707,6 +1746,7 @@ processing.processRefItem:
 	sub rsp, 8
 
 
+
 	sub rsp, 8*8
 	mov rcx, [processRefItem.item]
 	call getUnprocessedParams
@@ -1725,6 +1765,9 @@ processing.processRefItem:
 
 	.hasUnprocessedParams:
 
+
+
+
 	
 	sub rsp, 8*8
 	mov rdx, [processRefItem.refBaseFlags]
@@ -1733,14 +1776,11 @@ processing.processRefItem:
 	add rsp, 8*8
 	mov [processRefItem.baseRef], rax
 
-
 	mov r8, [processRefItem.baseRef]
 	add r8, Ref.definedRefFlags
 	mov r10, [r8]
 	mov r9, [processRefItem.definedRefFlags]
-	add r9, Ref.definedRefFlags
-	mov r11, [r9]
-	cmp r10, r11
+	cmp r10, r9
 	jne processRefItem.end					; Not same, skip
 
 
@@ -1752,7 +1792,6 @@ processing.processRefItem:
 	mov rcx, [processRefItem.minParamCount]
 	cmp r8, rcx
 	jnge processRefItem.end					; Insufficient params, skip
-
 
 
 	sub rsp, 8*8
@@ -1770,6 +1809,7 @@ processing.processRefItem:
 	mov rcx, [processRefItem.parsing]
 	call processAppending				
 	add rsp, 8*8
+
 
 	sub rsp, 8*8
 	mov r9, [processRefItem.definedRefFlags]
@@ -1820,6 +1860,8 @@ processing.processRefItem:
 
 
 	.end:
+
+
 	mov rax, [processRefItem.nextRef]
 
 

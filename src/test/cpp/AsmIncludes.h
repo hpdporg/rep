@@ -211,6 +211,8 @@ extern "C" {
 
 	//Processing
 	char* processRep(Parsing* parsing, char* letters, RefRegistry* refRegistry);
+	Ref* processRefValues(Parsing* parsing, Ref* item, RefRegistry* refRegistry);
+	Ref* processRefItem(Ref* item, _int64 minParamCount, _int64 refBaseFlags, _int64 definedRefFlags, Parsing* parsing, RefRegistry* refRegistry);
 	Ref* processLetters(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
 	Ref* processAppending(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
 	Ref* processStoreFile(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
@@ -221,6 +223,7 @@ extern "C" {
 	Ref* getBaseRefUsingFlags(Ref* item, _int64 refBaseFlags);
 	char* getRefLettersAlloc(Ref* item);
 	List* getRefLettersList(Ref* item);
+	_int64 getUnprocessedParams(Ref* item);
 	_int64 getUnprocessedRegisteredParams(Ref* item, RefRegistry* refRegistry);
 
 	//Ref

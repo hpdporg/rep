@@ -8,7 +8,8 @@ extrn '__imp_retrieveRecordNamesExtension' as retrieveRecordNamesExtension:qword
 extrn '__imp_removeRecord' as removeRecord:qword
 extrn '__imp_debugNum' as debugNum:qword
 extrn '__imp_debugLetters' as debugLetters:qword
-
+extrn '__imp_debugNumMsg' as debugNumMsg:qword
+extrn '__imp_debugLettersMsg' as debugLettersMsg:qword
 
 
 	struc Record
