@@ -38,7 +38,8 @@ section '.data' data readable writeable align 16
 	directoryContentsLetters db '\*',0
 	currentDirLetter db '.',0
 	containingDirLetters db '..',0
-	newlineWinLetters db 13,10,0		; '\r\n',0
+	newlineUnixLetters db 10,0		; '\r\n',0
+	newlineWinLetters db 13,10,0		; '\r\n',0	; TO-DO: Handle both. 
 	tabLetters db 9,0			;'\t',0
 
 
@@ -60,8 +61,15 @@ section '.data' data readable writeable align 16
 	repOffsetMsg db 'Rep offset:',0
 	baseRepOffsetMsg db 'Base Rep offset:',0
 	atNewLineMsg db 'At newline.',0
+	notAtNewLineMsg db 'Not at newline.',0
+	atDelimiterOrLettersMsg db 'At delimiter or Letters',0	
 	atDelimiterMsg db 'At delimiter',0
 	atLettersMsg db 'At letters.',0
+	alreadyRegisteredMsg db 'Already Registered',0
+	newRegisteredValueMsg db 'New Registered Value',0
+	newRegisteredDefinedRefMsg db 'New Registered Defined Ref',0
+	gettingRegisteredRefMsg db 'Getting existing Registered Ref..',0
+
 
 section '.text' code readable writeable executable align 16
 
@@ -379,7 +387,7 @@ parsing.getNext:
 parsing.getNextMatchOrDelimiter:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*8);+(8*6)
+	sub rsp, (8*9);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -391,6 +399,7 @@ parsing.getNextMatchOrDelimiter:
 	label getNextMatchOrDelimiter.letters qword at rbp-48
 	label getNextMatchOrDelimiter.matchList qword at rbp-56
 	label getNextMatchOrDelimiter.parsedLetters qword at rbp-64
+	label getNextMatchOrDelimiter.parsePassFlag qword at rbp-72
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -424,6 +433,9 @@ parsing.getNextMatchOrDelimiter:
 	mov rcx, 0
 	mov [getNextMatchOrDelimiter.parsedLetters], rcx		; Begin as 0
 	mov [getNextMatchOrDelimiter.matchIndex], rcx			; Begin as 0
+	mov [getNextMatchOrDelimiter.parsePassFlag], rcx			; 0 delimiter, then newline if no next delimiter
+
+	.nextMatchAttempt:
 
 	sub rsp, 8*8
 	call [newMatches]
@@ -439,11 +451,19 @@ parsing.getNextMatchOrDelimiter:
 	mov rcx, 100b
 	mov [rbx], rcx
 
+	mov r8, [getNextMatchOrDelimiter.parsePassFlag]
+	cmp r8, 0
+	je getNextMatchOrDelimiter.useDelimiter
+	mov rdx, newlineUnixLetters
 
-	sub rsp, 8*8
+	jmp getNextMatchOrDelimiter.newContainsRangeItem
+	.useDelimiter:
+
 	mov rbx, [getNextMatchOrDelimiter.parsing]
 	add rbx, Parsing.delimiter
 	mov rdx, [rbx]
+	.newContainsRangeItem:
+	sub rsp, 8*8
 	mov rbx, [getNextMatchOrDelimiter.matches]
 	add rbx, Matches.containsRangeList
 	mov rcx, [rbx]
@@ -468,7 +488,25 @@ parsing.getNextMatchOrDelimiter:
 	mov rcx, 0
 	mov rdx, [rbx]
 	cmp rcx, rdx
-	je getNextMatchOrDelimiter.endParsing			; No next
+	jne getNextMatchOrDelimiter.hasNext			; No next
+
+	mov rcx, [getNextMatchOrDelimiter.parsePassFlag]
+	cmp rcx, 0
+	jne getNextMatchOrDelimiter.endParsing			; No next, already tried delimiter and newline in match
+
+	mov rdx, 1b						; Newline instead of tab this time
+	mov [getNextMatchOrDelimiter.parsePassFlag], rdx
+
+	sub rsp, 8*8
+	mov r8, [getNextMatchOrDelimiter.matches]
+	mov rdx, 0
+	mov rcx, [getNextMatchOrDelimiter.heapAddress]
+	call [HeapFree]
+	add rsp, 8*8
+
+	jmp getNextMatchOrDelimiter.nextMatchAttempt		; Now try newline
+
+	.hasNext:
 
 	
 	sub rsp, 8*8
@@ -582,15 +620,6 @@ parsing.parseRep:
 	sub rsp, 8
 
 
-	sub rsp, 8*8
-	mov rcx, 189
-	call [debugNumMsg]
-	add rsp, 8*8
-
-	sub rsp, 8*8
-	mov rcx, [parseRep.letters]
-	call [debugLettersMsg]
-	add rsp, 8*8
 
 	mov rbx, [parseRep.parsing]
 	add rbx, Parsing.endIndex
@@ -645,11 +674,6 @@ parsing.parseRep:
 	add rsp, 8*8
 	mov [parseRep.nextRef], rax
 
-
-	sub rsp, 8*8
-	mov rcx, 1222489
-	call [debugNumMsg]
-	add rsp, 8*8
 
 
 	sub rsp, 8*8
@@ -744,7 +768,7 @@ parsing.next:
 
 	
 	sub rsp, 8*8
-	mov rdx, newlineWinLetters
+	mov rdx, newlineUnixLetters;newlineWinLetters
 	mov rcx, [next.letters]
 	mov rbx, [next.parsing]
 	add rbx, Parsing.index
@@ -758,13 +782,9 @@ parsing.next:
 	je next.notAtNewLine			; No newline
 
 
-	sub rsp, 8*8
-	mov rcx, 73
-	call [debugNumMsg]
-	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rdx, newlineWinLetters
+	mov rdx, newlineUnixLetters;newlineWinLetters
 	mov rcx, [next.letters]
 	mov rbx, [next.parsing]
 	add rbx, Parsing.index
@@ -775,10 +795,6 @@ parsing.next:
 	mov [next.nextNewlineIndex], rax
 
 
-	sub rsp, 8*8
-	mov rcx, 733
-	call [debugNumMsg]
-	add rsp, 8*8
 
 	mov rcx, 0
 	mov rdx, [next.nextNewlineIndex]
@@ -788,8 +804,8 @@ parsing.next:
 	.notAtNewLine:
 
 	sub rsp, 8*8
-	mov rcx, 153
-	call [debugNumMsg]
+	mov rcx, notAtNewLineMsg
+	call [debugLettersMsg]
 	add rsp, 8*8
 
 
@@ -810,8 +826,8 @@ parsing.next:
 	je next.notAtDelimiter			; No delimiter
 
 	sub rsp, 8*8
-	mov rcx, 553
-	call [debugNumMsg]
+	mov rcx, atDelimiterOrLettersMsg
+	call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -861,11 +877,11 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, atNewLineMsg
-	call [debugNumMsg]
+	call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rcx, newlineWinLetters
+	mov rcx, newlineUnixLetters;newlineWinLetters
 	call [letterLength]
 	add rsp, 8*8
 	mov [next.parsedLettersLength], rax	; Cache length
@@ -882,7 +898,7 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, atDelimiterMsg
-	call [debugNumMsg]
+	call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -905,7 +921,7 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, atLettersMsg
-	call [debugNumMsg]
+	call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -1390,14 +1406,17 @@ parsing.buildNestedRepList:
 	add rsp, 8*8
 
 
-	sub rsp, 8*8
-	mov rcx, [buildNestedRepList.nextRef]
-	call [debugNumMsg]
-	add rsp, 8*8
 
 	mov rdx, [buildNestedRepList.nextRef]
 	cmp rdx, 0
 	je buildNestedRepList.end			; Not at a new Ref
+
+	sub rsp, 8*8
+	mov rbx, [buildBaseRepOffset.parsing]
+	add rbx, Parsing.lineRefCount
+	mov rcx, [rbx]
+	call [debugNumMsg]
+	add rsp, 8*8
 
 
 	mov rbx, [buildBaseRepOffset.parsing]
@@ -1450,6 +1469,15 @@ parsing.buildNestedRepList:
 
 	.notFirstRef:
 
+
+
+	sub rsp, 8*8
+	mov rbx, [buildNestedRepList.parsing]
+	add rbx, Parsing.parsingRefs
+	mov rcx, [rbx]
+	call [resetIndex]				; TO-DO: Remove this
+	add rsp, 8*8
+
 	sub rsp, 8*8
 	mov rdx, [buildNestedRepList.nextRef]
 	mov rbx, [buildNestedRepList.parsing]
@@ -1467,6 +1495,8 @@ parsing.buildNestedRepList:
 	mov rcx, [rbx]
 	call [lastItemNesting]
 	add rsp, 8*8
+
+
 
 	jmp buildNestedRepList.end
 	.refAsParam:
@@ -1815,7 +1845,7 @@ parsing.defineLists:
 	mov rbx, [defineLists.prevItem]
 	add rbx, Ref.flags
 	mov rdx, 10b
-	mov [rbx], rdx						; Found a List
+	mov [rbx], rdx						; Found a List REF_LIST
 
 
 	.listRefNotFound:
@@ -2199,6 +2229,11 @@ parsing.parseRef:
 	add rsp, 8*8
 	mov [parseRef.newRef], rax
 
+	sub rsp, 8*8
+	mov rcx, 33
+	call [debugNumMsg]
+	add rsp, 8*8
+
 
 	jmp parseRef.end
 
@@ -2277,6 +2312,9 @@ parsing.parseRef:
 	mov [rbx], r8					; Copy flags
 
 	sub rsp, 8*8
+	mov rbx, [parseRef.parsing]
+	add rbx, Parsing.index
+	mov r8, [rbx]
 	mov rdx, [parseRef.newRef]
 	mov rcx, [parseRef.refRegistry]
 	call refRegistry.newLastRegisteredRef	; Uses same list as non-defined
@@ -2297,6 +2335,9 @@ parsing.parseRef:
 	mov [rbx], r8
 
 	sub rsp, 8*8
+	mov rbx, [parseRef.parsing]
+	add rbx, Parsing.index
+	mov r8, [rbx]
 	mov rdx, [parseRef.newRef]
 	mov rcx, [parseRef.refRegistry]
 	call refRegistry.newLastRegisteredRef
@@ -2326,7 +2367,7 @@ parsing.parseRef:
 	add rbx, Ref.flags
 	mov r8, [rbx]
 	cmp r8, rcx
-	mov rcx, 10b				; REF_DEFINED
+	mov rcx, 100b				; REF_DEFINED
 	je parseRef.newDefinedRef
 
 
@@ -2416,8 +2457,15 @@ parsing.getRegisteredValue:
 	push r15
 	sub rsp, 8
 
-	mov rcx, 0
-	mov [getRegisteredValue.refFlags], rcx			; Begin as 0
+	mov rcx, 1b
+	mov [getRegisteredValue.refFlags], rcx			; Begin as REF_VALUE
+
+
+
+	sub rsp, 8*8
+	mov rcx, gettingRegisteredRefMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rbx, [getRegisteredValue.parsing]
@@ -2433,25 +2481,44 @@ parsing.getRegisteredValue:
 	je getRegisteredValue.newLastRegisteredDefinedRef	; Non-existent DefinedRef
 
 	.alreadyDefined:
+
+	mov [getRegisteredValue.newRef], rax
+
+	sub rsp, 8*8
+	mov rcx, alreadyRegisteredMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
 	
 
 	jmp getRegisteredValue.end
 
 	.newLastRegisteredDefinedRef:
 
-	mov r8, 10b						; REF_DEFINED
+	sub rsp, 8*8
+	mov rcx, newRegisteredDefinedRefMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
+
+	mov r8, 100b						; REF_DEFINED
 	mov [getRegisteredValue.refFlags], r8
 
 
 	jmp getRegisteredValue.newLastRegisteredVal
-	.newLastRegisteredRef:
+	.newLastRegisteredRef:					; refFlags is 1 REF_VALUE (may become REF_LIST later)
+
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
 	mov [getRegisteredValue.newRef], rax
 
-
+	sub rsp, 8*8
+	mov rcx, newRegisteredValueMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
+	
+	
+	jmp getRegisteredValue.placeRefInRefRegistry
 
 	.newLastRegisteredVal:
 
@@ -2460,10 +2527,14 @@ parsing.getRegisteredValue:
 	add rsp, 8*8
 	mov [getRegisteredValue.newRef], rax
 
+
+	.placeRefInRefRegistry:
+
 	mov rbx, [getRegisteredValue.newRef]
 	add rbx, Ref.flags
 	mov r8, [getRegisteredValue.refFlags]			; REF_DEFINED or undefined at this point
 	mov [rbx], r8
+
 
 	mov rbx, [getRegisteredValue.newRef]
 	add rbx, Ref.ref
@@ -2471,6 +2542,9 @@ parsing.getRegisteredValue:
 	mov [rbx], r8
 
 	sub rsp, 8*8
+	mov rbx, [getRegisteredValue.parsing]
+	add rbx, Parsing.index
+	mov r8, [rbx]						; Used with defined Refs only
 	mov rdx, [getRegisteredValue.newRef]
 	mov rcx, [getRegisteredValue.refRegistry]
 	call refRegistry.newLastRegisteredRef

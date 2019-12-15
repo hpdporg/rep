@@ -22,8 +22,8 @@ section '.data' data readable writeable align 16
 	;element Element
 
 
-	
-
+	gettingNextRegisteredRefValueMsg db 'Getting next Registered Ref Value..',0
+	gettingNextRegisteredDefinedRefMsg db 'Getting next Registered Defined Ref..',0	
 	
 
 section '.text' code readable writeable executable align 16
@@ -146,7 +146,7 @@ refRegistry.newLastRegisteredRef:
 	label newLastRegisteredRef.refRegistryAddr qword at rbp-48
 	label newLastRegisteredRef.newRef qword at rbp-56
 	label newLastRegisteredRef.ref qword at rbp-64
-	label next.lettersIndex qword at rbp-72
+	label newLastRegisteredRef.refIndex qword at rbp-72
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -154,6 +154,7 @@ refRegistry.newLastRegisteredRef:
 
 	mov [newLastRegisteredRef.refRegistryAddr], rcx
 	mov [newLastRegisteredRef.ref], rdx	
+	mov [newLastRegisteredRef.refIndex], r8
 
 	and rsp, -32
 	push rbx 
@@ -171,7 +172,20 @@ refRegistry.newLastRegisteredRef:
 	mov rcx, 0
 	;mov [newLastRegisteredRef.lettersIndex], rcx		; Begin as 0
 
+	mov rbx, [newLastRegisteredRef.ref]
+	add rbx, Ref.repIndex
+	mov r8, [newLastRegisteredRef.refIndex]
+	mov [rbx], r8
+
 	
+	sub rsp, 8*8
+	mov rbx, [newLastRegisteredRef.refRegistryAddr]
+	add rbx, RefRegistry.list
+	mov rcx, [rbx]
+	call [resetIndex]
+	add rsp, 8*8
+
+
 	sub rsp, 8*8
 	mov rdx, [newLastRegisteredRef.ref]
 	mov rbx, [newLastRegisteredRef.refRegistryAddr]
@@ -246,6 +260,7 @@ refRegistry.newLastRegisteredDefinedRef:
 	;mov [newLastRegisteredDefinedRef.lettersIndex], rcx		; Begin as 0
 
 
+	
 
 	sub rsp, 8*8
 	mov rdx, [newLastRegisteredDefinedRef.ref]
@@ -358,11 +373,27 @@ refRegistry.getRegisteredRef:
 	cmp rcx, r8
 	jnl getRegisteredRef.endList
 
+	mov rcx, 0
+	mov [getRegisteredRef.nextRef], rcx		; Begin as 0
+
+
+	sub rsp, 8*8
+	mov rcx, gettingNextRegisteredRefValueMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
+
 	sub rsp, 8*8
 	mov rcx, [getRegisteredRef.list]
 	call [getNextItem]
 	add rsp, 8*8
 	mov [getRegisteredRef.nextRef], rax
+
+	sub rsp, 8*8
+	mov rbx, [getRegisteredRef.nextRef]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	call [debugLettersMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rdx, [getRegisteredRef.ref]
@@ -376,7 +407,25 @@ refRegistry.getRegisteredRef:
 
 	mov rax, [getRegisteredRef.nextRef]
 
-	jmp getRegisteredRef.end			; Found
+
+	mov rbx, [getRegisteredRef.nextRef]	
+	add rbx, Ref.flags
+	mov rdx, [rbx]
+	cmp rdx, 100b					;REF_DEFINED
+	jne getRegisteredRef.end			; Found, already exists
+
+
+	mov rbx, [getRegisteredRef.nextRef]
+	add rbx, Ref.repIndex
+	mov rdx, [rbx]
+	mov rcx, [getRegisteredRef.repIndex]
+	cmp rcx, rdx
+	jne getRegisteredRef.nonExistentDefinedRef	; New defined ref
+
+
+	jmp getRegisteredRef.end			; Found, already exists
+
+
 
 	.endList:
 
@@ -390,11 +439,30 @@ refRegistry.getRegisteredRef:
 	cmp rcx, r8
 	jnl getRegisteredRef.end
 
+	mov rcx, 0
+	mov [getRegisteredRef.nextRef], rcx		; Begin as 0
+
+
+	sub rsp, 8*8
+	mov rcx, gettingNextRegisteredDefinedRefMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
+
+
 	sub rsp, 8*8
 	mov rcx, [getRegisteredRef.definedList]
 	call [getNextItem]
 	add rsp, 8*8
 	mov [getRegisteredRef.nextRef], rax
+
+
+	sub rsp, 8*8
+	mov rbx, [getRegisteredRef.nextRef]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	call [debugLettersMsg]
+	add rsp, 8*8
+
 
 	sub rsp, 8*8
 	mov rdx, [getRegisteredRef.ref]
@@ -404,21 +472,17 @@ refRegistry.getRegisteredRef:
 	call [lettersSameExact]
 	add rsp, 8*8	
 	cmp rax, 0
-	je getRegisteredRef.nextItem
+	je getRegisteredRef.nextDefinedItem
 
 
-	mov rbx, [getRegisteredRef.nextRef]
-	add rbx, Ref.repIndex
-	mov rdx, [rbx]
-	mov rcx, [getRegisteredRef.repIndex]
-	cmp rcx, rdx
-	jne getRegisteredRef.nextDefinedItem
+
 
 
 
 
 	; return ref instead of 1?
 	; how are we determining processed versus not?
+	.nonExistentDefinedRef:
 	mov rax, 1b
 	mov [getRegisteredRef.nextRef], rax			; 1 when defined
 

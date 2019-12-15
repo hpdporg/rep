@@ -1,0 +1,358 @@
+Index:0
+At newline.
+Building Rep..
+Building nested rep List..
+Index:1
+Not at newline.
+At delimiter or Letters
+5653
+ParseRef starting..
+Parsed letters:ref2
+Getting existing Registered Ref..
+Getting next Registered Defined Ref..
+storeFile
+Getting next Registered Defined Ref..
+retrieveFile
+Getting next Registered Defined Ref..
+letters
+Getting next Registered Defined Ref..
+replaceLettersList
+Getting next Registered Defined Ref..
+separator
+New Registered Value
+33
+99653
+At letters.
+Building Rep..
+Base Rep Offset is at Letters..
+1
+1
+Building nested rep List..
+1
+Rep offset:0
+Base Rep offset:0
+Index:5
+Not at newline.
+At delimiter or Letters
+At delimiter
+Building Rep..
+Building nested rep List..
+Index:6
+Not at newline.
+At delimiter or Letters
+5653
+ParseRef starting..
+Parsed letters:letters
+Getting existing Registered Ref..
+Getting next Registered Ref Value..
+ref2
+Getting next Registered Defined Ref..
+storeFile
+Getting next Registered Defined Ref..
+retrieveFile
+Getting next Registered Defined Ref..
+letters
+New Registered Defined Ref
+33
+99653
+At letters.
+Building Rep..
+Base Rep Offset is at Letters..
+2
+2
+Building nested rep List..
+2
+Ref as param
+Last ref:2589327889504
+Index:13
+Not at newline.
+At delimiter or Letters
+At delimiter
+Building Rep..
+Building nested rep List..
+Index:14
+Not at newline.
+At delimiter or Letters
+5653
+ParseRef starting..
+Parsed letters:Some letters1
+Getting existing Registered Ref..
+Getting next Registered Ref Value..
+ref2
+Getting next Registered Ref Value..
+letters
+Getting next Registered Defined Ref..
+storeFile
+Getting next Registered Defined Ref..
+retrieveFile
+Getting next Registered Defined Ref..
+letters
+Getting next Registered Defined Ref..
+replaceLettersList
+Getting next Registered Defined Ref..
+separator
+New Registered Value
+33
+99653
+At letters.
+Building Rep..
+Base Rep Offset is at Letters..
+3
+3
+Building nested rep List..
+3
+Ref as param
+Last ref:2589327889504
+Index:27
+Not at newline.
+At delimiter or Letters
+At delimiter
+Building Rep..
+Building nested rep List..
+Index:28
+At newline.
+Building Rep..
+Building nested rep List..
+Index:29
+At newline.
+Building Rep..
+Building nested rep List..
+Index:30
+Not at newline.
+At delimiter or Letters
+5653
+ParseRef starting..
+Parsed letters:ref5
+Getting existing Registered Ref..
+Getting next Registered Ref Value..
+ref2
+Getting next Registered Ref Value..
+letters
+Getting next Registered Ref Value..
+Some letters1
+Getting next Registered Defined Ref..
+storeFile
+Getting next Registered Defined Ref..
+retrieveFile
+Getting next Registered Defined Ref..
+letters
+Getting next Registered Defined Ref..
+replaceLettersList
+Getting next Registered Defined Ref..
+separator
+New Registered Value
+33
+99653
+At letters.
+Building Rep..
+Base Rep Offset is at Letters..
+1
+1
+Building nested rep List..
+1
+Index:34
+Not at newline.
+At delimiter or Letters
+At delimiter
+Building Rep..
+Building nested rep List..
+Index:35
+Not at newline.
+At delimiter or Letters
+5653
+ParseRef starting..
+Parsed letters:letters
+Getting existing Registered Ref..
+Getting next Registered Ref Value..
+ref2
+Getting next Registered Ref Value..
+letters
+New Registered Defined Ref
+33
+99653
+At letters.
+Building Rep..
+Base Rep Offset is at Letters..
+2
+2
+Building nested rep List..
+2
+Ref as param
+Last ref:2589327890544
+Index:42
+Not at newline.
+At delimiter or Letters
+At delimiter
+Building Rep..
+Building nested rep List..
+Index:43
+Not at newline.
+At delimiter or Letters
+5653
+ParseRef starting..
+Parsed letters:fileName4.txt
+Getting existing Registered Ref..
+Getting next Registered Ref Value..
+ref2
+Getting next Registered Ref Value..
+letters
+Getting next Registered Ref Value..
+Some letters1
+Getting next Registered Ref Value..
+ref5
+Getting next Registered Ref Value..
+letters
+Getting next Registered Defined Ref..
+storeFile
+Getting next Registered Defined Ref..
+retrieveFile
+Getting next Registered Defined Ref..
+letters
+Getting next Registered Defined Ref..
+replaceLettersList
+Getting next Registered Defined Ref..
+separator
+New Registered Value
+33
+99653
+At letters.
+Building Rep..
+Base Rep Offset is at Letters..
+3
+3
+Building nested rep List..
+3
+Ref as param
+Last ref:2589327890544
+Index:56
+Not at newline.
+At delimiter or Letters
+At delimiter
+Building Rep..
+Building nested rep List..
+Index:57
+At newline.
+Building Rep..
+Building nested rep List..
+Index:58
+At newline.
+Building Rep..
+Building nested rep List..
+Index:59
+Not at newline.
+At delimiter or Letters
+5653
+ParseRef starting..
+Parsed letters:retrieveFile
+Getting existing Registered Ref..
+Getting next Registered Ref Value..
+ref2
+Getting next Registered Ref Value..
+letters
+Getting next Registered Ref Value..
+Some letters1
+Getting next Registered Ref Value..
+ref5
+Getting next Registered Ref Value..
+letters
+Getting next Registered Ref Value..
+fileName4.txt
+Getting next Registered Defined Ref..
+storeFile
+Getting next Registered Defined Ref..
+retrieveFile
+New Registered Defined Ref
+33
+99653
+At letters.
+Building Rep..
+Base Rep Offset is at Letters..
+1
+1
+Building nested rep List..
+1
+Index:71
+Not at newline.
+At delimiter or Letters
+At delimiter
+Building Rep..
+Building nested rep List..
+Index:72
+Not at newline.
+At delimiter or Letters
+5653
+ParseRef starting..
+Parsed letters:ref5
+Getting existing Registered Ref..
+Getting next Registered Ref Value..
+ref2
+Getting next Registered Ref Value..
+letters
+Getting next Registered Ref Value..
+Some letters1
+Getting next Registered Ref Value..
+ref5
+Already Registered
+33
+99653
+At letters.
+Building Rep..
+Base Rep Offset is at Letters..
+2
+2
+Building nested rep List..
+2
+Ref as param
+Last ref:2589327888944
+Index:76
+Not at newline.
+At delimiter or Letters
+At delimiter
+Building Rep..
+Building nested rep List..
+Index:77
+Not at newline.
+5653
+ParseRef starting..
+Parsed letters:ref6
+Getting existing Registered Ref..
+Getting next Registered Ref Value..
+ref2
+Getting next Registered Ref Value..
+letters
+Getting next Registered Ref Value..
+Some letters1
+Getting next Registered Ref Value..
+ref5
+Getting next Registered Ref Value..
+letters
+Getting next Registered Ref Value..
+fileName4.txt
+Getting next Registered Ref Value..
+retrieveFile
+Getting next Registered Defined Ref..
+storeFile
+Getting next Registered Defined Ref..
+retrieveFile
+Getting next Registered Defined Ref..
+letters
+Getting next Registered Defined Ref..
+replaceLettersList
+Getting next Registered Defined Ref..
+separator
+New Registered Value
+33
+99653
+At letters.
+Building Rep..
+Base Rep Offset is at Letters..
+3
+3
+Building nested rep List..
+3
+Ref as param
+Last ref:2589327888944
+Index:81
+At newline.
+Building Rep..
+Building nested rep List..

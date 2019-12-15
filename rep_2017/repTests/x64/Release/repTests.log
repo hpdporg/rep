@@ -1,82 +1,277 @@
-﻿  ProcessingTests.cpp
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(257): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(257): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(257): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(257): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(274): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(274): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(274): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(274): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(278): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(278): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(278): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(278): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(295): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(295): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(295): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(295): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(296): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(296): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(296): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(296): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(299): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(299): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(299): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(299): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(312): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(312): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(312): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(312): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(313): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(313): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(313): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(313): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(316): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(316): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(316): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(316): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(331): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(331): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(331): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(331): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(332): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(332): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(332): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(332): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(335): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(335): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(335): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(335): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(348): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(348): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(348): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(348): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(349): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(349): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(349): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(349): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(352): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(352): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(352): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(352): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(365): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(365): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(365): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(365): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(366): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(366): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(366): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(366): note: consider using '%I64d' in the format string
-c:\users\lewis\rep\src\test\cpp\processingtests.cpp(369): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(369): note: consider using '%lld' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(369): note: consider using '%Id' in the format string
-  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(369): note: consider using '%I64d' in the format string
+﻿  Main.cpp
+  ParsingRepFromFileTest.cpp
+  ParsingRepFromFileTests.cpp
+c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(24): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(24): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(24): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(24): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(24): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 2 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(24): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(24): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(24): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(30): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 2 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(30): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(30): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(30): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(39): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(39): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(39): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(39): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(44): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(44): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(44): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(44): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(45): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(45): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(45): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(45): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(51): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(51): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(51): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingrepfromfiletests.cpp(51): note: consider using '%I64d' in the format string
+  ParsingTests.cpp
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(22): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(22): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(22): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(22): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(24): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(24): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(24): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(24): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(37): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(37): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(37): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(37): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(39): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(39): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(39): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(39): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(45): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(45): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(45): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(45): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(59): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(59): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(59): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(59): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(67): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(67): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(67): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(67): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(69): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(69): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(69): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(69): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(73): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(73): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(73): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(73): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(90): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(90): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(90): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(90): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(102): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(102): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(102): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(102): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(105): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(105): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(105): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(105): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(107): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(107): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(107): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(107): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(109): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(109): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(109): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(109): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(122): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(122): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(122): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(122): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(126): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(126): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(126): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(126): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(128): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(128): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(128): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(128): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(130): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(130): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(130): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(130): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(134): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(134): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(134): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(134): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(136): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(136): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(136): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(136): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(138): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(138): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(138): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(138): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(151): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(151): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(151): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(151): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(158): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(158): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(158): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(158): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(160): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(160): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(160): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(160): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(162): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(162): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(162): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(162): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(175): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(175): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(175): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(175): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(178): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(178): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(178): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(178): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(180): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(180): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(180): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(180): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(184): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(184): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(184): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(184): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(186): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(186): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(186): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(186): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(200): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(200): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(200): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(200): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(202): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(202): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(202): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(202): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(205): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(205): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(205): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(205): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(211): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(211): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(211): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(211): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(213): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(213): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(213): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\parsingtests.cpp(213): note: consider using '%I64d' in the format string
+  ProcessingDefinedRefTests.cpp
+  ProcessingRefValueTests.cpp
+  ProcessingTests.cpp
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(91): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(91): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(91): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(91): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(128): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(128): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(128): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(128): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(145): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(145): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(145): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(145): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(149): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(149): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(149): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(149): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(166): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(166): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(166): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(166): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(167): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(167): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(167): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(167): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(170): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(170): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(170): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(170): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(183): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(183): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(183): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(183): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(184): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(184): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(184): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(184): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(187): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(187): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(187): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(187): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(202): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(202): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(202): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(202): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(203): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(203): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(203): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(203): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(206): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(206): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(206): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(206): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(219): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(219): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(219): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(219): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(220): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(220): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(220): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(220): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(223): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(223): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(223): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(223): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(236): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(236): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(236): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(236): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(237): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(237): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(237): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(237): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\processingtests.cpp(240): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(240): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(240): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\processingtests.cpp(240): note: consider using '%I64d' in the format string
+  RefTests.cpp
+  RunCyclesTest.cpp
+  RunCyclesTests.cpp
+c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(11): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(11): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(11): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(11): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(28): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(28): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(28): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(28): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(43): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(43): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(43): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(43): note: consider using '%I64d' in the format string
+c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(44): warning C4477: 'fprintf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type '__int64'
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(44): note: consider using '%lld' in the format string
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(44): note: consider using '%Id' in the format string
+  c:\users\lewis\rep\src\test\cpp\runcyclestests.cpp(44): note: consider using '%I64d' in the format string
 datap.obj : warning LNK4078: multiple '.data' sections found with different attributes (C03000C0)
 gtest.lib(gtest-all.obj) : warning LNK4078: multiple '.text' sections found with different attributes (60501020)
   Generating code
-  1 of 741 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+  All 794 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
 rep.obj : warning LNK4049: locally defined symbol linearAllocate imported
 rep.obj : warning LNK4049: locally defined symbol newList imported
@@ -109,6 +304,10 @@ rep.obj : warning LNK4049: locally defined symbol restoreLetters imported
 rep.obj : warning LNK4049: locally defined symbol retrieveRecordNames imported
 rep.obj : warning LNK4049: locally defined symbol retrieveRecordNamesExtension imported
 rep.obj : warning LNK4049: locally defined symbol removeRecord imported
+rep.obj : warning LNK4049: locally defined symbol debugNum imported
+rep.obj : warning LNK4049: locally defined symbol debugLetters imported
+rep.obj : warning LNK4049: locally defined symbol debugNumMsg imported
+rep.obj : warning LNK4049: locally defined symbol debugLettersMsg imported
 rep.obj : warning LNK4049: locally defined symbol newMatches imported
 rep.obj : warning LNK4049: locally defined symbol processMatchFlags imported
 rep.obj : warning LNK4049: locally defined symbol getMatches imported

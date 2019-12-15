@@ -24,6 +24,13 @@ TEST_F(ParsingRepFromFileTest, ParsingRefValuesAndRetrieveFile) {
 		fprintf(stdout, "\nParsing index, endindex: %d %d\n", parsing->index, parsing->endIndex);
 		parseRep(parsing, (char*)record->allocAddr, refRegistry);
 	
+		resetIndex(refRegistry->list);
+		while (refRegistry->list->index < refRegistry->list->itemsCount) {
+			Ref* registeredRef = (Ref*)getNextItem(refRegistry->list);
+			fprintf(stdout, "\nNext Registered Ref, index: %s, %d", registeredRef->ref, (refRegistry->list->index - 1));
+		}
+		resetIndex(refRegistry->list);
+
 		_int64 priorIndex = parsing->parsingRefs->index;
 		resetIndex(parsing->parsingRefs);
 		while (parsing->parsingRefs->index < parsing->parsingRefs->itemsCount) {
