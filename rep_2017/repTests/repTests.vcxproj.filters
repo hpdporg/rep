@@ -45,6 +45,12 @@
     <ClCompile Include="..\..\src\test\cpp\ProcessingDefinedRefTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\test\cpp\RunCyclesParsingProcessingTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\test\cpp\RunCyclesParsingProcessingTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\test\cpp\AsmIncludes.h">

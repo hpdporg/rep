@@ -558,7 +558,6 @@ refRegistry.getRegisteredDefinedRef:
 	mov [getRegisteredDefinedRef.nextRef], rcx		; Begin as 0
 
 
-	
 
 	mov rbx, [getRegisteredDefinedRef.refRegistryAddr]
 	add rbx, RefRegistry.definedList
@@ -600,8 +599,8 @@ refRegistry.getRegisteredDefinedRef:
 	je getRegisteredDefinedRef.nextDefinedItem
 
 
-
-	mov [getRegisteredDefinedRef.nextRef], rax			; 1 when defined
+	mov rax, [getRegisteredDefinedRef.nextRef]
+	mov [getRegisteredDefinedRef.nextRef], rax			; lettersSameExact returns 1 when defined
 
 	
 

@@ -11,6 +11,7 @@ section '.data' data readable writeable align 16
 		.repOffset dq 0		; Indentation offset used in Rep
 		.endDelimiter dq 0	; End of an entry delimiter i.e. newline
 		.index dq 0 		; Index of what is being parsed
+		.unParsedIndex dq 0 	; Index before being parsed
 		.lineRefCount dq 0 	; Count of Refs on line
 		.multilineRefCount dq 0 ; Count of Refs on this line that use multiline (letters)
 		.parsingRefs dq 0	; Refs being parsed, if any. A list
@@ -145,6 +146,10 @@ parsing.new:
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]
 	add rbx, Parsing.index
+	mov rax, 0
+	mov [rbx], rax
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, Parsing.unParsedIndex
 	mov rax, 0
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]
@@ -718,7 +723,7 @@ parsing.parseRep:
 parsing.next:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*13);+(8*6)
+	sub rsp, (8*14);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -735,6 +740,8 @@ parsing.next:
 	label next.newLineLetterLength qword at rbp-88
 	label next.parsedLettersLength qword at rbp-96
 	label next.nextRef qword at rbp-104
+	label next.beforeMatchIndex qword at rbp-112
+
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -765,6 +772,13 @@ parsing.next:
 	mov rcx, 0
 	mov [next.nextRef], rcx			; Begin as 0
 
+
+	mov rbx, [next.parsing]
+	mov rdx, rbx
+	add rbx, Parsing.index
+	add rdx, Parsing.unParsedIndex
+	mov rcx, [rbx]
+	mov [rdx], rcx				; Maintain unParsed index
 
 	
 	sub rsp, 8*8
@@ -2313,7 +2327,7 @@ parsing.parseRef:
 
 	sub rsp, 8*8
 	mov rbx, [parseRef.parsing]
-	add rbx, Parsing.index
+	add rbx, Parsing.unParsedIndex
 	mov r8, [rbx]
 	mov rdx, [parseRef.newRef]
 	mov rcx, [parseRef.refRegistry]
@@ -2336,7 +2350,7 @@ parsing.parseRef:
 
 	sub rsp, 8*8
 	mov rbx, [parseRef.parsing]
-	add rbx, Parsing.index
+	add rbx, Parsing.unParsedIndex
 	mov r8, [rbx]
 	mov rdx, [parseRef.newRef]
 	mov rcx, [parseRef.refRegistry]
@@ -2419,7 +2433,7 @@ parsing.parseRef:
 parsing.getRegisteredValue:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*13);+(8*6)
+	sub rsp, (8*14);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -2436,6 +2450,7 @@ parsing.getRegisteredValue:
 	label getRegisteredValue.newLineLetterLength qword at rbp-88
 	label getRegisteredValue.matchingStartIndex qword at rbp-96
 	label getRegisteredValue.refFlags qword at rbp-104
+	label getRegisteredValue.definedRefFlags qword at rbp-112
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -2459,7 +2474,8 @@ parsing.getRegisteredValue:
 
 	mov rcx, 1b
 	mov [getRegisteredValue.refFlags], rcx			; Begin as REF_VALUE
-
+	mov rcx, 0
+	mov [getRegisteredValue.definedRefFlags], rcx		; Begin as 0
 
 
 	sub rsp, 8*8
@@ -2469,7 +2485,7 @@ parsing.getRegisteredValue:
 
 	sub rsp, 8*8
 	mov rbx, [getRegisteredValue.parsing]
-	add rbx, Parsing.index
+	add rbx, Parsing.unParsedIndex
 	mov r8, [rbx]						; Used with defined Refs only
 	mov rdx, [getRegisteredValue.parsedLetters]
 	mov rcx, [getRegisteredValue.refRegistry]
@@ -2502,6 +2518,15 @@ parsing.getRegisteredValue:
 	mov r8, 100b						; REF_DEFINED
 	mov [getRegisteredValue.refFlags], r8
 
+	sub rsp, 8*8
+	mov rdx, [getRegisteredValue.parsedLetters]
+	mov rcx, [getRegisteredValue.refRegistry]
+	call refRegistry.getRegisteredDefinedRef
+	add rsp, 8*8
+	add rax, Ref.definedRefFlags
+	mov r8, [rax]
+	mov [getRegisteredValue.definedRefFlags], r8
+	
 
 	jmp getRegisteredValue.newLastRegisteredVal
 	.newLastRegisteredRef:					; refFlags is 1 REF_VALUE (may become REF_LIST later)
@@ -2528,12 +2553,20 @@ parsing.getRegisteredValue:
 	mov [getRegisteredValue.newRef], rax
 
 
+
+
 	.placeRefInRefRegistry:
 
 	mov rbx, [getRegisteredValue.newRef]
 	add rbx, Ref.flags
 	mov r8, [getRegisteredValue.refFlags]			; REF_DEFINED or undefined at this point
 	mov [rbx], r8
+
+	mov rbx, [getRegisteredValue.newRef]
+	mov r8, [getRegisteredValue.definedRefFlags]
+	add rbx, Ref.definedRefFlags
+	mov [rbx], r8					; Copy defined refflags or 0
+
 
 
 	mov rbx, [getRegisteredValue.newRef]
@@ -2543,7 +2576,7 @@ parsing.getRegisteredValue:
 
 	sub rsp, 8*8
 	mov rbx, [getRegisteredValue.parsing]
-	add rbx, Parsing.index
+	add rbx, Parsing.unParsedIndex
 	mov r8, [rbx]						; Used with defined Refs only
 	mov rdx, [getRegisteredValue.newRef]
 	mov rcx, [getRegisteredValue.refRegistry]

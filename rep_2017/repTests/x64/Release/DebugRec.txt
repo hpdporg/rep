@@ -63,7 +63,7 @@ Base Rep Offset is at Letters..
 Building nested rep List..
 2
 Ref as param
-Last ref:2589327889504
+Last ref:1286068507392
 Index:13
 Not at newline.
 At delimiter or Letters
@@ -102,7 +102,7 @@ Base Rep Offset is at Letters..
 Building nested rep List..
 3
 Ref as param
-Last ref:2589327889504
+Last ref:1286068507392
 Index:27
 Not at newline.
 At delimiter or Letters
@@ -178,7 +178,7 @@ Base Rep Offset is at Letters..
 Building nested rep List..
 2
 Ref as param
-Last ref:2589327890544
+Last ref:1286068505872
 Index:42
 Not at newline.
 At delimiter or Letters
@@ -223,7 +223,7 @@ Base Rep Offset is at Letters..
 Building nested rep List..
 3
 Ref as param
-Last ref:2589327890544
+Last ref:1286068505872
 Index:56
 Not at newline.
 At delimiter or Letters
@@ -303,7 +303,7 @@ Base Rep Offset is at Letters..
 Building nested rep List..
 2
 Ref as param
-Last ref:2589327888944
+Last ref:1286068507472
 Index:76
 Not at newline.
 At delimiter or Letters
@@ -351,8 +351,31 @@ Base Rep Offset is at Letters..
 Building nested rep List..
 3
 Ref as param
-Last ref:2589327888944
+Last ref:1286068507472
 Index:81
 At newline.
 Building Rep..
 Building nested rep List..
+Processing Rep...
+Next Process Rep Ref:ref2
+Processing Ref Values...
+Unprocessed Param count:2
+Refbase flags:1
+Defined ref flags:4
+Base Ref:letters
+BaseRef Defined RefFlags:4
+Defined Ref flags match.
+Processing Letters...
+Refbase flags:4
+Defined ref flags:0
+Unprocessed Param count:2
+Refbase flags:1
+Defined ref flags:4
+Refbase flags:4
+Defined ref flags:0
+Refbase flags:2
+Defined ref flags:1
+Refbase flags:2
+Defined ref flags:2
+Refbase flags:1
+Defined ref flags:8

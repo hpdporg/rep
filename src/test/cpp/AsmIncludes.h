@@ -130,6 +130,7 @@ typedef struct Parsing{
 	_int64 repOffset;
 	char* endDelimiter;
 	_int64 index;
+	_int64 unParsedIndex;
 	_int64 lineRefCount;
 	_int64 multilineRefCount;
 	List* parsingRefs;
