@@ -33,7 +33,7 @@ namespace processing
 processing.processRep:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*14);+(8*6)
+	sub rsp, (8*15);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -51,6 +51,7 @@ processing.processRep:
 	label processRep.matchingStartIndex qword at rbp-96
 	label processRep.nextRef qword at rbp-104
 	label processRep.parsingRefs qword at rbp-112
+	label processRep.parsingRefsIndex qword at rbp-120
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -73,6 +74,9 @@ processing.processRep:
 	sub rsp, 8
 
 
+	mov rcx, 0
+	mov [processRep.parsingRefsIndex], rcx		; Begin as 0
+
 	sub rsp, 8*8
 	mov rcx, processRepMsg
 	call [debugLettersMsg]
@@ -88,10 +92,28 @@ processing.processRep:
 	call [resetIndex]
 	add rsp, 8*8
 
+	sub rsp, 8*8
+	mov rbx, [processRep.parsingRefs]
+	add rbx, List.itemsCount
+	mov rcx, [rbx]
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [processRep.parsingRefs]
+	add rbx, List.index
+	mov rcx, [rbx]
+	call [debugNumMsg]
+	add rsp, 8*8
+
+
+
 	.nextRepItem:
 	mov rbx, [processRep.parsingRefs]
 	mov rdx, rbx
 	add rbx, List.index
+	mov rcx, [processRep.parsingRefsIndex]
+	mov [rbx], rcx					; Nested functions change this
 	add rdx, List.itemsCount
 	mov rcx, [rbx]
 	mov r8, [rdx]
@@ -104,6 +126,13 @@ processing.processRep:
 	call [getNextItem]
 	add rsp, 8*8
 	mov [processRep.nextRef], rax
+
+
+	mov rbx, [processRep.parsingRefs]
+	add rbx, List.index
+	mov rcx, [rbx]					; Nested functions change this. Cache here.
+	mov [processRep.parsingRefsIndex], rcx
+
 
 	sub rsp, 8*8
 	mov rcx, nextProcessRepRefMsg

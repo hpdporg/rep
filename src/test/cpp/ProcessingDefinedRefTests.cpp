@@ -51,7 +51,7 @@ TEST(ProcessingDefinedRefTest, ProcessesStoreFile) {
 TEST(ProcessingDefinedRefTest, ProcessesRetrieveFile) {
 
 	Record* record = newStorage();
-	record->builtLocation = "fileName4.txt";
+	record->builtLocation = "fileName5.txt";
 	storeLetters(record, (char*)"ABC281");
 
 	Ref* ref = newRef();
@@ -63,7 +63,7 @@ TEST(ProcessingDefinedRefTest, ProcessesRetrieveFile) {
 	ref2->flags = REF_VALUE;
 	ref2->ref = (char*)"ref2";
 	ref2->unprocessed = 0;
-	ref2->valueAlloc = "fileName4.txt";
+	ref2->valueAlloc = "fileName5.txt";
 
 	Ref* ref3 = newRef();
 	ref3->ref = (char*)"ref3";

@@ -16,6 +16,16 @@ class RunCyclesParsingProcessingTest : public ::testing::Test {
 	fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));	
 	restoreLetters(record,(char*)backupFile->allocAddr);
 	
+	backupFile = newStorage();
+	defineRecordPath(backupFile, (char*)"fileName4.txt", (char*)"..\\..\\..\\..\\src\\resources");
+	fprintf(stdout, "\nRestoring test data: %s\n", (backupFile->builtLocation));
+	retrieve(backupFile);
+
+	record = newStorage();
+	defineRecordPath(record, (char*)"fileName4.txt", (char*)".\\");
+	fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
+	restoreLetters(record, (char*)backupFile->allocAddr);
+
 
 
   }
@@ -31,6 +41,16 @@ class RunCyclesParsingProcessingTest : public ::testing::Test {
 	fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));	
 	restoreLetters(record,(char*)backupFile->allocAddr);
 	
+	backupFile = newStorage();
+	defineRecordPath(backupFile, (char*)"fileName4.txt", (char*)"..\\..\\..\\..\\src\\resources");
+	fprintf(stdout, "\nRestoring test data: %s\n", (backupFile->builtLocation));
+	retrieve(backupFile);
+
+	record = newStorage();
+	defineRecordPath(record, (char*)"fileName4.txt", (char*)".\\");
+	fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
+	restoreLetters(record, (char*)backupFile->allocAddr);
+
 
 
    }
