@@ -70,6 +70,10 @@ section '.data' data readable writeable align 16
 	newRegisteredValueMsg db 'New Registered Value',0
 	newRegisteredDefinedRefMsg db 'New Registered Defined Ref',0
 	gettingRegisteredRefMsg db 'Getting existing Registered Ref..',0
+	parseListsMsg db 'Parsing Lists..',0
+	defineListsMsg	db 'Define Lists..',0
+	defineNonListsMsg	db 'Define NonLists..',0
+	defineListParamsMsg	db 'Define List Params..',0
 
 
 section '.text' code readable writeable executable align 16
@@ -392,7 +396,7 @@ parsing.getNext:
 parsing.getNextMatchOrDelimiter:
 	push rbp 
 	mov rbp, rsp 
-	sub rsp, (8*9);+(8*6)
+	sub rsp, (8*11);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
@@ -405,6 +409,8 @@ parsing.getNextMatchOrDelimiter:
 	label getNextMatchOrDelimiter.matchList qword at rbp-56
 	label getNextMatchOrDelimiter.parsedLetters qword at rbp-64
 	label getNextMatchOrDelimiter.parsePassFlag qword at rbp-72
+	label getNextMatchOrDelimiter.nextNewlineIndex qword at rbp-80
+	label getNextMatchOrDelimiter.nextDelimiterIndex qword at rbp-88
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -511,7 +517,69 @@ parsing.getNextMatchOrDelimiter:
 
 	jmp getNextMatchOrDelimiter.nextMatchAttempt		; Now try newline
 
-	.hasNext:
+	.hasNext:						; TO-DO: Simplify this section (delimiter versus newline nearest determination)
+
+
+	sub rsp, 8*8
+	mov rdx, newlineUnixLetters;newlineWinLetters
+	mov rcx, [getNextMatchOrDelimiter.letters]
+	mov rbx, [getNextMatchOrDelimiter.parsing]
+	add rbx, Parsing.index
+	mov r8, [rbx]
+	add rcx, r8
+	call [hasMatch]
+	add rsp, 8*8
+	mov rcx, 0
+	mov rdx, rax
+	cmp rdx, rcx	
+	je getNextMatchOrDelimiter.noNextNewline			; No newline
+
+
+
+	sub rsp, 8*8
+	mov rdx, newlineUnixLetters;newlineWinLetters
+	mov rcx, [getNextMatchOrDelimiter.letters]
+	mov rbx, [getNextMatchOrDelimiter.parsing]
+	add rbx, Parsing.index
+	mov r8, [rbx]
+	add rcx, r8
+	call [getNextMatchIndex]
+	add rsp, 8*8
+	mov [getNextMatchOrDelimiter.nextNewlineIndex], rax
+
+	sub rsp, 8*8
+	mov rcx, [getNextMatchOrDelimiter.matchList]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [getNextMatchOrDelimiter.matchIndex], rax
+
+
+	sub rsp, 8*8
+	mov rcx, 8929
+	call [debugNumMsg]
+	add rsp, 8*8
+
+
+	sub rsp, 8*8
+	mov rcx, [getNextMatchOrDelimiter.matchIndex]
+	call [debugNumMsg]
+	add rsp, 8*8
+
+
+	sub rsp, 8*8
+	mov rcx, [getNextMatchOrDelimiter.nextNewlineIndex]
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	mov rcx, [getNextMatchOrDelimiter.matchIndex]
+	mov rdx, [getNextMatchOrDelimiter.nextNewlineIndex]
+	cmp rcx, rdx
+	jle getNextMatchOrDelimiter.matchIndexDetermined
+
+	mov [getNextMatchOrDelimiter.matchIndex], rdx
+	jmp getNextMatchOrDelimiter.matchIndexDetermined		; When newline comes before delimiter, use it instead
+
+	.noNextNewline:
 
 	
 	sub rsp, 8*8
@@ -519,6 +587,8 @@ parsing.getNextMatchOrDelimiter:
 	call [getNextItem]
 	add rsp, 8*8
 	mov [getNextMatchOrDelimiter.matchIndex], rax
+
+	.matchIndexDetermined:
 
 
 	sub rsp, 8*8
@@ -1120,7 +1190,6 @@ parsing.buildRep:
 
 
 
-
 	sub rsp, 8*8
 	mov r8, [buildRep.refRegistry]
 	mov rdx, [buildRep.nextRef]
@@ -1538,6 +1607,21 @@ parsing.buildNestedRepList:
 	call [debugNumMsg]
 	add rsp, 8*8
 
+
+	;mov rbx, [buildNestedRepList.lastRef]
+	;add rbx, Ref.flags
+	;mov rdx, [rbx]
+	;cmp rdx, 10b					
+	;jne buildNestedRepList.lastRefNotList		
+
+	;mov rbx, [buildNestedRepList.nextRef]
+	;add rbx, Ref.flags
+	;mov rdx, [rbx]
+	;cmp rdx, 100b					; REF_DEFINED TO-DO: Handle this elsewhere? letters should not be a list param
+	;je buildNestedRepList.end			; Skip
+
+	;.lastRefNotList:
+
 	sub rsp, 8*8
 	mov rdx, [buildNestedRepList.nextRef]
 	mov rbx, [buildNestedRepList.lastRef]
@@ -1707,6 +1791,10 @@ parsing.parseLists:
 	sub rsp, 8
 
 	
+	sub rsp, 8*8
+	mov rcx, parseListsMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
 
 
 	sub rsp, 8*8
@@ -1809,6 +1897,12 @@ parsing.defineLists:
 	mov [defineLists.prevItemNesting], rcx
 	mov [defineLists.nesting], rcx
 
+
+	sub rsp, 8*8
+	mov rcx, defineListsMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
+
 	mov rbx, [defineLists.parsing]
 	add rbx, Parsing.parsingRefs
 	mov rcx, [rbx]
@@ -1860,6 +1954,12 @@ parsing.defineLists:
 	add rbx, Ref.flags
 	mov rdx, 10b
 	mov [rbx], rdx						; Found a List REF_LIST
+
+	sub rsp, 8*8
+	mov rcx, rdx
+	call [debugNumMsg]
+	add rsp, 8*8
+
 
 
 	.listRefNotFound:
@@ -1936,6 +2036,11 @@ parsing.defineNonLists:
 	push r15
 	sub rsp, 8
 
+
+	sub rsp, 8*8
+	mov rcx, defineNonListsMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
 	
 
 
@@ -2067,7 +2172,22 @@ parsing.defineListParams:
 	push r15
 	sub rsp, 8
 
+
+	mov rcx, [defineListParams.nextRef]
+	cmp rcx, 0
+	je defineListParams.end					; No ref
 	
+	;mov rbx, [defineListParams.nextRef]		; Instead of this, make sure convergedcount does not show these
+	;add rbx, Ref.flags
+	;mov rdx, [rbx]
+	;cmp rdx, 100b					; REF_DEFINED TO-DO: Handle this elsewhere? letters should not be a list param
+	;je defineListParams.end				; Skip
+
+
+	sub rsp, 8*8
+	mov rcx, defineListParamsMsg
+	call [debugLettersMsg]
+	add rsp, 8*8
 
 
 	mov rbx, [defineListParams.parsing]
@@ -2104,6 +2224,14 @@ parsing.defineListParams:
 	add rsp, 8*8
 	mov [defineListParams.nextListRef], rax
 
+
+	sub rsp, 8*8
+	mov rbx, [defineListParams.nextListRef]
+	add rbx, Ref.flags
+	mov rcx, [rbx]
+	call [debugNumMsg]
+	add rsp, 8*8
+
 	mov rbx, [defineListParams.nextListRef]
 	add rbx, Ref.flags
 	mov rcx, [rbx]
@@ -2118,10 +2246,25 @@ parsing.defineListParams:
 	mov [rbx], rcx					; Go back 1
 	
 	sub rsp, 8*8
+	mov rcx, 839
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
 	mov rcx, [defineListParams.parsingRefsList]
 	call [getConvergedItemCount]
 	add rsp, 8*8
 	mov [defineListParams.convergedCount], rax
+
+	sub rsp, 8*8
+	mov rcx, 89
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rcx, [defineListParams.convergedCount]
+	call [debugNumMsg]
+	add rsp, 8*8
 
 	mov rbx, [defineListParams.nextListRef]
 	add rbx, Ref.list

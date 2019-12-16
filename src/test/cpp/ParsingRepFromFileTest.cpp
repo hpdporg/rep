@@ -16,6 +16,16 @@ protected:
 		fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
 		restoreLetters(record, (char*)backupFile->allocAddr);
 
+		backupFile = newStorage();
+		defineRecordPath(backupFile, (char*)"testRefListRep.rep", (char*)"..\\..\\..\\..\\src\\resources");
+		fprintf(stdout, "\nRestoring test data: %s\n", (backupFile->builtLocation));
+		retrieve(backupFile);
+
+		record = newStorage();
+		defineRecordPath(record, (char*)"testRefListRep.rep", (char*)".\\");
+		fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
+		restoreLetters(record, (char*)backupFile->allocAddr);
+
 
 
 	}
@@ -28,6 +38,16 @@ protected:
 
 		Record* record = newStorage();
 		defineRecordPath(record, (char*)"testDefinedRefRep.rep", (char*)".\\");
+		fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
+		restoreLetters(record, (char*)backupFile->allocAddr);
+
+		backupFile = newStorage();
+		defineRecordPath(backupFile, (char*)"testRefListRep.rep", (char*)"..\\..\\..\\..\\src\\resources");
+		fprintf(stdout, "\nRestoring test data: %s\n", (backupFile->builtLocation));
+		retrieve(backupFile);
+
+		record = newStorage();
+		defineRecordPath(record, (char*)"testRefListRep.rep", (char*)".\\");
 		fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
 		restoreLetters(record, (char*)backupFile->allocAddr);
 
