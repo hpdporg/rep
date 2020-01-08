@@ -16,7 +16,7 @@ TEST_F(RunCyclesTest, LoadsReps) {
 		fprintf(stdout, "\nNext record name: %s\n",nextRecordName);
 	}
 
-	EXPECT_EQ(1,runCycles->repRecordList->itemsCount);
+	EXPECT_EQ(3,runCycles->repRecordList->itemsCount);
 }
 
 TEST_F(RunCyclesTest, LoadsRepAllocation) {
