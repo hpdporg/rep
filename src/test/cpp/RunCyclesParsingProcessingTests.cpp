@@ -71,11 +71,11 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedRefs) {
 		resetIndex(nextRef->list);
 
 	}
-	resetIndex(parsing->parsingRefs);
-	while (parsing->parsingRefs->index < parsing->parsingRefs->itemsCount) {
-		Ref* nextRef = (Ref*)getNextItem(parsing->parsingRefs);
-		if (parsing->parsingRefs->index == 0) {	// Index increments implicitly after getNextItem
-			EXPECT_STREQ((char*)nextRef->valueAlloc,"dabaSEPARATOR89188SEPARATOR883 djkhksalh hk88\n				dfjlaSEPARATOR99");
+	resetIndex(refRegistry->list);
+	while (refRegistry->list->index < refRegistry->list->itemsCount) {
+		Ref* nextRef = (Ref*)getNextItem(refRegistry->list);
+		if (refRegistry->list->index == 8) {	// Index increments implicitly after getNextItem
+			EXPECT_STREQ((char*)nextRef->valueAlloc,"dabaSEPARATOR89188SEPARATOR883 djkhksalh hk88\ndfjlaSEPARATOR99");
 		}
 	}
 
