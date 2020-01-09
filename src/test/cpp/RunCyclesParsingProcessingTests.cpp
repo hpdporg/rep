@@ -65,14 +65,22 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedRefs) {
 			fprintf(stdout, "\nparamRep name: %s\n", (char*)paramRef->ref);
 			fprintf(stdout, "\nparamRep flags: %d\n", paramRef->flags);
 			fprintf(stdout, "\nparamRep index: %d\n", paramRef->repIndex);
-			fprintf(stdout, "\nRep unprocessed: %d\n", paramRef->unprocessed);
-			fprintf(stdout, "\nRep value alloc: %s\n", (char*)paramRef->valueAlloc);
+			fprintf(stdout, "\nparamRep unprocessed: %d\n", paramRef->unprocessed);
+			fprintf(stdout, "\nparamRep value alloc: %s\n", (char*)paramRef->valueAlloc);
 		}
 		resetIndex(nextRef->list);
 
 	}
 	resetIndex(parsing->parsingRefs);
+	while (parsing->parsingRefs->index < parsing->parsingRefs->itemsCount) {
+		Ref* nextRef = (Ref*)getNextItem(parsing->parsingRefs);
+		if (parsing->parsingRefs->index == 0) {	// Index increments implicitly after getNextItem
+			EXPECT_STREQ((char*)nextRef->valueAlloc,"dabaSEPARATOR89188SEPARATOR883 djkhksalh hk88\n				dfjlaSEPARATOR99");
+		}
+	}
+
 }
+
 
 
 
