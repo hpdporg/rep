@@ -1,0 +1,6 @@
+C:/Users/lsall/datap/external/googletestBuild_2010/CMakeFiles/gtest.dir
+C:/Users/lsall/datap/external/googletestBuild_2010/CMakeFiles/gtest_main.dir
+C:/Users/lsall/datap/external/googletestBuild_2010/CMakeFiles/gtest_unittest.dir
+C:/Users/lsall/datap/external/googletestBuild_2010/CMakeFiles/RUN_TESTS.dir
+C:/Users/lsall/datap/external/googletestBuild_2010/CMakeFiles/ALL_BUILD.dir
+C:/Users/lsall/datap/external/googletestBuild_2010/CMakeFiles/ZERO_CHECK.dir

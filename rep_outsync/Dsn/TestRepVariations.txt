@@ -1,0 +1,17 @@
+Test Rep variations
+
+
+.rep
+refList1
+	ref2
+	ref3
+
+
+.rep
+refList1
+	ref2
+	ref3
+refList2
+	ref4
+	ref5
+
