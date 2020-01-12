@@ -133,7 +133,8 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListRefs) {
 
 	}
 	processRep(parsing, (char*)record->allocAddr, refRegistry);
-	
+	processRep(parsing, (char*)record->allocAddr, refRegistry);
+
 	resetIndex(parsing->parsingRefs);
 	fprintf(stdout, "\nProcessing....\n\n\n");
 	while (parsing->parsingRefs->index < parsing->parsingRefs->itemsCount) {

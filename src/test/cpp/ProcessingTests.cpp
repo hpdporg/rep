@@ -299,3 +299,38 @@ TEST(ProcessingTest, GetsLettersFromListRef) {
 
 
 }
+
+TEST(ProcessingTest, GetsLettersAllocFromListRef) {
+	Ref* ref = newRef();
+	ref->ref = (char*)"ref";
+	ref->flags = REF_LIST;
+
+
+	Ref* ref2 = newRef();
+	ref2->ref = (char*)"ref2";
+	ref2->flags = REF_VALUE;
+	ref2->valueAlloc = "A2R4";
+	ref2->unprocessed = 0;
+
+	Ref* ref3 = newRef();
+	ref3->ref = (char*)"ref3";
+	ref3->flags = REF_VALUE;
+	ref3->valueAlloc = "Aab4";
+	ref3->unprocessed = 0;
+
+	newLastItem(ref->list, ref2);
+	newLastItem(ref->list, ref3);
+
+
+
+	List* refLettersList = getRefLettersList(ref);
+	char* refLettersReturned = getRefLettersAlloc(ref);
+
+	
+
+	EXPECT_STREQ("A2R4Aab4", (char*)ref->valueAlloc);
+
+
+
+}
+
