@@ -556,19 +556,19 @@ parsing.getNextMatchOrDelimiter:
 
 	sub rsp, 8*8
 	mov rcx, 8929
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
 	sub rsp, 8*8
 	mov rcx, [getNextMatchOrDelimiter.matchIndex]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
 	sub rsp, 8*8
 	mov rcx, [getNextMatchOrDelimiter.nextNewlineIndex]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	mov rcx, [getNextMatchOrDelimiter.matchIndex]
@@ -728,7 +728,7 @@ parsing.parseRep:
 
 	sub rsp, 8*8
 	mov rcx, indexMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 
@@ -737,7 +737,7 @@ parsing.parseRep:
 	mov rdx, rbx
 	add rdx, Parsing.index
 	mov rcx, [rdx]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -889,7 +889,7 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, notAtNewLineMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
@@ -911,7 +911,7 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, atDelimiterOrLettersMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -936,7 +936,7 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, 5653
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -951,7 +951,7 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, 99653
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -961,7 +961,7 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, atNewLineMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -982,7 +982,7 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, atDelimiterMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -1005,7 +1005,7 @@ parsing.next:
 
 	sub rsp, 8*8
 	mov rcx, atLettersMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -1170,7 +1170,7 @@ parsing.buildRep:
 
 	sub rsp, 8*8
 	mov rcx, buildingRepMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
@@ -1327,7 +1327,7 @@ parsing.buildBaseRepOffset:
 
 	sub rsp, 8*8
 	mov rcx, baseRepOffsetAtLettersMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	mov rbx, [buildBaseRepOffset.parsing]
@@ -1338,14 +1338,14 @@ parsing.buildBaseRepOffset:
 
 	sub rsp, 8*8
 	mov rcx, rcx
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rbx, [buildBaseRepOffset.parsing]
 	add rbx, Parsing.lineRefCount
 	mov rcx, [rbx]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	; TO-DO: Multiline
@@ -1485,7 +1485,7 @@ parsing.buildNestedRepList:
 
 	sub rsp, 8*8
 	mov rcx, buildNestedRepListMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
@@ -1498,7 +1498,7 @@ parsing.buildNestedRepList:
 	mov rbx, [buildBaseRepOffset.parsing]
 	add rbx, Parsing.lineRefCount
 	mov rcx, [rbx]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -1528,26 +1528,26 @@ parsing.buildNestedRepList:
 
 	sub rsp, 8*8
 	mov rcx, repOffsetMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rbx, [buildNestedRepList.parsing]
 	add rbx, Parsing.repOffset
 	mov rcx, [rbx]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, baseRepOffsetMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rbx, [buildNestedRepList.parsing]
 	add rbx, Parsing.baseRepOffset
 	mov rcx, [rbx]					; Also increase baseRepOffset if needed when first
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	.notFirstRef:
@@ -1586,7 +1586,7 @@ parsing.buildNestedRepList:
 
 	sub rsp, 8*8
 	mov rcx, refAsParamMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -1599,12 +1599,12 @@ parsing.buildNestedRepList:
 
 	sub rsp, 8*8
 	mov rcx, lastRefMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, [buildNestedRepList.lastRef]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -1793,7 +1793,7 @@ parsing.parseLists:
 	
 	sub rsp, 8*8
 	mov rcx, parseListsMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
@@ -1900,7 +1900,7 @@ parsing.defineLists:
 
 	sub rsp, 8*8
 	mov rcx, defineListsMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	mov rbx, [defineLists.parsing]
@@ -1957,7 +1957,7 @@ parsing.defineLists:
 
 	sub rsp, 8*8
 	mov rcx, rdx
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -2039,7 +2039,7 @@ parsing.defineNonLists:
 
 	sub rsp, 8*8
 	mov rcx, defineNonListsMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 	
 
@@ -2186,7 +2186,7 @@ parsing.defineListParams:
 
 	sub rsp, 8*8
 	mov rcx, defineListParamsMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
@@ -2229,7 +2229,7 @@ parsing.defineListParams:
 	mov rbx, [defineListParams.nextListRef]
 	add rbx, Ref.flags
 	mov rcx, [rbx]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	mov rbx, [defineListParams.nextListRef]
@@ -2247,7 +2247,7 @@ parsing.defineListParams:
 	
 	sub rsp, 8*8
 	mov rcx, 839
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -2258,13 +2258,17 @@ parsing.defineListParams:
 
 	sub rsp, 8*8
 	mov rcx, 89
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, [defineListParams.convergedCount]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
+
+	mov r9, [defineListParams.convergedCount]
+	cmp r9, 0
+	je defineListParams.nextRefItem			; Can this ever happen?
 
 	mov rbx, [defineListParams.nextListRef]
 	add rbx, Ref.list
@@ -2273,7 +2277,7 @@ parsing.defineListParams:
 	mov r8, [rdx]
 	mov r9, [defineListParams.convergedCount]
 	cmp r8, r9
-	jnle defineListParams.nextRefItem		; ListRef's item count is not less than or equal to converged count
+	jnl defineListParams.nextRefItem		; ListRef's item count is not less than or equal to converged count
 
 
 	sub rsp, 8*8
@@ -2356,7 +2360,7 @@ parsing.parseRef:
 
 	sub rsp, 8*8
 	mov rcx, startingParseRefMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -2369,12 +2373,12 @@ parsing.parseRef:
 	
 	sub rsp, 8*8
 	mov rcx, parsedLettersMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, [parseRef.parsedLetters]
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
@@ -2388,7 +2392,7 @@ parsing.parseRef:
 
 	sub rsp, 8*8
 	mov rcx, 33
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -2623,7 +2627,7 @@ parsing.getRegisteredValue:
 
 	sub rsp, 8*8
 	mov rcx, gettingRegisteredRefMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -2645,7 +2649,7 @@ parsing.getRegisteredValue:
 
 	sub rsp, 8*8
 	mov rcx, alreadyRegisteredMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 	
 
@@ -2655,7 +2659,7 @@ parsing.getRegisteredValue:
 
 	sub rsp, 8*8
 	mov rcx, newRegisteredDefinedRefMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	mov r8, 100b						; REF_DEFINED
@@ -2682,7 +2686,7 @@ parsing.getRegisteredValue:
 
 	sub rsp, 8*8
 	mov rcx, newRegisteredValueMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 	
 	

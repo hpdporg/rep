@@ -37,12 +37,12 @@ class RunCyclesParsingProcessingTest : public ::testing::Test {
 	restoreLetters(record, (char*)backupFile->allocAddr);
 
 	backupFile = newStorage();
-	defineRecordPath(backupFile, (char*)"testRepListOfListsNoSeparator.rep", (char*)"..\\..\\..\\..\\src\\resources");
+	defineRecordPath(backupFile, (char*)"testRepListDefinedRefReps.rep", (char*)"..\\..\\..\\..\\src\\resources");
 	fprintf(stdout, "\nRestoring test data: %s\n", (backupFile->builtLocation));
 	retrieve(backupFile);
 
 	record = newStorage();
-	defineRecordPath(record, (char*)"testRepListOfListsNoSeparator.rep", (char*)".\\");
+	defineRecordPath(record, (char*)"testRepListDefinedRefReps.rep", (char*)".\\");
 	fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
 	restoreLetters(record, (char*)backupFile->allocAddr);
 
@@ -82,14 +82,19 @@ class RunCyclesParsingProcessingTest : public ::testing::Test {
 	restoreLetters(record, (char*)backupFile->allocAddr);
 
 	backupFile = newStorage();
-	defineRecordPath(backupFile, (char*)"testRepListOfListsNoSeparator.rep", (char*)"..\\..\\..\\..\\src\\resources");
+	defineRecordPath(backupFile, (char*)"testRepListDefinedRefReps.rep", (char*)"..\\..\\..\\..\\src\\resources");
 	fprintf(stdout, "\nRestoring test data: %s\n", (backupFile->builtLocation));
 	retrieve(backupFile);
 
 	record = newStorage();
-	defineRecordPath(record, (char*)"testRepListOfListsNoSeparator.rep", (char*)".\\");
+	defineRecordPath(record, (char*)"testRepListDefinedRefReps.rep", (char*)".\\");
 	fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
 	restoreLetters(record, (char*)backupFile->allocAddr);
+
+	record = newStorage();
+	defineRecordPath(record, (char*)"fileName3.txt", (char*)".\\");
+	fprintf(stdout, "\nRemoving test data: %s\n", (record->builtLocation));
+	removeRecord(record);
 
 
    }

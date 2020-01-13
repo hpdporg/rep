@@ -135,6 +135,7 @@ TEST(ProcessingDefinedRefTest, ProcessesReplaceLettersList) {
 
 	newLastItem(ref4->list, ref6);
 	newLastItem(ref4->list, ref7);
+	getRefLettersList(ref4);
 
 	newLastItem(ref->list, ref2);
 	newLastItem(ref->list, ref3);

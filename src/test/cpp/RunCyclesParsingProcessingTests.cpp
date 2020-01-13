@@ -155,13 +155,34 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListRefs) {
 		resetIndex(nextRef->list);
 
 	}
-	resetIndex(parsing->parsingRefs);
+	resetIndex(refRegistry->list);
+	while (refRegistry->list->index < refRegistry->list->itemsCount) {
+		Ref* nextRef = (Ref*)getNextItem(refRegistry->list);
+		if (refRegistry->list->index == 1) {	// Index increments implicitly after getNextItem
+			EXPECT_EQ(((List*)nextRef->valueAlloc)->itemsCount, 3);
+			resetIndex(((List*)nextRef->valueAlloc));
+			while (((List*)nextRef->valueAlloc)->index < ((List*)nextRef->valueAlloc)->itemsCount) {
+				char* listLetters = (char*)getNextItem(((List*)nextRef->valueAlloc));
+				if (((List*)nextRef->valueAlloc)->index == 1) {		// Index increments implicitly after getNextItem
+					fprintf(stdout, "\nList letters at 1 %s\n", (char*)listLetters);
+					EXPECT_STREQ(listLetters, "Some letters1");
+				}else if(((List*)nextRef->valueAlloc)->index == 2) {		// Index increments implicitly after getNextItem
+					fprintf(stdout, "\nList letters at 2 %s\n", (char*)listLetters);
+					EXPECT_STREQ(listLetters, "some other letters2");
+				}else if (((List*)nextRef->valueAlloc)->index == 3) {		// Index increments implicitly after getNextItem
+					fprintf(stdout, "\nList letters at 3 %s\n", (char*)listLetters);
+					EXPECT_STREQ(listLetters, "Some letters1some other letters2last letters");
+				}
+				
+			}
+		}
+	}
 }
 
-TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListOfListRefs) {
+TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListDefinedRefs) {
 	Record* record = newStorage();
 
-	defineRecordPath(record, (char*)"testRepListOfListsNoSeparator.rep", (char*)".\\");
+	defineRecordPath(record, (char*)"testRepListDefinedRefReps.rep", (char*)".\\");
 	retrieve(record);
 
 
@@ -208,6 +229,8 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListOfListRefs) {
 	}
 	processRep(parsing, (char*)record->allocAddr, refRegistry);
 	processRep(parsing, (char*)record->allocAddr, refRegistry);
+	processRep(parsing, (char*)record->allocAddr, refRegistry);
+	
 
 	resetIndex(parsing->parsingRefs);
 	fprintf(stdout, "\nProcessing....\n\n\n");
@@ -236,4 +259,11 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListOfListRefs) {
 
 	}
 	resetIndex(parsing->parsingRefs);
+
+	Record* testFile = newStorage();
+	defineRecordPath(testFile, (char*)"fileName3.txt", (char*)".\\");
+	retrieve(testFile);
+	fprintf(stdout, "\nFile contents: %s\n", (testFile->allocAddr));
+	EXPECT_STREQ((char*)testFile->allocAddr, "Some letters189j3Some letters189j3ABD898");
+
 }

@@ -110,6 +110,12 @@ TEST_F(ParsingRepFromFileTest, ParsingRefListAndRetrieveFile) {
 
 	}
 
-
+	resetIndex(refRegistry->list);
+	while (refRegistry->list->index < refRegistry->list->itemsCount) {
+		Ref* nextRef = (Ref*)getNextItem(refRegistry->list);
+		if (refRegistry->list->index == 1) {	// Index increments implicitly after getNextItem
+			EXPECT_EQ(((List*)nextRef->list)->itemsCount, 3);			
+		}
+	}
 
 }

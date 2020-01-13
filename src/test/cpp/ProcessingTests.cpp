@@ -324,11 +324,11 @@ TEST(ProcessingTest, GetsLettersAllocFromListRef) {
 
 
 	List* refLettersList = getRefLettersList(ref);
-	char* refLettersReturned = getRefLettersAlloc(ref);
+	
 
 	
 
-	EXPECT_STREQ("A2R4Aab4", (char*)ref->valueAlloc);
+	EXPECT_EQ(refLettersList->itemsCount, 2);
 
 
 

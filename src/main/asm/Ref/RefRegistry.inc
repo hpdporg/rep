@@ -379,7 +379,7 @@ refRegistry.getRegisteredRef:
 
 	sub rsp, 8*8
 	mov rcx, gettingNextRegisteredRefValueMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -392,7 +392,7 @@ refRegistry.getRegisteredRef:
 	mov rbx, [getRegisteredRef.nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
@@ -445,7 +445,7 @@ refRegistry.getRegisteredRef:
 
 	sub rsp, 8*8
 	mov rcx, gettingNextRegisteredDefinedRefMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
@@ -460,7 +460,7 @@ refRegistry.getRegisteredRef:
 	mov rbx, [getRegisteredRef.nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 

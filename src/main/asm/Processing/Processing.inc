@@ -79,7 +79,7 @@ processing.processRep:
 
 	sub rsp, 8*8
 	mov rcx, processRepMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	mov rbx, [processRep.parsing]
@@ -96,14 +96,14 @@ processing.processRep:
 	mov rbx, [processRep.parsingRefs]
 	add rbx, List.itemsCount
 	mov rcx, [rbx]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rbx, [processRep.parsingRefs]
 	add rbx, List.index
 	mov rcx, [rbx]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -136,14 +136,14 @@ processing.processRep:
 
 	sub rsp, 8*8
 	mov rcx, nextProcessRepRefMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rbx, [processRep.nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 	
 	sub rsp, 8*8
@@ -248,7 +248,7 @@ processing.processRefValues:
 
 	sub rsp, 8*8
 	mov rcx, processRefValuesMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	mov rcx, 0
@@ -293,9 +293,9 @@ processing.processRefValues:
 	mov rbx, [processRefValues.item]
 	add rbx, Ref.flags
 	mov r8, [rbx]
-	mov rdx, 1b						; REF_VALUE
-	cmp r8, rdx
-	jne processRefValues.nextRefItem			; Skip when not REF_VALUE
+	mov rdx, 11b						; REF_LIST REF_VALUE
+	and r8, rdx
+	jz processRefValues.nextRefItem			; Skip when not REF_LIST or REF_VALUE
 
 	sub rsp, 8*8
 	mov rcx, [processRefValues.item]
@@ -316,12 +316,12 @@ processing.processRefValues:
 
 	sub rsp, 8*8
 	mov rcx, unprocessedParamCountMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, [processRefValues.unprocessedParamCount]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	;definedRefFlags
@@ -361,6 +361,20 @@ processing.processRefValues:
 	mov rcx, [processRefValues.nextRef]
 	call processRefItem
 	add rsp, 8*8
+
+	; List
+	sub rsp, 8*8
+	mov r11, [processRefValues.refRegistry]
+	mov qword [rsp+5*8], r11
+	mov r10, [processRefValues.parsing]
+	mov qword [rsp+4*8], r10
+	mov r9, 0						; definedRefFlags	No defined ref
+	mov r8,	100b						; refBaseFlags		REF_BASE_DEFINED_REF_NOT_FIRST_SECOND_PARAM
+	mov rdx, 1b						; minParamCount
+	mov rcx, [processRefValues.nextRef]
+	call processRefItem
+	add rsp, 8*8
+
 
 
 	jmp processRefValues.nextRefItem
@@ -870,7 +884,7 @@ processing.processLetters:
 
 	sub rsp, 8*8
 	mov rcx, processingLettersMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	mov rbx, [processLetters.item]
@@ -1004,6 +1018,14 @@ processing.processAppending:
 	cmp rcx, r9 
 	jne processAppending.end				; Only attempt processing letters
 
+	mov r8, [processAppending.item]
+	add r8, Ref.flags
+	mov rdx, [r8]
+	mov r9, 1b						; REF_VALUE
+	cmp rdx, r9 
+	jne processAppending.end				; Only attempt processing letters
+
+
 	sub rsp, 8*8
 	mov rdx, [processAppending.refRegistry]
 	mov rcx, [processAppending.item]
@@ -1107,6 +1129,114 @@ processing.processAppending:
 
 	.end:
 	;mov rax, [processAppending.nextRef]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+
+processing.processList:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*15);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label processList.heapAddress qword at rbp-8  
+	label processList.handleAllocatedMemory qword at rbp-16
+	label processList.parsing qword at rbp-24 
+	label processList.unprocessedCount qword at rbp-32
+	label processList.newRef qword at rbp-40
+	label processList.letters qword at rbp-48
+	label processList.processedCount qword at rbp-56
+	label processList.list qword at rbp-64
+	label processList.prevItem qword at rbp-72
+	label processList.refRegistry qword at rbp-80
+	label processList.item qword at rbp-88
+	label processList.unprocessedParamCount qword at rbp-96
+	label processList.nextRef qword at rbp-104
+	label processList.nesting qword at rbp-112
+	label processList.definedRefFlags qword at rbp-120
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [processList.parsing], rcx
+	mov [processList.item], rdx	
+	mov [processList.refRegistry], r8
+	mov [processList.definedRefFlags], r9
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+	
+
+	
+
+	mov rcx, [processList.definedRefFlags]
+	mov r9, 0b						; definedRefFlags	None
+	cmp rcx, r9 
+	jne processList.end				; Only attempt processing List
+
+	mov r8, [processList.item]
+	add r8, Ref.flags
+	mov rdx, [r8]
+	mov r9, 10b						; REF_LIST
+	cmp rdx, r9 
+	jne processList.end				; Only attempt processing letters
+
+
+	sub rsp, 8*8
+	mov rdx, [processList.refRegistry]
+	mov rcx, [processList.item]
+	call getUnprocessedRegisteredParams
+	add rsp, 8*8
+	cmp rax, 0
+	jne processList.end				; Appending depends on param registeredRefs being processed, not just the param
+
+	sub rsp, 8*8
+	mov rcx, [processList.item]
+	call getRefLettersList
+	add rsp, 8*8
+
+
+
+
+
+	sub rsp, 8*8
+	mov rcx, [processList.item]
+	call defineAsProcessed				; Done, refs processed
+	add rsp, 8*8
+
+
+	.notReady:
+
+
+	.end:
+	;mov rax, [processList.nextRef]
 
 
 	add rsp, 8	
@@ -1243,11 +1373,30 @@ processing.processStoreFile:
 	add rsp, 8*8
 	mov [processStoreFile.nextRef], rax
 
+	mov rbx, [processStoreFile.nextRef]
+	add rbx, Ref.flags
+	mov rdx, [rbx]
+	mov rcx, 10b					; REF_LIST
+	cmp rcx, rdx
+	je processStoreFile.listLetters
 
 	sub rsp, 8*8
 	mov rcx, [processStoreFile.nextRef]
 	call getRefLettersAlloc
 	add rsp, 8*8
+
+	jmp processStoreFile.storeRefFile
+	.listLetters:
+
+	mov r8, [processStoreFile.nextRef]
+	add r8, Ref.valueAlloc
+	mov rcx, [r8]
+	sub rsp, 8*8
+	call [listAsLetters]
+	add rsp, 8*8
+
+
+	.storeRefFile:
 
 	sub rsp, 8*8
 	mov rdx, rax 
@@ -1518,7 +1667,7 @@ processing.processReplaceLettersList:
 	mov rcx, [processReplaceLettersList.item]
 	call getUnprocessedRegisteredParams
 	add rsp, 8*8
-	cmp rax, 10b
+	cmp rax, 1b
 	jnle processReplaceLettersList.end				; Separator, replaceLettersList definedref can be unprocessed? This definedRef depends on param registeredRefs being processed, not just the param
 
 
@@ -1572,10 +1721,9 @@ processing.processReplaceLettersList:
 	call [getNextItem]
 	add rsp, 8*8
 	mov [processReplaceLettersList.nextRef], rax	; list
-	sub rsp, 8*8
-	mov rcx, [processReplaceLettersList.nextRef]
-	call getRefLettersList
-	add rsp, 8*8
+	mov rbx, [processReplaceLettersList.nextRef]
+	add rbx, Ref.valueAlloc
+	mov rax, [rbx]
 	mov [processReplaceLettersList.param2], rax	; letters
 
 
@@ -1822,22 +1970,22 @@ processing.processRefItem:
 
 	sub rsp, 8*8
 	mov rcx, refBaseFlagsMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, [processRefItem.refBaseFlags]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, definedRefFlagsMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, [processRefItem.definedRefFlags]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -1872,26 +2020,26 @@ processing.processRefItem:
 
 	sub rsp, 8*8
 	mov rcx, baseRefMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rbx, [processRefItem.baseRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, baseRefDefinedRefFlagsMsg
-	call [debugLetters]
+	;call [debugLetters]
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov r8, [processRefItem.baseRef]
 	add r8, Ref.definedRefFlags
 	mov rcx, [r8]
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 	mov r8, [processRefItem.baseRef]
@@ -1903,7 +2051,7 @@ processing.processRefItem:
 
 	sub rsp, 8*8
 	mov rcx, definedRefFlagsMatchMsg
-	call [debugLettersMsg]
+	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	mov rbx, [processRefItem.item]
@@ -1932,6 +2080,13 @@ processing.processRefItem:
 	call processAppending				
 	add rsp, 8*8
 
+	sub rsp, 8*8
+	mov r9, [processRefItem.definedRefFlags]
+	mov r8, [processRefItem.refRegistry]
+	mov rdx, [processRefItem.item]
+	mov rcx, [processRefItem.parsing]
+	call processList				
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov r9, [processRefItem.definedRefFlags]
