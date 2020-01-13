@@ -1,3 +1,0 @@
-extrn '__imp_replaceLettersWithList' as replaceLettersWithList:qword
-
-extrn '__imp_replaceContainsLettersWithList' as replaceContainsLettersWithList:qword

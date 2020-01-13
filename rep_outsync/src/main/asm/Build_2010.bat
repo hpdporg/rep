@@ -1,2 +1,0 @@
-CALL "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" AMD64
-link /LARGEADDRESSAWARE /MACHINE:X64 /SUBSYSTEM:WINDOWS  /ENTRY:start datap.obj "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Lib\x64\User32.Lib" "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Lib\x64\Kernel32.Lib" "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Lib\x64\Gdi32.lib" "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Lib\x64\Ws2_32.lib"  /OUT:datap.exe

@@ -1,4 +1,0 @@
-C:/Users/lewis/datap/external/googletestBuild/CMakeFiles/gtest.dir
-C:/Users/lewis/datap/external/googletestBuild/CMakeFiles/gtest_main.dir
-C:/Users/lewis/datap/external/googletestBuild/CMakeFiles/ALL_BUILD.dir
-C:/Users/lewis/datap/external/googletestBuild/CMakeFiles/ZERO_CHECK.dir
