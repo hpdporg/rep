@@ -30,7 +30,7 @@ TEST_F(RunCyclesTest, LoadsRepAllocation) {
 	loadRunCycleRepAllocation(runCycles);
 
 	fprintf(stdout, "\nRunCycle Rep allocation: \n%s",runCycles->repAllocation);
-	EXPECT_STRNE(0,runCycles->repAllocation);
+	EXPECT_NE(0,(_int64)runCycles->repAllocation);
 }
 
 TEST_F(RunCyclesTest, LoadsRefRegistry) {
@@ -46,20 +46,46 @@ TEST_F(RunCyclesTest, LoadsRefRegistry) {
 	EXPECT_EQ(5,runCycles->refRegistry->definedList->itemsCount);
 }
 
+TEST_F(RunCyclesTest,ParsesProccessReps) {
+	RunCycles* runCycles = newRunCycles();
+
+	
+	loadRunCycleReps(runCycles);
+	
+	fprintf(stdout, "\nRunCycle Rep count: %d\n", runCycles->repRecordList->itemsCount);
+
+	loadRunCycleRepAllocation(runCycles);
+
+	RefRegistry* refRegistry = newRefRegistry();
+	runCycles->refRegistry = refRegistry;
+	
+	loadRunCycleRefRegistry(runCycles);
+	Parsing* parsing = newParsing();
+	runCycles->parsing = parsing;
+	fprintf(stdout, "\nRunCycle allocation: %s\n", runCycles->repAllocation);
+
+	parseRep(parsing, (char*)runCycles->repAllocation, refRegistry);
+	processRep(parsing,(char*)runCycles->repAllocation,refRegistry);
+	processRep(parsing,(char*)runCycles->repAllocation,refRegistry);
+	processRep(parsing,(char*)runCycles->repAllocation,refRegistry);
+	
+
+}
+
 TEST_F(RunCyclesTest, BeginsRunCycles) {
 	fprintf(stdout, "\nBeginning load \n");
 	RunCycles* runCycles = newRunCycles();
 
-/*	beginRunCycles(runCycles);
+	beginRunCycles(runCycles);
 		
 
-	EXPECT_EQ(1,runCycles->repRecordList->itemsCount);
+	//EXPECT_EQ(1,runCycles->repRecordList->itemsCount);
 	fprintf(stdout, "\nLoading complete\n");
 	fprintf(stdout, "\nRunCycle Ref List count: %d\n", runCycles->refRegistry->list->itemsCount);
 	fprintf(stdout, "\nRunCycle Ref List count: %d\n", runCycles->refRegistry->definedList->itemsCount);
 
-	EXPECT_EQ(5,runCycles->refRegistry->definedList->itemsCount);
+	//EXPECT_EQ(5,runCycles->refRegistry->definedList->itemsCount);
 	fprintf(stdout, "\nRunCycle Rep allocation: \n%s",runCycles->repAllocation);
-	EXPECT_STRNE(0,runCycles->repAllocation);*/
+	//EXPECT_STRNE(0,runCycles->repAllocation);
 	
 }

@@ -31,9 +31,15 @@ startRep:
        and rsp, -32
 
 
+	sub rsp, 8*8
+	call runCycles.new
+	add rsp, 8*8
+	
+	sub rsp, 8*8
+	mov rcx, rax
+	call runCycles.begin
+	add rsp, 8*8
 
-	;newFile filename1,[handAddr]
-	;writeFile [handAddr],entry1,4,[alloc3]
 
 
 	 mov rcx, 0

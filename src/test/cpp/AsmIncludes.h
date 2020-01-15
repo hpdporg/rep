@@ -149,6 +149,8 @@ typedef struct RunCycles{
 	RefRegistry* refRegistry;
 	Parsing* parsing;
 	List* repRecordList;
+	_int64 cycleIndex;
+	_int64 maxCycleCount;
 	char* repAllocation;	
 } RunCycles;
 

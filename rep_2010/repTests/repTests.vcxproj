@@ -115,15 +115,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\test\cpp\Main.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\ParsingRepFromFileTest.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\ParsingRepFromFileTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\ParsingTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\ProcessingDefinedRefTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\ProcessingRefValueTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\ProcessingTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RefTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\RunCyclesParsingProcessingTest.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\RunCyclesParsingProcessingTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RunCyclesTest.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RunCyclesTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\test\cpp\AsmIncludes.h" />
+    <ClInclude Include="..\..\src\test\cpp\ParsingRepFromFileTests.h" />
     <ClInclude Include="..\..\src\test\cpp\ParsingTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\ProcessingDefinedRefTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\ProcessingRefValueTests.h" />
     <ClInclude Include="..\..\src\test\cpp\ProcessingTests.h" />
     <ClInclude Include="..\..\src\test\cpp\RefTests.h" />
     <ClInclude Include="..\..\src\test\cpp\RunCyclesTests.h" />

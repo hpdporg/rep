@@ -10,6 +10,8 @@ section '.data' data readable writeable align 16
 		.refRegistry	dq 0		; Ref Registry has list of Refs, list of Defined Refs
 		.parsing dq 0			; Parsing reference; Used with parsing passes
 		.repRecordList	dq 0		; List of storage records with .rep file extension
+		.cycleIndex	dq 0		; What cycle is currently running, must be less than max cycle count
+		.maxCycleCount	dq 0		; Maximum amount of cycle runs.
 		.repAllocation dq 0		; Rep allocation
 	end struc
 
@@ -111,6 +113,14 @@ runCycles.new:
 	mov rbx, [new.handleAllocatedMemory]
 	add rbx, RunCycles.repRecordList
 	mov rax, 0
+	mov [rbx], rax
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, RunCycles.cycleIndex
+	mov rax, 0
+	mov [rbx], rax
+	mov rbx, [new.handleAllocatedMemory]
+	add rbx, RunCycles.maxCycleCount
+	mov rax, 50						; 50 cycles can occur maximum, far fewer should be required, change this later if needed.
 	mov [rbx], rax
 	mov rbx, [new.handleAllocatedMemory]
 	add rbx, RunCycles.repAllocation
@@ -248,9 +258,31 @@ runCycles.begin:
 	cmp r9, 0
 	je begin.firstCycle
 	cmp rcx, r9
-	jnl begin.endCycles
+	jnl begin.endCycles;		;dbg;parsingComplete
+	;mov rbx, [begin.runCyclesAddr]
+	;mov rdx, rbx
+	;add rbx, RunCycles.cycleIndex
+	;mov rcx, [rbx]
+	;add rdx, RunCycles.maxCycleCount
+	;mov r8, [rdx]
+	;cmp rcx, r8
+	;jnl begin.endCycles
+
 	
 	.firstCycle:	
+
+	sub rsp, 8*8
+	mov rcx, 1b
+	call [debugNumMsg]
+	add rsp, 8*8
+
+sub rsp, 8*8
+	mov rbx, [begin.runCyclesAddr]
+	add rbx, RunCycles.repAllocation
+	mov rcx, [rbx]
+	call [debugNumMsg]
+	add rsp, 8*8
+	
 
 	sub rsp, 8*8
 	mov rbx, [begin.runCyclesAddr]
@@ -264,6 +296,36 @@ runCycles.begin:
 	add rsp, 8*8
 
 	sub rsp, 8*8
+	mov rcx, 10b
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	jmp begin.skip1;dbg
+	mov rbx, [begin.runCyclesAddr]
+	add rbx, RunCycles.cycleIndex
+	mov rcx, 0
+	mov [rbx], rcx					; Parsing resets cycleIndex when still within Parsing range
+
+	.parsingComplete:
+
+	sub rsp, 8*8
+	mov rbx, [begin.runCyclesAddr]
+	add rbx, RunCycles.refRegistry
+	mov rcx, [rbx]
+	call refRegistry.unprocessedRefsCount
+	add rsp, 8*8
+	cmp rax, 0
+	je begin.processingComplete
+
+
+	sub rsp, 8*8
+	mov rcx, 11b
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	.skip1:;dbg
+
+	sub rsp, 8*8
 	mov rbx, [begin.runCyclesAddr]
 	add rbx, RunCycles.refRegistry
 	mov r8, [rbx]
@@ -274,6 +336,21 @@ runCycles.begin:
 	call processing.processRep
 	add rsp, 8*8
 
+	sub rsp, 8*8
+	mov rcx, 100b
+	call [debugNumMsg]
+	add rsp, 8*8
+
+	jmp begin.nextCycle;dbg
+
+
+	.processingComplete:
+
+	mov rbx, [begin.runCyclesAddr]
+	add rbx, RunCycles.cycleIndex
+	mov rcx, [rbx]
+	add rcx, 1b
+	mov [rbx], rcx
 
 
 	jmp begin.nextCycle
@@ -495,7 +572,6 @@ runCycles.loadRepAllocation:
 	mov rbx, [loadRepAllocation.runCyclesAddr]
 	add rbx, RunCycles.repAllocation	
 	mov [rbx], rax
-
 
 
 	jmp loadRepAllocation.nextRepRecord

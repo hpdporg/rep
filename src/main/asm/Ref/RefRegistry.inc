@@ -629,6 +629,125 @@ refRegistry.getRegisteredDefinedRef:
 
 	retn 0
 
+
+
+
+refRegistry.unprocessedRefsCount:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*10);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label unprocessedRefsCount.heapAddress qword at rbp-8  
+	label unprocessedRefsCount.handleAllocatedMemory qword at rbp-16
+	label unprocessedRefsCount.list qword at rbp-24 
+	label unprocessedRefsCount.definedList qword at rbp-32
+	label unprocessedRefsCount.matches qword at rbp-40
+	label unprocessedRefsCount.refRegistryAddr qword at rbp-48
+	label unprocessedRefsCount.nextRef qword at rbp-56
+	label unprocessedRefsCount.ref qword at rbp-64
+	label unprocessedRefsCount.count qword at rbp-72
+	label unprocessedRefsCount.repIndex qword at rbp-80
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [unprocessedRefsCount.refRegistryAddr], rcx
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+
+	mov rcx, 0
+	mov [unprocessedRefsCount.count], rcx		; Begin as 0
+
+
+
+	mov rbx, [unprocessedRefsCount.refRegistryAddr]
+	add rbx, RefRegistry.list
+	mov r8, [rbx]
+	mov [unprocessedRefsCount.list], r8
+
+	sub rsp, 8*8
+	mov rcx, [unprocessedRefsCount.list]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+
+	.nextItem:
+	mov rbx, [unprocessedRefsCount.list]
+	mov rdx, rbx
+	add rbx, List.index
+	add rdx, List.itemsCount
+	mov rcx, [rbx]
+	mov r8, [rdx]
+	cmp rcx, r8
+	jnl unprocessedRefsCount.endItems
+
+	sub rsp, 8*8
+	mov rcx, [unprocessedRefsCount.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [unprocessedRefsCount.nextRef], rax
+
+
+	mov r10, [unprocessedRefsCount.nextRef]
+	add r10, Ref.unprocessed
+	mov r11, [r10]
+	cmp r11, 0
+	jne unprocessedRefsCount.nextItem
+	
+	mov rcx, [unprocessedRefsCount.count]
+	add rcx, 1b
+	mov [unprocessedRefsCount.count], rcx
+
+
+	jmp unprocessedRefsCount.nextItem
+	
+	.endItems:
+
+	sub rsp, 8*8
+	mov rcx, [unprocessedRefsCount.list]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+
+	.end:
+
+	mov rax, [unprocessedRefsCount.count]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
 ;
 ;
 
