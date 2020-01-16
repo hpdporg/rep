@@ -217,3 +217,14 @@ TEST(ParsingTest, ParsingFirstRepUpdatesRefRegistry) {
 		}
 	}
 }
+
+
+TEST(ParsingTest, RunDebug) {		// Remove this
+	fprintf(stdout, "\nBeginning load \n");
+	RunCycles* runCycles = newRunCycles();
+
+	beginRunCycles(runCycles);
+
+	fprintf(stdout, "\nLoading complete\n");
+
+}

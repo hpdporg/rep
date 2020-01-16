@@ -202,10 +202,14 @@ runCycles.begin:
 	sub rsp, 8
 
 
+
+
 	sub rsp, 8*8
 	call refRegistry.new
 	add rsp, 8*8
 	mov [begin.refRegistry], rax
+
+
 
 	mov rbx, [begin.runCyclesAddr]
 	add rbx, RunCycles.refRegistry
@@ -223,11 +227,13 @@ runCycles.begin:
 
 
 
-
 	sub rsp, 8*8
 	call parsing.new
 	add rsp, 8*8
 	mov [begin.parsing], rax
+
+
+
 
 	mov rbx, [begin.runCyclesAddr]
 	add rbx, RunCycles.parsing
@@ -235,10 +241,14 @@ runCycles.begin:
 	mov [rbx], rdx					; Cache Parsing
 
 
+
 	sub rsp, 8*8
 	mov rcx, [begin.runCyclesAddr]	
 	call loadReps
 	add rsp, 8*8
+
+
+
 
 	sub rsp, 8*8
 	mov rcx, [begin.runCyclesAddr]	
@@ -246,7 +256,18 @@ runCycles.begin:
 	add rsp, 8*8
 
 
+
+
+
 	.nextCycle:
+	mov rbx, [begin.runCyclesAddr]
+	mov rdx, rbx
+	add rbx, RunCycles.cycleIndex
+	mov rcx, [rbx]
+	add rdx, RunCycles.maxCycleCount
+	mov r8, [rdx]
+	cmp rcx, r8
+	jnl begin.endCycles
 	mov rbx, [begin.runCyclesAddr]
 	add rbx, RunCycles.parsing
 	mov rdx, [rbx]
@@ -258,31 +279,14 @@ runCycles.begin:
 	cmp r9, 0
 	je begin.firstCycle
 	cmp rcx, r9
-	jnl begin.endCycles;		;dbg;parsingComplete
-	;mov rbx, [begin.runCyclesAddr]
-	;mov rdx, rbx
-	;add rbx, RunCycles.cycleIndex
-	;mov rcx, [rbx]
-	;add rdx, RunCycles.maxCycleCount
-	;mov r8, [rdx]
-	;cmp rcx, r8
-	;jnl begin.endCycles
+	jnl begin.parsingComplete
+
+
 
 	
 	.firstCycle:	
 
-	sub rsp, 8*8
-	mov rcx, 1b
-	call [debugNumMsg]
-	add rsp, 8*8
 
-sub rsp, 8*8
-	mov rbx, [begin.runCyclesAddr]
-	add rbx, RunCycles.repAllocation
-	mov rcx, [rbx]
-	call [debugNumMsg]
-	add rsp, 8*8
-	
 
 	sub rsp, 8*8
 	mov rbx, [begin.runCyclesAddr]
@@ -295,35 +299,27 @@ sub rsp, 8*8
 	call parsing.parseRep
 	add rsp, 8*8
 
-	sub rsp, 8*8
-	mov rcx, 10b
-	call [debugNumMsg]
-	add rsp, 8*8
-
-	jmp begin.skip1;dbg
+		
 	mov rbx, [begin.runCyclesAddr]
 	add rbx, RunCycles.cycleIndex
 	mov rcx, 0
 	mov [rbx], rcx					; Parsing resets cycleIndex when still within Parsing range
 
+	jmp begin.nextCycle				; This must change when working with separators
 	.parsingComplete:
+
+
 
 	sub rsp, 8*8
 	mov rbx, [begin.runCyclesAddr]
 	add rbx, RunCycles.refRegistry
 	mov rcx, [rbx]
-	call refRegistry.unprocessedRefsCount
+	;call refRegistry.unprocessedRefsCount
 	add rsp, 8*8
 	cmp rax, 0
-	je begin.processingComplete
+	;je begin.processingComplete
 
 
-	sub rsp, 8*8
-	mov rcx, 11b
-	call [debugNumMsg]
-	add rsp, 8*8
-
-	.skip1:;dbg
 
 	sub rsp, 8*8
 	mov rbx, [begin.runCyclesAddr]
@@ -336,12 +332,9 @@ sub rsp, 8*8
 	call processing.processRep
 	add rsp, 8*8
 
-	sub rsp, 8*8
-	mov rcx, 100b
-	call [debugNumMsg]
-	add rsp, 8*8
 
-	jmp begin.nextCycle;dbg
+
+
 
 
 	.processingComplete:
@@ -430,11 +423,18 @@ runCycles.loadReps:
 	add rsp, 8*8
 	mov [loadReps.storageRecord], rax
 
+
+
+
 	mov rbx, [loadReps.storageRecord]
 	add rbx, Record.location
 	mov r8, currentDirLetter;currentDirRepFileExtensionLettersMatcher
 	mov [rbx], r8
+
+
 	
+
+
 
 	sub rsp, 8*8
 	mov rdx, repFileExtensionLetters
@@ -443,10 +443,13 @@ runCycles.loadReps:
 	add rsp, 8*8
 	mov [loadReps.repRecordList], rax
 
+
 	mov rbx, [loadReps.runCyclesAddr]
 	add rbx, RunCycles.repRecordList
 	mov rdx, [loadReps.repRecordList]
 	mov [rbx], rdx	
+
+
 
 
 
@@ -546,29 +549,45 @@ runCycles.loadRepAllocation:
 	call [newStorage]
 	add rsp, 8*8
 	mov [loadRepAllocation.storageRecord], rax
+	
+	
 
 	mov rbx, [loadRepAllocation.storageRecord]
 	add rbx, Record.builtLocation
 	mov r8, [loadRepAllocation.storageRecordName];repFileExtensionLettersMatcher		; TO-DO: Handle other base dirs
 	mov [rbx], r8
+
 	
 
 	sub rsp, 8*8
 	mov rcx, [loadRepAllocation.storageRecord]
 	call [retrieve]
 	add rsp, 8*8
-	mov [loadRepAllocation.repRecordList], rax
-
 	
+
 	sub rsp, 8*8
-	mov rbx, [loadRepAllocation.repRecordList]
+	mov rbx, [loadRepAllocation.storageRecord]
 	add rbx, Record.allocAddr
-	mov rdx, [rbx]
+	mov rcx, [rbx]
+	call [copyLetters]				; allocate first, do not append
+	add rsp, 8*8
+	
+	mov rbx, [loadRepAllocation.repRecordList]
+	add rbx, List.index
+	mov rcx, [rbx]
+	cmp rcx, 1b
+	je loadRepAllocation.endCopy			; CopyLetters only on first index, index incremented implicitly following getNextItem
+
+
+	sub rsp, 8*8
+	mov rdx, rax	
 	mov rbx, [loadRepAllocation.runCyclesAddr]
 	add rbx, RunCycles.repAllocation	
 	mov rcx, [rbx]
 	call [appendLetters]
 	add rsp, 8*8
+
+	.endCopy:
 	mov rbx, [loadRepAllocation.runCyclesAddr]
 	add rbx, RunCycles.repAllocation	
 	mov [rbx], rax

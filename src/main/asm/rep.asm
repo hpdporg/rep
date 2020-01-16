@@ -22,7 +22,7 @@ section '.data' data readable writeable align 16
 section '.text' code readable writeable executable align 16
 
 
-;align 16
+align 16
 startRep:
        push rbp
        mov rbp, rsp
@@ -35,10 +35,10 @@ startRep:
 	call runCycles.new
 	add rsp, 8*8
 	
-	sub rsp, 8*8
+	sub rsp, 8*12
 	mov rcx, rax
 	call runCycles.begin
-	add rsp, 8*8
+	add rsp, 8*12
 
 
 

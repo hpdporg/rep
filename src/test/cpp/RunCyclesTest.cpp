@@ -5,7 +5,7 @@
 class RunCyclesTest : public ::testing::Test {
  protected:
   void SetUp() override {
-  
+	
 	Record* backupFile = newStorage();
 	defineRecordPath(backupFile, (char*)"testRepListDefinedRefReps.rep", (char*)"..\\..\\..\\..\\src\\resources");
 	fprintf(stdout, "\nRestoring test data: %s\n", (backupFile->builtLocation));		
@@ -31,6 +31,7 @@ class RunCyclesTest : public ::testing::Test {
 	fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));	
 	restoreLetters(record,(char*)backupFile->allocAddr);
 	
+
 
 
    }

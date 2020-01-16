@@ -91,10 +91,7 @@ class RunCyclesParsingProcessingTest : public ::testing::Test {
 	fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
 	restoreLetters(record, (char*)backupFile->allocAddr);
 
-	record = newStorage();
-	defineRecordPath(record, (char*)"fileName3.txt", (char*)".\\");
-	fprintf(stdout, "\nRemoving test data: %s\n", (record->builtLocation));
-	removeRecord(record);
+
 
 
    }

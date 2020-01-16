@@ -266,4 +266,10 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListDefinedRefs) {
 	fprintf(stdout, "\nFile contents: %s\n", (testFile->allocAddr));
 	EXPECT_STREQ((char*)testFile->allocAddr, "Some letters189j3Some letters189j3ABD898");
 
+
+	record = newStorage();
+	defineRecordPath(record, (char*)"fileName3.txt", (char*)".\\");
+	fprintf(stdout, "\nRemoving test data: %s\n", (record->builtLocation));
+	removeRecord(record);
+
 }
