@@ -91,6 +91,12 @@ TEST_F(RunCyclesTest,ParsesProcessReps) {
 }
 
 TEST_F(RunCyclesTest, BeginsRunCycles) {
+
+	Record* record = newStorage();	//TO-DO: Remove this block
+	defineRecordPath(record, (char*)"testRepListDefinedRefReps.rep", (char*)".\\");
+	fprintf(stdout, "\nRemoving test data: %s\n", (record->builtLocation));
+	removeRecord(record);
+
 	fprintf(stdout, "\nBeginning load \n");
 	RunCycles* runCycles = newRunCycles();
 
