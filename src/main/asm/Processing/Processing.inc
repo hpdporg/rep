@@ -481,15 +481,9 @@ processing.processDefinedRefs:
 	mov rcx, [processDefinedRefs.parsingRefsList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [processDefinedRefs.item], rax
+	mov [processDefinedRefs.item], rax			; Item is REF_DEFINED or sometimes not (replaceLettersList's first ref that holds alloc)
 
 
-	mov rbx, [processDefinedRefs.item]
-	add rbx, Ref.flags
-	mov r8, [rbx]
-	mov rdx, 100b
-	cmp r8, rdx
-	jne processDefinedRefs.nextRefItem			; Skip when not REF_DEFINED
 
 
 	sub rsp, 8*8
@@ -793,12 +787,33 @@ processing.getUnprocessedRegisteredParams:
 	add rsp, 8*8
 	cmp rax, 0
 	je getUnprocessedRegisteredParams.nextRefItem
+	cmp rax, 2
+	jle getUnprocessedRegisteredParams.nextRefItem
+	mov [getUnprocessedRegisteredParams.nextRef], rax
+
+	sub rsp, 8*8
+	mov rbx, [getUnprocessedRegisteredParams.nextRef]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
+
+	sub rsp, 8*8
+	mov rbx, [getUnprocessedRegisteredParams.nextRef]
+	add rbx, Ref.unprocessed
+	mov rcx, [rbx]
+	;call [debugNumMsg]
+	add rsp, 8*8
+
+
 	mov rbx, [getUnprocessedRegisteredParams.nextRef]
 	add rbx, Ref.unprocessed
 	mov rcx, [rbx]
 	mov rdx, 1b
 	cmp rcx, rdx
 	jne getUnprocessedRegisteredParams.nextRefItem			; Skip when already processed (not unprocessed)
+
 
 	mov rcx, [getUnprocessedRegisteredParams.unprocessedCount]
 	add rcx, 1b
@@ -935,6 +950,7 @@ processing.processLetters:
 	mov [rbx], rax
 
 	sub rsp, 8*8
+	mov rdx, [processLetters.refRegistry]
 	mov rcx, [processLetters.item]
 	call defineAsProcessed				; Done
 	add rsp, 8*8
@@ -1119,6 +1135,7 @@ processing.processAppending:
 
 
 	sub rsp, 8*8
+	mov rdx, [processAppending.refRegistry]
 	mov rcx, [processAppending.item]
 	call defineAsProcessed				; Done, refs processed
 	add rsp, 8*8
@@ -1227,6 +1244,7 @@ processing.processList:
 
 
 	sub rsp, 8*8
+	mov rdx, [processList.refRegistry]
 	mov rcx, [processList.item]
 	call defineAsProcessed				; Done, refs processed
 	add rsp, 8*8
@@ -1410,6 +1428,7 @@ processing.processStoreFile:
 
 
 	sub rsp, 8*8
+	mov rdx, [processStoreFile.refRegistry]
 	mov rcx, [processStoreFile.item]
 	call defineAsProcessed				; Done, refs processed
 	add rsp, 8*8
@@ -1577,6 +1596,7 @@ processing.processRetrieveFile:
 
 
 	sub rsp, 8*8
+	mov rdx, [processRetrieveFile.refRegistry]
 	mov rcx, [processRetrieveFile.item]
 	call defineAsProcessed				; Done, refs processed
 	add rsp, 8*8
@@ -1662,13 +1682,27 @@ processing.processReplaceLettersList:
 	cmp rcx, r9 
 	jne processReplaceLettersList.end				; Only attempt processing this definedRef
 
+
+
 	sub rsp, 8*8
 	mov rdx, [processReplaceLettersList.refRegistry]
 	mov rcx, [processReplaceLettersList.item]
 	call getUnprocessedRegisteredParams
 	add rsp, 8*8
-	cmp rax, 1b
+	sub rsp, 8*8
+	mov rcx, rax
+	call [debugNumMsg]
+	add rsp, 8*8
+
+
+	sub rsp, 8*8
+	mov rdx, [processReplaceLettersList.refRegistry]
+	mov rcx, [processReplaceLettersList.item]
+	call getUnprocessedRegisteredParams
+	add rsp, 8*8
+	cmp rax, 10b
 	jnle processReplaceLettersList.end				; Separator, replaceLettersList definedref can be unprocessed? This definedRef depends on param registeredRefs being processed, not just the param
+
 
 
 
@@ -1762,6 +1796,7 @@ processing.processReplaceLettersList:
 
 
 	sub rsp, 8*8
+	mov rdx, [processReplaceLettersList.refRegistry]
 	mov rcx, [processReplaceLettersList.item]
 	call defineAsProcessed				; Done, refs processed
 	add rsp, 8*8
@@ -1818,7 +1853,7 @@ processing.defineAsProcessed:
 
 
 	mov [defineAsProcessed.item], rcx
-	
+	mov [defineAsProcessed.refRegistry], rdx	
 
 	and rsp, -32
 	push rbx 
@@ -1874,6 +1909,25 @@ processing.defineAsProcessed:
 	mov [rbx], rcx
 
 
+	sub rsp, 8*8
+	mov rbx, [defineAsProcessed.nextRef]
+	add rbx, Ref.repIndex
+	mov r8, [rbx]
+	mov rbx, [defineAsProcessed.nextRef]
+	add rbx, Ref.ref
+	mov rdx, [rbx]
+	mov rcx, [defineAsProcessed.refRegistry]
+	call refRegistry.getRegisteredRef
+	add rsp, 8*8
+	cmp rax, 0
+	je defineAsProcessed.nextRefItem
+	cmp rax, 2
+	jle defineAsProcessed.nextRefItem
+	add rax, Ref.unprocessed
+	mov rcx, 0
+	mov [rax], rcx					; Processed in Registry also
+	
+
 	jmp defineAsProcessed.nextRefItem
 	.endItemList:
 
@@ -1881,6 +1935,25 @@ processing.defineAsProcessed:
 	add rbx, Ref.unprocessed
 	mov rcx, 0				; Ref as processed
 	mov [rbx], rcx
+
+	sub rsp, 8*8
+	mov rbx, [defineAsProcessed.item]
+	add rbx, Ref.repIndex
+	mov r8, [rbx]
+	mov rbx, [defineAsProcessed.item]
+	add rbx, Ref.ref
+	mov rdx, [rbx]
+	mov rcx, [defineAsProcessed.refRegistry]
+	call refRegistry.getRegisteredRef
+	add rsp, 8*8
+	cmp rax, 0
+	je defineAsProcessed.end
+	cmp rax, 2
+	jle defineAsProcessed.end
+	add rax, Ref.unprocessed
+	mov rcx, 0
+	mov [rax], rcx					; Processed in Registry also
+	
 
 
 	.end:
@@ -2064,6 +2137,7 @@ processing.processRefItem:
 	jnge processRefItem.end					; Insufficient params, skip
 
 
+
 	sub rsp, 8*8
 	mov r9, [processRefItem.definedRefFlags]
 	mov r8, [processRefItem.refRegistry]
@@ -2126,6 +2200,7 @@ processing.processRefItem:
 	jg processRefItem.notReady				; Still has unprocessed params
 
 	sub rsp, 8*8
+	mov rdx, [processRefItem.refRegistry]
 	mov rcx, [processRefItem.item]
 	call defineAsProcessed					; Done, refs processed
 	add rsp, 8*8

@@ -1,1 +1,1 @@
-.\repTests.exe --gtest_filter="*RunD*"
+.\repTests.exe --gtest_filter="*BeginsRunC*"

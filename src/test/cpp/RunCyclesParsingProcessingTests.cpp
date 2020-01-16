@@ -231,6 +231,9 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListDefinedRefs) {
 	processRep(parsing, (char*)record->allocAddr, refRegistry);
 	processRep(parsing, (char*)record->allocAddr, refRegistry);
 	
+	processRep(parsing, (char*)record->allocAddr, refRegistry);
+	processRep(parsing, (char*)record->allocAddr, refRegistry);
+	processRep(parsing, (char*)record->allocAddr, refRegistry);
 
 	resetIndex(parsing->parsingRefs);
 	fprintf(stdout, "\nProcessing....\n\n\n");
@@ -249,6 +252,7 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListDefinedRefs) {
 			Ref* paramRef = (Ref*)getNextItem(nextRef->list);
 			fprintf(stdout, "\nparamRep name: %s\n", (char*)paramRef->ref);
 			fprintf(stdout, "\nparamRep flags: %d\n", paramRef->flags);
+			fprintf(stdout, "\nparamRep definedRefFlags: %d\n", paramRef->definedRefFlags);
 			fprintf(stdout, "\nparamRep index: %d\n", paramRef->repIndex);
 			fprintf(stdout, "\nRep unprocessed: %d\n", paramRef->unprocessed);
 			fprintf(stdout, "\nRep value alloc: %s\n", (char*)paramRef->valueAlloc);
