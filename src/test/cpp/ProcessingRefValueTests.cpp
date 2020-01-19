@@ -66,6 +66,7 @@ TEST(ProcessingRefValueTest, ProcessesAppending) {
 	Ref* ref = newRef();
 	ref->flags = REF_VALUE;
 	ref->definedRefFlags = 0;
+	ref->ref = (char*)"ref";
 	char* refLetters = "adf12";
 	char* refLetters2 = "9zdf77";
 	
@@ -86,6 +87,7 @@ TEST(ProcessingRefValueTest, ProcessesAppending) {
 
 	Parsing* parsing = newParsing();
 	RefRegistry* refRegistry = newRefRegistry();
+	newLastRegisteredRef(refRegistry, ref);
 	newLastRegisteredRef(refRegistry, ref2);
 	newLastRegisteredRef(refRegistry, ref3);
 

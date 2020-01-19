@@ -210,14 +210,16 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListDefinedRefs) {
 		resetIndex(parsing->parsingRefs);
 		while (parsing->parsingRefs->index < parsing->parsingRefs->itemsCount) {
 			Ref* nextRef = (Ref*)getNextItem(parsing->parsingRefs);
-			fprintf(stdout, "\nRep name: %s\n", (char*)nextRef->ref);
-			fprintf(stdout, "\nRep flags: %d\n", nextRef->flags);
+			fprintf(stdout, "\nRep name: %s", (char*)nextRef->ref);
+			fprintf(stdout, "\nRep flags: %d", nextRef->flags);
+			fprintf(stdout, "\nRep param count: %d", nextRef->list->itemsCount);
+			fprintf(stdout, "\nRep index: %d", nextRef->repIndex);			
 			resetIndex(nextRef->list);
 			while (nextRef->list->index < nextRef->list->itemsCount) {
 				Ref* paramRef = (Ref*)getNextItem(nextRef->list);
-				fprintf(stdout, "\nparamRep name: %s\n", (char*)paramRef->ref);
-				fprintf(stdout, "\nparamRep flags: %d\n", paramRef->flags);
-				fprintf(stdout, "\nparamRep index: %d\n", paramRef->repIndex);
+				fprintf(stdout, "\n\tparamRep name: %s", (char*)paramRef->ref);
+				fprintf(stdout, "\n\t\tparamRep flags: %d", paramRef->flags);
+				fprintf(stdout, "\n\t\tparamRep index: %d", paramRef->repIndex);
 			}
 			resetIndex(nextRef->list);
 
@@ -227,6 +229,7 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListDefinedRefs) {
 
 
 	}
+	fprintf(stdout, "\nDone Parsing\n");
 	processRep(parsing, (char*)record->allocAddr, refRegistry);
 	processRep(parsing, (char*)record->allocAddr, refRegistry);
 	processRep(parsing, (char*)record->allocAddr, refRegistry);
@@ -241,22 +244,22 @@ TEST_F(RunCyclesParsingProcessingTest, ProcessesParsedListDefinedRefs) {
 	while (parsing->parsingRefs->index < parsing->parsingRefs->itemsCount) {
 		nesting = getNextItemNesting(parsing->parsingRefs);
 		Ref* nextRef = (Ref*)getNextItem(parsing->parsingRefs);
-		fprintf(stdout, "\nRep name: %s\n", (char*)nextRef->ref);
-		fprintf(stdout, "\nRep flags: %d\n", nextRef->flags);
-		fprintf(stdout, "\nRep unprocessed: %d\n", nextRef->unprocessed);
-		fprintf(stdout, "\nRep value alloc: %s\n", (char*)nextRef->valueAlloc);
-		fprintf(stdout, "\nRep value nesting: %d\n", nesting);
+		fprintf(stdout, "\nRep name: %s", (char*)nextRef->ref);
+		fprintf(stdout, "\nRep flags: %d", nextRef->flags);
+		fprintf(stdout, "\nRep unprocessed: %d", nextRef->unprocessed);
+		fprintf(stdout, "\nRep value alloc: %s", (char*)nextRef->valueAlloc);
+		fprintf(stdout, "\nRep value nesting: %d", nesting);
 		resetIndex(nextRef->list);
 		while (nextRef->list->index < nextRef->list->itemsCount) {
 			nesting = getNextItemNesting(nextRef->list);
 			Ref* paramRef = (Ref*)getNextItem(nextRef->list);
-			fprintf(stdout, "\nparamRep name: %s\n", (char*)paramRef->ref);
-			fprintf(stdout, "\nparamRep flags: %d\n", paramRef->flags);
-			fprintf(stdout, "\nparamRep definedRefFlags: %d\n", paramRef->definedRefFlags);
-			fprintf(stdout, "\nparamRep index: %d\n", paramRef->repIndex);
-			fprintf(stdout, "\nRep unprocessed: %d\n", paramRef->unprocessed);
-			fprintf(stdout, "\nRep value alloc: %s\n", (char*)paramRef->valueAlloc);
-			fprintf(stdout, "\nRep value nesting: %d\n", nesting);
+			fprintf(stdout, "\n\tparamRep name: %s", (char*)paramRef->ref);
+			fprintf(stdout, "\n\tparamRep flags: %d", paramRef->flags);
+			fprintf(stdout, "\n\tparamRep definedRefFlags: %d", paramRef->definedRefFlags);
+			fprintf(stdout, "\n\tparamRep index: %d", paramRef->repIndex);
+			fprintf(stdout, "\n\tparamRep unprocessed: %d", paramRef->unprocessed);
+			fprintf(stdout, "\n\tparamRep value alloc: %.3s", (char*)paramRef->valueAlloc);
+			fprintf(stdout, "\n\tparamRep value nesting: %d", nesting);
 
 		}
 		resetIndex(nextRef->list);

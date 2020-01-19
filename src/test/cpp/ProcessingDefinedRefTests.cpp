@@ -7,6 +7,7 @@
 
 TEST(ProcessingDefinedRefTest, ProcessesStoreFile) {
 	Ref* ref = newRef();
+	ref->ref = (char*)"ref";
 	ref->flags = REF_DEFINED;
 	ref->definedRefFlags = DEFINED_REF_STORE_FILE;
 	
@@ -16,18 +17,21 @@ TEST(ProcessingDefinedRefTest, ProcessesStoreFile) {
 	ref2->ref = (char*)"ref2";
 	ref2->unprocessed = 0;
 	ref2->valueAlloc = "fileName3.txt";
+	ref2->repIndex = 0;
 	
 	Ref* ref3 = newRef();
 	ref3->ref = (char*)"ref3";
 	ref3->flags = REF_VALUE;
 	ref3->unprocessed = 0;
 	ref3->valueAlloc = "ABC281";
+	ref3->repIndex = 2;
 
 	newLastItem(ref->list, ref2);
 	newLastItem(ref->list, ref3);
 
 	Parsing* parsing = newParsing();
 	RefRegistry* refRegistry = newRefRegistry();
+	newLastRegisteredRef(refRegistry, ref);
 	newLastRegisteredRef(refRegistry, ref2);
 	newLastRegisteredRef(refRegistry, ref3);
 
@@ -56,6 +60,7 @@ TEST(ProcessingDefinedRefTest, ProcessesRetrieveFile) {
 
 	Ref* ref = newRef();
 	ref->flags = REF_DEFINED;
+	ref->ref = (char*)"ref";
 	ref->definedRefFlags = DEFINED_REF_RETRIEVE_FILE;
 
 	Ref* ref2 = newRef();
@@ -76,6 +81,7 @@ TEST(ProcessingDefinedRefTest, ProcessesRetrieveFile) {
 
 	Parsing* parsing = newParsing();
 	RefRegistry* refRegistry = newRefRegistry();
+	newLastRegisteredRef(refRegistry, ref);
 	newLastRegisteredRef(refRegistry, ref2);
 	newLastRegisteredRef(refRegistry, ref3);
 
@@ -145,6 +151,7 @@ TEST(ProcessingDefinedRefTest, ProcessesReplaceLettersList) {
 	Parsing* parsing = newParsing();
 	RefRegistry* refRegistry = newRefRegistry();
 	//newLastRegisteredRef(refRegistry, ref2);
+	newLastRegisteredRef(refRegistry, ref);
 	newLastRegisteredRef(refRegistry, ref3);
 	newLastRegisteredRef(refRegistry, ref4);
 	newLastRegisteredRef(refRegistry, ref5);

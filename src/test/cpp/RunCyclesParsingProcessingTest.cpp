@@ -87,7 +87,7 @@ class RunCyclesParsingProcessingTest : public ::testing::Test {
 	retrieve(backupFile);
 
 	record = newStorage();
-	defineRecordPath(record, (char*)"testRepListDefinedRefReps.rep", (char*)".\\");
+	defineRecordPath(record, (char*)(char*)"testRepListDefinedRefReps.rep", (char*)".\\");
 	fprintf(stdout, "\nRestoring test data: %s\n", (record->builtLocation));
 	restoreLetters(record, (char*)backupFile->allocAddr);
 

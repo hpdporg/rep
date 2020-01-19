@@ -221,7 +221,7 @@ extern "C" {
 	Ref* processStoreFile(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
 	Ref* processRetrieveFile(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
 	Ref* processReplaceLettersList(Parsing* parsing, Ref* item, RefRegistry* refRegistry, DefinedRefFlags definedRefFlags);
-	void defineAsProcessed(Ref* ref);
+	void defineAsProcessed(Ref* ref, RefRegistry* refRegistry);
 	Ref* getBaseRefAtIndex(Ref* item, _int64 index);
 	Ref* getBaseRefUsingFlags(Ref* item, _int64 refBaseFlags);
 	char* getRefLettersAlloc(Ref* item);

@@ -74,6 +74,7 @@ section '.data' data readable writeable align 16
 	defineListsMsg	db 'Define Lists..',0
 	defineNonListsMsg	db 'Define NonLists..',0
 	defineListParamsMsg	db 'Define List Params..',0
+	prevItemWasListMsg	db 'Prev Item was a List: ',0
 
 
 section '.text' code readable writeable executable align 16
@@ -1490,9 +1491,18 @@ parsing.buildNestedRepList:
 
 
 
+
 	mov rdx, [buildNestedRepList.nextRef]
 	cmp rdx, 0
 	je buildNestedRepList.end			; Not at a new Ref
+
+
+	sub rsp, 8*8
+	mov rbx, [buildNestedRepList.nextRef]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rbx, [buildBaseRepOffset.parsing]
@@ -1930,6 +1940,8 @@ parsing.defineLists:
 	cmp rcx, rdx
 	jnl defineLists.endParsingRefsList
 
+	
+
 
 	sub rsp, 8*8
 	mov rcx, [defineLists.parsingRefsList]
@@ -1938,10 +1950,23 @@ parsing.defineLists:
 	mov [defineLists.nesting], rax
 
 	sub rsp, 8*8
+	mov rcx, [defineLists.nesting]
+	;call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
 	mov rcx, [defineLists.parsingRefsList]
 	call [getNextItem]
 	add rsp, 8*8
 	mov [defineLists.item], rax
+
+	sub rsp, 8*8
+	mov rbx, [defineLists.item]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
 
 	mov rcx, [defineLists.nesting]
 	mov rdx, [defineLists.prevItemNesting]
@@ -1954,6 +1979,27 @@ parsing.defineLists:
 	add rbx, Ref.flags
 	mov rdx, 10b
 	mov [rbx], rdx						; Found a List REF_LIST
+
+
+	sub rsp, 8*8
+	mov r8, [defineLists.refRegistry]
+	mov rdx, [defineLists.prevItem]
+	mov rcx, [defineLists.parsing]
+	call propagateRefFlags					; Ensure every occurence is a List, and Ref Registry Ref also
+	add rsp, 8*8
+	
+
+	sub rsp, 8*8
+	mov rcx,prevItemWasListMsg
+	;call [debugLetters]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [defineLists.prevItem]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, rdx
@@ -2143,7 +2189,7 @@ parsing.defineListParams:
 	label defineListParams.letters qword at rbp-48
 	label defineListParams.nextNewlineIndex qword at rbp-56
 	label defineListParams.parsingRefsList qword at rbp-64
-	label defineListParams.lettersIndex qword at rbp-72
+	label defineListParams.parsingListIndex qword at rbp-72
 	label defineListParams.refRegistry qword at rbp-80
 	label defineListParams.newLineLetterLength qword at rbp-88
 	label defineListParams.matchingStartIndex qword at rbp-96
@@ -2172,6 +2218,9 @@ parsing.defineListParams:
 	push r15
 	sub rsp, 8
 
+
+	mov rcx, 0
+	mov [defineListParams.parsingListIndex], rcx		; Begin as 0
 
 	mov rcx, [defineListParams.nextRef]
 	cmp rcx, 0
@@ -2225,6 +2274,8 @@ parsing.defineListParams:
 	mov [defineListParams.nextListRef], rax
 
 
+
+
 	sub rsp, 8*8
 	mov rbx, [defineListParams.nextListRef]
 	add rbx, Ref.flags
@@ -2239,22 +2290,60 @@ parsing.defineListParams:
 	cmp rcx, r8
 	jne defineListParams.nextRefItem		; List Ref not reached
 
+	sub rsp, 8*8
+	mov rcx, 839898
+	;call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [defineListParams.nextListRef]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
+	mov rbx, [defineListParams.parsingRefsList]
+	add rbx, List.index
+	mov rcx, [rbx]
+	mov [defineListParams.parsingListIndex], rcx			; cache
+
 	mov rbx, [defineListParams.parsingRefsList]
 	add rbx, List.index
 	mov rcx, [rbx]
 	sub rcx, 1b
 	mov [rbx], rcx					; Go back 1
 	
+
 	sub rsp, 8*8
-	mov rcx, 839
+	mov rbx, [defineListParams.parsingRefsList]
+	add rbx, List.index
+	mov rcx, [rbx]
 	;call [debugNumMsg]
 	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rcx, 28918
+	;call [debugNumMsg]
+	add rsp, 8*8
+
 
 	sub rsp, 8*8
 	mov rcx, [defineListParams.parsingRefsList]
 	call [getConvergedItemCount]
 	add rsp, 8*8
 	mov [defineListParams.convergedCount], rax
+
+	mov rbx, [defineListParams.parsingRefsList]
+	add rbx, List.index
+	mov rcx, [defineListParams.parsingListIndex]			; Restore
+	mov [rbx], rcx
+
+	sub rsp, 8*8
+	mov rbx, [defineListParams.parsingRefsList]
+	add rbx, List.index
+	mov rcx, [rbx]
+	;call [debugNumMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rcx, 89
@@ -2741,6 +2830,237 @@ parsing.getRegisteredValue:
 
 	
 	mov rax, [getRegisteredValue.newRef]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
+
+; Copy Ref flags into every occurence in the Parsing Refs and Ref Registry Lists
+; Preserves Parsing List index
+parsing.propagateRefFlags:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*14);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label propagateRefFlags.heapAddress qword at rbp-8  
+	label propagateRefFlags.handleAllocatedMemory qword at rbp-16
+	label propagateRefFlags.parsing qword at rbp-24 
+	label propagateRefFlags.ref qword at rbp-32
+	label propagateRefFlags.newRef qword at rbp-40
+	label propagateRefFlags.parsingList qword at rbp-48
+	label propagateRefFlags.parsingListIndex qword at rbp-56
+	label propagateRefFlags.refRegistryList qword at rbp-64
+	label propagateRefFlags.lettersIndex qword at rbp-72
+	label propagateRefFlags.refRegistry qword at rbp-80
+	label propagateRefFlags.newLineLetterLength qword at rbp-88
+	label propagateRefFlags.matchingStartIndex qword at rbp-96
+	label propagateRefFlags.refFlags qword at rbp-104
+	label propagateRefFlags.definedRefFlags qword at rbp-112
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [propagateRefFlags.parsing], rcx
+	mov [propagateRefFlags.ref], rdx	
+	mov [propagateRefFlags.refRegistry], r8
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+
+
+	
+
+	mov rbx, [propagateRefFlags.parsing]
+	add rbx, Parsing.parsingRefs
+	mov rdx, [rbx]
+	mov [propagateRefFlags.parsingList], rdx		; Cache
+	add rdx, List.index
+	mov rcx, [rdx]
+	mov [propagateRefFlags.parsingListIndex], rcx		; Restore later
+
+
+
+	sub rsp, 8*8
+	mov r8, 0						; Used with defined Refs only
+	mov rbx, [propagateRefFlags.ref]
+	add rbx, Ref.ref
+	mov rdx, [rbx]
+	mov rcx, [propagateRefFlags.refRegistry]
+	call refRegistry.getRegisteredRef
+	add rsp, 8*8
+	cmp rax, 0						
+	je propagateRefFlags.noRegisteredRefValue		; Non-existent Ref
+	cmp rax, 1b
+	je propagateRefFlags.noRegisteredRefValue		; Non-existent DefinedRef
+
+	.alreadyDefined:
+
+	mov [propagateRefFlags.newRef], rax
+
+	sub rsp, 8*8
+	mov rcx, 55218989
+	;call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [propagateRefFlags.newRef]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
+	mov rbx, [propagateRefFlags.ref]
+	add rbx, Ref.flags
+	mov r8, [propagateRefFlags.newRef]
+	add r8, Ref.flags
+	mov r9, [rbx]
+	mov [r8], r9						; Propagate into RefRegistry
+
+
+	
+
+	.noRegisteredRefValue:
+
+	sub rsp, 8*8
+	mov rcx, [propagateRefFlags.parsingList]
+	call [resetIndex]
+	add rsp, 8*8
+	
+	.nextParsingRef:
+	mov rbx, [propagateRefFlags.parsingList]
+	mov rdx, rbx
+	add rbx, List.index
+	add rdx, List.itemsCount
+	mov rcx, [rbx]
+	mov r8, [rdx]
+	cmp rcx, r8
+	jnl propagateRefFlags.endParsingRefs
+
+	sub rsp, 8*8
+	mov rcx, [propagateRefFlags.parsingList]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [propagateRefFlags.newRef], rax
+
+	mov rbx, [propagateRefFlags.ref]
+	add rbx, Ref.ref
+	mov r8, [propagateRefFlags.newRef]
+	add r8, Ref.ref
+	mov r9, [rbx]
+	mov r10, [r8]
+
+
+	sub rsp, 8*8
+	mov rcx, 218989
+	;call [debugNumMsg]
+	add rsp, 8*8
+
+
+	sub rsp, 8*8
+	mov rbx, [propagateRefFlags.ref]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [propagateRefFlags.newRef]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
+
+	mov rbx, [propagateRefFlags.ref]
+	add rbx, Ref.ref
+	mov r8, [propagateRefFlags.newRef]
+	add r8, Ref.ref
+	mov r9, [rbx]
+	mov r10, [r8]
+
+
+	sub rsp, 8*8
+	mov rdx, r10
+	mov rcx, r9
+	call [lettersSameExact]
+	add rsp, 8*8	
+	cmp rax, 0
+	je propagateRefFlags.nextParsingRef
+	
+
+	mov rbx, [propagateRefFlags.ref]
+	add rbx, Ref.flags
+	mov r8, [propagateRefFlags.newRef]
+	add r8, Ref.flags
+	mov r9, [rbx]
+	mov [r8], r9						; Propagate into Parsing Refs List Ref
+
+
+	sub rsp, 8*8
+	mov rcx, 213989
+	;call [debugNumMsg]
+	add rsp, 8*8
+
+
+	sub rsp, 8*8
+	mov rbx, [propagateRefFlags.ref]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [propagateRefFlags.newRef]
+	add rbx, Ref.ref
+	mov rcx, [rbx]
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
+
+	jmp propagateRefFlags.nextParsingRef
+
+	.endParsingRefs:
+	
+	mov rbx, [propagateRefFlags.parsingList]
+	add rbx, List.index
+	mov rcx, [propagateRefFlags.parsingListIndex]
+	mov [rbx], rcx						; Restore Index
+
+
+
+	.end:
+
+
+
+	
+	mov rax, [propagateRefFlags.ref]
 
 
 	add rsp, 8	

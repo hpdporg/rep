@@ -23,6 +23,8 @@ section '.data' data readable writeable align 16
 	baseRefDefinedRefFlagsMsg db 'BaseRef Defined RefFlags:',0
 	definedRefFlagsMatchMsg	db 'Defined Ref flags match.',0
 	processingLettersMsg db 'Processing Letters...',0
+	processingListMsg db 'Processing List...',0
+	gettingRefLettersListMsg db 'Getting Ref Letters List...',0
 
 section '.text' code readable writeable executable align 16
 
@@ -1218,12 +1220,27 @@ processing.processList:
 	cmp rcx, r9 
 	jne processList.end				; Only attempt processing List
 
+
+
 	mov r8, [processList.item]
 	add r8, Ref.flags
 	mov rdx, [r8]
 	mov r9, 10b						; REF_LIST
 	cmp rdx, r9 
 	jne processList.end				; Only attempt processing letters
+
+
+	sub rsp, 8*8
+	mov rcx, processingListMsg
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov r8, [processList.item]
+	add r8, Ref.ref
+	mov rcx, [r8]
+	;call [debugLettersMsg]
+	add rsp, 8*8
 
 
 	sub rsp, 8*8
@@ -1238,7 +1255,6 @@ processing.processList:
 	mov rcx, [processList.item]
 	call getRefLettersList
 	add rsp, 8*8
-
 
 
 
@@ -1351,6 +1367,7 @@ processing.processStoreFile:
 
 
 
+
 	.nextRefItem:						; Ensure end is not reached
 	mov rbx, [processStoreFile.list]
 	mov r8, rbx
@@ -1368,6 +1385,7 @@ processing.processStoreFile:
 	call [getNextItem]
 	add rsp, 8*8
 	mov [processStoreFile.nextRef], rax
+
 
 
 	sub rsp, 8*8
@@ -1398,6 +1416,7 @@ processing.processStoreFile:
 	cmp rcx, rdx
 	je processStoreFile.listLetters
 
+	
 	sub rsp, 8*8
 	mov rcx, [processStoreFile.nextRef]
 	call getRefLettersAlloc
@@ -1414,6 +1433,7 @@ processing.processStoreFile:
 	add rsp, 8*8
 
 
+
 	.storeRefFile:
 
 	sub rsp, 8*8
@@ -1423,8 +1443,10 @@ processing.processStoreFile:
 	add rsp, 8*8
 
 
+
 	;jmp processStoreFile.nextRefItem
 	.endItemList:
+
 
 
 	sub rsp, 8*8
@@ -1432,7 +1454,6 @@ processing.processStoreFile:
 	mov rcx, [processStoreFile.item]
 	call defineAsProcessed				; Done, refs processed
 	add rsp, 8*8
-
 
 	.notReady:
 
@@ -1691,7 +1712,7 @@ processing.processReplaceLettersList:
 	add rsp, 8*8
 	sub rsp, 8*8
 	mov rcx, rax
-	call [debugNumMsg]
+	;call [debugNumMsg]
 	add rsp, 8*8
 
 
@@ -1870,16 +1891,18 @@ processing.defineAsProcessed:
 	
 
 
-
 	mov rbx, [defineAsProcessed.item]
 	add rbx, Ref.list
 	mov rcx, [rbx]
 	mov [defineAsProcessed.list], rcx		; Cache
 
+
+
 	sub rsp, 8*8
 	mov rcx, [defineAsProcessed.list]
 	call [resetIndex]
 	add rsp, 8*8
+
 
 
 
@@ -1894,12 +1917,14 @@ processing.defineAsProcessed:
 	jnl defineAsProcessed.endItemList
 
 
+
 	
 	sub rsp, 8*8
 	mov rcx, [defineAsProcessed.list]
 	call [getNextItem]
 	add rsp, 8*8
 	mov [defineAsProcessed.nextRef], rax
+
 
 	
 
@@ -1927,6 +1952,8 @@ processing.defineAsProcessed:
 	mov rcx, 0
 	mov [rax], rcx					; Processed in Registry also
 	
+
+
 
 	jmp defineAsProcessed.nextRefItem
 	.endItemList:
@@ -2687,6 +2714,18 @@ processing.getRefLettersList:
 	sub rsp, 8
 
 
+	sub rsp, 8*8
+	mov rcx, gettingRefLettersListMsg
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov r8, [getRefLettersList.item]
+	add r8, Ref.ref
+	mov rcx, [r8]
+	;call [debugLettersMsg]
+	add rsp, 8*8
+
 	mov rcx, 0
 	mov [getRefLettersList.nextRef], rcx				; Begin as 0
 	mov [getRefLettersList.letters], rcx
@@ -2704,6 +2743,7 @@ processing.getRefLettersList:
 	jne getRefLettersList.refList
 
 	
+
 	sub rsp, 8*8
 	call [newList]
 	add rsp, 8*8
@@ -2757,6 +2797,22 @@ processing.getRefLettersList:
 	add rsp, 8*8
 	mov [getRefLettersList.nextRef], rax
 
+	mov rbx, [getRefLettersList.nextRef]
+	add rbx, Ref.flags
+	mov rdx, [rbx]
+	mov rcx, 10b									; REF_LIST
+	cmp rdx, rcx
+	jne getRefLettersList.noNextRefListClearing
+
+	mov rbx, [getRefLettersList.nextRef]
+	add rbx, Ref.valueAlloc
+	mov rcx, 0
+	mov [rbx], rcx									; Rebuild nextRef valueAlloc when it is a List. Do not duplicate when it built this separately
+
+	.noNextRefListClearing:
+
+
+
 
 	sub rsp, 8*8
 	mov rcx, [getRefLettersList.nextRef]
@@ -2770,6 +2826,7 @@ processing.getRefLettersList:
 	jne getRefLettersList.notFirstAlloc
 
 
+
 	sub rsp, 8*8
 	call [newList]
 	add rsp, 8*8
@@ -2778,6 +2835,14 @@ processing.getRefLettersList:
 	mov [rbx], rax
 
 
+	mov rbx, [getRefLettersList.nextRef]
+	add rbx, Ref.flags
+	mov rdx, [rbx]
+	mov rcx, 10b									; REF_LIST
+	cmp rdx, rcx
+	je getRefLettersList.nextRefIsList
+
+
 	sub rsp, 8*8
 	mov rbx, [getRefLettersList.nextRef]
 	add rbx, Ref.listAlloc
@@ -2787,12 +2852,24 @@ processing.getRefLettersList:
 	mov rcx, [rbx]
 	call [extendList]
 	add rsp, 8*8
+
+
 	
 
 	jmp getRefLettersList.nextRefItem
 
 	.notFirstAlloc:
 
+
+
+
+	mov rbx, [getRefLettersList.nextRef]
+	add rbx, Ref.flags
+	mov rdx, [rbx]
+	mov rcx, 10b								; REF_LIST
+	cmp rdx, rcx
+	je getRefLettersList.nextRefIsList
+
 	sub rsp, 8*8
 	mov rbx, [getRefLettersList.nextRef]
 	add rbx, Ref.listAlloc
@@ -2802,6 +2879,22 @@ processing.getRefLettersList:
 	mov rcx, [rbx]
 	call [extendList]
 	add rsp, 8*8
+
+
+	jmp getRefLettersList.nextRefItem
+	.nextRefIsList:
+
+
+	sub rsp, 8*8
+	mov rbx, [getRefLettersList.nextRef]
+	add rbx, Ref.valueAlloc
+	mov rdx, [rbx]
+	mov rbx, [getRefLettersList.item]
+	add rbx, Ref.valueAlloc
+	mov rcx, [rbx]
+	call [extendList]
+	add rsp, 8*8
+
 	
 
 
@@ -2813,6 +2906,9 @@ processing.getRefLettersList:
 	.endItemList:
 
 	.end:
+
+
+
 	mov rbx, [getRefLettersList.item]
 	add rbx, Ref.valueAlloc
 	mov rax, [rbx]

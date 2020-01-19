@@ -140,12 +140,15 @@ TEST(ProcessingTest, GetsUnprocessedRegisteredParams) {
 
 TEST(ProcessingTest, DefinesARepAsProcessed) {
 	Ref* ref = newRef();
+	ref->ref = (char*)"ref";
 	ref->list = newList();
 
 	fprintf(stdout,"\nRef is unprocessed? %d\n",ref->unprocessed);
-
+	RefRegistry* refRegistry = newRefRegistry();
+	newLastRegisteredRef(refRegistry,ref);
+	
 	EXPECT_EQ(1, ref->unprocessed);
-	defineAsProcessed(ref);
+	defineAsProcessed(ref,refRegistry);
 	fprintf(stdout,"\nRef is unprocessed? %d\n",ref->unprocessed);
 
 	EXPECT_EQ(0, ref->unprocessed);
