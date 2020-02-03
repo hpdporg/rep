@@ -91,12 +91,15 @@ TEST_F(RunCyclesTest,ParsesProcessReps) {
 
 }
 
+/* 
+*	More of an integration test
+*/
 TEST_F(RunCyclesTest, BeginsRunCycles) {
 
-	Record* record = newStorage();	//TO-DO: Remove this block
+	/*Record* record = newStorage();	//TO-DO: Remove this block
 	defineRecordPath(record, (char*)"testRepListDefinedRefReps.rep", (char*)".\\");
 	fprintf(stdout, "\nRemoving test data: %s\n", (record->builtLocation));
-	removeRecord(record);
+	removeRecord(record);*/
 
 	fprintf(stdout, "\nBeginning load \n");
 	RunCycles* runCycles = newRunCycles();
@@ -104,18 +107,20 @@ TEST_F(RunCyclesTest, BeginsRunCycles) {
 	beginRunCycles(runCycles);
 		
 
-	//EXPECT_EQ(1,runCycles->repRecordList->itemsCount);
+	EXPECT_EQ(1,runCycles->repRecordList->itemsCount);
 	fprintf(stdout, "\nLoading complete\n");
 	fprintf(stdout, "\nRunCycle Ref List count: %d\n", runCycles->refRegistry->list->itemsCount);
 	fprintf(stdout, "\nRunCycle Defined Ref List count: %d\n", runCycles->refRegistry->definedList->itemsCount);
 
 	//EXPECT_EQ(5,runCycles->refRegistry->definedList->itemsCount);
 	fprintf(stdout, "\nRunCycle Rep allocation: \n%s",runCycles->repAllocation);
-	//EXPECT_STRNE(0,runCycles->repAllocation);
+	EXPECT_STRNE(0,runCycles->repAllocation);
 
-	/*Record* record = newStorage();
+	Record* record = newStorage();
 	defineRecordPath(record, (char*)"fileName3.txt", (char*)".\\");
+	retrieve(record);
+	EXPECT_STREQ("Some letters189j3Some letters189j3ABD898",(char*)record->allocAddr);
 	fprintf(stdout, "\nRemoving test data: %s\n", (record->builtLocation));
-	removeRecord(record);*/
+	removeRecord(record);
 	
 }

@@ -63,6 +63,10 @@ TEST(ProcessingRefValueTest, ProcessesLetters) {
 }
 
 TEST(ProcessingRefValueTest, ProcessesAppending) {
+	/*
+	*	There is a bug where appending is used in list that appends many letter refs and does not resolve completely. Fixed when letter refs defined towards top of rep file, problems when just before appending.
+	*	TO-DO: Repro and fix. list was first in rep file, then many other letters, appending, then appending that had problem, then store and retrieve files.
+	*/
 	Ref* ref = newRef();
 	ref->flags = REF_VALUE;
 	ref->definedRefFlags = 0;

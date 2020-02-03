@@ -286,6 +286,12 @@ runCycles.begin:
 	
 	.firstCycle:	
 
+	sub rsp, 8*8
+	mov rbx, [begin.parsing]
+	add rbx, Parsing.index
+	mov rcx, [rbx]
+	;call [debugNumMsg]
+	add rsp, 8*8
 
 
 	sub rsp, 8*8
@@ -299,6 +305,17 @@ runCycles.begin:
 	call parsing.parseRep
 	add rsp, 8*8
 
+	sub rsp, 8*8
+	mov rcx, 22222
+	;call [debugNumMsg]
+	add rsp, 8*8
+	
+	sub rsp, 8*8
+	mov rbx, [begin.parsing]
+	add rbx, Parsing.index
+	mov rcx, [rbx]
+	;call [debugNumMsg]
+	add rsp, 8*8
 		
 	mov rbx, [begin.runCyclesAddr]
 	add rbx, RunCycles.cycleIndex
@@ -309,6 +326,10 @@ runCycles.begin:
 	.parsingComplete:
 
 
+	sub rsp, 8*8
+	mov rcx, 38888
+	;call [debugNumMsg]
+	add rsp, 8*8
 
 	sub rsp, 8*8
 	mov rbx, [begin.runCyclesAddr]
@@ -318,6 +339,8 @@ runCycles.begin:
 	add rsp, 8*8
 	cmp rax, 0
 	;je begin.processingComplete
+
+
 
 
 

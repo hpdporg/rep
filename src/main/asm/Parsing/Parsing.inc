@@ -696,6 +696,22 @@ parsing.parseRep:
 	sub rsp, 8
 
 
+	
+	
+	sub rsp, 8*8
+	mov rbx, [parseRep.parsing]
+	add rbx, Parsing.index
+	mov rcx, [rbx]
+	;call [debugNumMsg]
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov rbx, [parseRep.parsing]
+	add rbx, Parsing.endIndex
+	mov rcx, [rbx]
+	;call [debugNumMsg]
+	add rsp, 8*8
+
 
 	mov rbx, [parseRep.parsing]
 	add rbx, Parsing.endIndex
@@ -741,6 +757,13 @@ parsing.parseRep:
 	;call [debugNumMsg]
 	add rsp, 8*8
 
+	sub rsp, 8*8
+	mov rcx, 5
+	call [numAsLetters]					; There is a bug here, alignment? Remove this call which re-aligns..
+	add rsp, 8*8
+	mov rax, rax
+
+
 
 	sub rsp, 8*8
 	mov r8, [parseRep.refRegistry]
@@ -770,6 +793,8 @@ parsing.parseRep:
 
 
 	.end:
+
+	
 
 	;dbgmov rax,0;[parseRep.parsedLetters]
 

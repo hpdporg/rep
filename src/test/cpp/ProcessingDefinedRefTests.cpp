@@ -6,9 +6,12 @@
 
 
 TEST(ProcessingDefinedRefTest, ProcessesStoreFile) {
+
+
 	Ref* ref = newRef();
 	ref->ref = (char*)"ref";
 	ref->flags = REF_DEFINED;
+	ref->unprocessed = 1;
 	ref->definedRefFlags = DEFINED_REF_STORE_FILE;
 	
 	Ref* ref2 = newRef();
@@ -53,7 +56,6 @@ TEST(ProcessingDefinedRefTest, ProcessesStoreFile) {
 }
 
 TEST(ProcessingDefinedRefTest, ProcessesRetrieveFile) {
-
 	Record* record = newStorage();
 	record->builtLocation = "fileName5.txt";
 	storeLetters(record, (char*)"ABC281");
@@ -62,6 +64,7 @@ TEST(ProcessingDefinedRefTest, ProcessesRetrieveFile) {
 	ref->flags = REF_DEFINED;
 	ref->ref = (char*)"ref";
 	ref->definedRefFlags = DEFINED_REF_RETRIEVE_FILE;
+	ref->unprocessed = 1;
 
 	Ref* ref2 = newRef();
 

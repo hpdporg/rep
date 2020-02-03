@@ -17,6 +17,16 @@ class RunCyclesTest : public ::testing::Test {
 	restoreLetters(record,(char*)backupFile->allocAddr);
 	
 	
+	record = newStorage();
+	defineRecordPath(record, (char*)"testRefListRep.rep", (char*)".\\");
+	fprintf(stdout, "\nRemoving test data: %s\n", (record->builtLocation));
+	removeRecord(record);
+	
+	record = newStorage();
+	defineRecordPath(record, (char*)"testDefinedRefRep.rep", (char*)".\\");
+	fprintf(stdout, "\nRemoving test data: %s\n", (record->builtLocation));
+	removeRecord(record);
+	
 
   }
 
