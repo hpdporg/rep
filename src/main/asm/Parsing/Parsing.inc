@@ -759,10 +759,14 @@ parsing.parseRep:
 
 	sub rsp, 8*8
 	mov rcx, 5
-	call [numAsLetters]					; There is a bug here, alignment? Remove this call which re-aligns..
+	call [numAsLetters]					; There is a bug here, alignment? Something uninitialized in numAsLetters? Remove this call which re-aligns..
 	add rsp, 8*8
 	mov rax, rax
 
+	sub rsp, 8*8
+	mov rcx, 389
+	;call [debugNumMsg]				; There is a bug here, alignment? Something uninitialized in numAsLetters? Remove this call which re-aligns..
+	add rsp, 8*8
 
 
 	sub rsp, 8*8
