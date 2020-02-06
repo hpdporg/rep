@@ -1,0 +1,7 @@
+
+value	letters	storeThis in a file	
+
+fileName1	letters	output.txt	
+
+
+storeFile	fileName1	value
