@@ -36,6 +36,7 @@ section '.data' data readable writeable align 16
 	storeFileDefinedRefLetters db 'storeFile',0
 	retrieveFileDefinedRefLetters db 'retrieveFile',0
 	lettersDefinedRefLetters db 'letters',0
+	lettersSpaceDefinedRefLetters db ' ',0				; Shorthand when defining letters, just ' ' space token
 	replaceLettersListDefinedRefLetters db 'replaceLettersList',0
 	separatorDefinedRefLetters db 'separator',0
 
@@ -746,6 +747,32 @@ runCycles.loadRefRegistry:
 	mov rbx, [loadRefRegistry.newRef]
 	add rbx, Ref.ref
 	mov r9, lettersDefinedRefLetters		; Ref ref
+	mov [rbx], r9
+
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.paramCount				; Param count
+	mov r9, 1b
+	mov [rbx], r9
+
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.definedRefFlags			; definedRefFlags
+	mov r9, 100b
+	mov [rbx], r9
+
+	sub rsp, 8*8
+	mov rdx, [loadRefRegistry.newRef]
+	mov rcx, [loadRefRegistry.refRegistry]
+	call refRegistry.newLastRegisteredDefinedRef
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	call ref.new
+	add rsp, 8*8
+	mov [loadRefRegistry.newRef], rax
+
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.ref
+	mov r9, lettersSpaceDefinedRefLetters		; Ref ref
 	mov [rbx], r9
 
 	mov rbx, [loadRefRegistry.newRef]
