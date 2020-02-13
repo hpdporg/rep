@@ -128,7 +128,8 @@ runCycles.new:
 	mov rax, 0
 	mov [rbx], rax
 
-
+	mov rdx, newlineUnixLetters		;newlineWinLetters	;
+	mov [newlineLetters], rdx
 
 
 	;lea rax, [new.list]

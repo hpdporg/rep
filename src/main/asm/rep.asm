@@ -32,11 +32,12 @@ startRep:
 
 
 
-
 	sub rsp, 8*8
 	call runCycles.new
 	add rsp, 8*8
 	
+	mov rdx, newlineWinLetters	;newlineUnixLetters
+	mov [newlineLetters], rdx
 
 
 	sub rsp, 8*12
