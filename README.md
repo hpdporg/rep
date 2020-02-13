@@ -27,5 +27,5 @@ Scans **.rep** representation files and processes their contents. Out of the box
 
 ## Platforms ##
 * x86_64, Windows only
-* There is a known limitation that out of the box only allows \n newline files as **.rep** files. The included .gitattributes should allow this to work easily. Just a reminder that saving with \cr\lf will not work unless if you override the delimiter in the source and rebuild, which is possible and has been tested.
+* **.rep** file newlines use \n in tests and \crlf in the built .exe since this is currently Windows-only. The included .gitattributes should allow this to work easily. Just a reminder that saving with \cr\lf will not work with tests unless if you override the delimiter in the source and rebuild, which is possible and has been tested.
 * (Other platform support may follow)
