@@ -1,0 +1,27 @@
+list3	retrieveFileAsList
+
+retrieveFileAsList		delim
+
+
+
+retrieveFileAsList	template	delim
+
+
+
+template
+	mem1
+	mem2
+
+
+res	= template.mem1 + bias
+
+
+matcher	list3	flags
+
+flags	 	contains
+
+
+fileResults	matcher	space
+
+storeFile	fileResults
+
