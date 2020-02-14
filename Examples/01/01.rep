@@ -1,7 +1,6 @@
+value	 	storeThis in a file	
 
-value	letters	storeThis in a file	
-
-fileName1	letters	output.txt	
-
+fileName1	 	output.txt	
 
 storeFile	fileName1	value
+

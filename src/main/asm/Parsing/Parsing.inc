@@ -42,7 +42,7 @@ section '.data' data readable writeable align 16
 	newlineUnixLetters db 10,0		; '\r\n',0
 	newlineWinLetters db 13,10,0		; '\r\n',0	; TO-DO: Handle both. 
 	tabLetters db 9,0			;'\t',0
-
+	newlineLetters dq 0
 
 
 	; Flags
@@ -466,7 +466,7 @@ parsing.getNextMatchOrDelimiter:
 	mov r8, [getNextMatchOrDelimiter.parsePassFlag]
 	cmp r8, 0
 	je getNextMatchOrDelimiter.useDelimiter
-	mov rdx, newlineUnixLetters
+	mov rdx, [newlineLetters]							;	newlineUnixLetters
 
 	jmp getNextMatchOrDelimiter.newContainsRangeItem
 	.useDelimiter:
@@ -522,7 +522,7 @@ parsing.getNextMatchOrDelimiter:
 
 
 	sub rsp, 8*8
-	mov rdx, newlineUnixLetters;newlineWinLetters
+	mov rdx, [newlineLetters]							;	newlineUnixLetters	newlineUnixLetters;newlineWinLetters
 	mov rcx, [getNextMatchOrDelimiter.letters]
 	mov rbx, [getNextMatchOrDelimiter.parsing]
 	add rbx, Parsing.index
@@ -538,7 +538,7 @@ parsing.getNextMatchOrDelimiter:
 
 
 	sub rsp, 8*8
-	mov rdx, newlineUnixLetters;newlineWinLetters
+	mov rdx, [newlineLetters]							;	newlineUnixLetters;newlineWinLetters
 	mov rcx, [getNextMatchOrDelimiter.letters]
 	mov rbx, [getNextMatchOrDelimiter.parsing]
 	add rbx, Parsing.index
@@ -882,7 +882,7 @@ parsing.next:
 
 	
 	sub rsp, 8*8
-	mov rdx, newlineUnixLetters;newlineWinLetters
+	mov rdx, [newlineLetters]							;	newlineUnixLetters;newlineWinLetters
 	mov rcx, [next.letters]
 	mov rbx, [next.parsing]
 	add rbx, Parsing.index
@@ -898,7 +898,7 @@ parsing.next:
 
 
 	sub rsp, 8*8
-	mov rdx, newlineUnixLetters;newlineWinLetters
+	mov rdx, [newlineLetters]							;	newlineUnixLetters;newlineWinLetters
 	mov rcx, [next.letters]
 	mov rbx, [next.parsing]
 	add rbx, Parsing.index
@@ -995,7 +995,7 @@ parsing.next:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rcx, newlineUnixLetters;newlineWinLetters
+	mov rcx, [newlineLetters]							;	newlineUnixLetters;newlineWinLetters
 	call [letterLength]
 	add rsp, 8*8
 	mov [next.parsedLettersLength], rax	; Cache length

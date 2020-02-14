@@ -1,0 +1,42 @@
+# rep pipeline
+
+
+
+trigger:
+- master
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+steps:
+- task: VSBuild@1
+  inputs:
+    solution: 'rep_2017\rep_2017.sln'
+    vsVersion: '15.0'
+    platform: 'x64'
+    configuration: 'release'
+    clean: true
+    msbuildArchitecture: 'x64'
+
+- script: 'reptests.exe --gtest_output=xml'
+  displayName: 'GoogleTest'
+  workingDirectory: rep_2017\repTests\x64\Release   
+  failOnStderr: true
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: 'rep_2017/repTests/x64/Release/test_detail.xml'
+    failTaskOnFailedTests: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'rep_2017\x64\Release\rep.exe'
+    ArtifactName: 'rep.exe'
+    publishLocation: 'Container'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'src\main\asm\rep.obj'
+    ArtifactName: 'rep.obj'
+    publishLocation: 'Container'
