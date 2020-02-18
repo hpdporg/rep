@@ -1,0 +1,38 @@
+
+
+
+restoreFile	asPercent
+
+
+list1
+	member1
+	member2
+	timestamp
+
+
+
+
+retrieveFileTemplate	list1	retrievedList	SEPARATOR
+
+
+sortList	list1	list1.timestamp
+
+asPercent	= list1.member1 / 100
+
+filterCriteria	passing	same	PASS
+
+filtered	retrievedList	list1.member2	filteredList	passing
+
+countItems	filteredList	passCount
+
+
+filterCriteria	thisWeek	between	1582044832	1582022832
+
+filtered	retrievedList	list1.timestamp	filteredList	thisWeek
+
+
+
+
+
+
+

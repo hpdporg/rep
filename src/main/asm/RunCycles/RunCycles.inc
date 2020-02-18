@@ -34,6 +34,7 @@ section '.data' data readable writeable align 16
 
 
 	storeFileDefinedRefLetters db 'storeFile',0
+	restoreFileDefinedRefLetters db 'restoreFile',0
 	retrieveFileDefinedRefLetters db 'retrieveFile',0
 	lettersDefinedRefLetters db 'letters',0
 	lettersSpaceDefinedRefLetters db ' ',0				; Shorthand when defining letters, just ' ' space token
@@ -705,7 +706,33 @@ runCycles.loadRefRegistry:
 
 	mov rbx, [loadRefRegistry.newRef]
 	add rbx, Ref.definedRefFlags			; definedRefFlags
-	mov r9, 1b
+	mov r9, 1b								; DEFINED_REF_STORE_FILE
+	mov [rbx], r9
+
+	sub rsp, 8*8
+	mov rdx, [loadRefRegistry.newRef]
+	mov rcx, [loadRefRegistry.refRegistry]
+	call refRegistry.newLastRegisteredDefinedRef
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	call ref.new
+	add rsp, 8*8
+	mov [loadRefRegistry.newRef], rax
+
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.ref
+	mov r9, restoreFileDefinedRefLetters		; Ref ref
+	mov [rbx], r9
+
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.paramCount				; Param count
+	mov r9, 10b
+	mov [rbx], r9
+
+	mov rbx, [loadRefRegistry.newRef]
+	add rbx, Ref.definedRefFlags			; definedRefFlags
+	mov r9, 100000b							; DEFINED_REF_RESTORE_FILE
 	mov [rbx], r9
 
 	sub rsp, 8*8
@@ -726,7 +753,7 @@ runCycles.loadRefRegistry:
 
 	mov rbx, [loadRefRegistry.newRef]
 	add rbx, Ref.paramCount				; Param count
-	mov r9, 10b
+	mov r9, 10b							; DEFINED_REF_RETRIEVE_FILE
 	mov [rbx], r9
 
 	mov rbx, [loadRefRegistry.newRef]
@@ -757,7 +784,7 @@ runCycles.loadRefRegistry:
 
 	mov rbx, [loadRefRegistry.newRef]
 	add rbx, Ref.definedRefFlags			; definedRefFlags
-	mov r9, 100b
+	mov r9, 100b							; DEFINED_REF_LETTERS
 	mov [rbx], r9
 
 	sub rsp, 8*8

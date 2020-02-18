@@ -528,6 +528,19 @@ processing.processDefinedRefs:
 	call processRefItem
 	add rsp, 8*8
 
+	; processRestoreFile
+	sub rsp, 8*8
+	mov r11, [processDefinedRefs.refRegistry]
+	mov qword [rsp+5*8], r11
+	mov r10, [processDefinedRefs.parsing]
+	mov qword [rsp+4*8], r10
+	mov r9, 100000b						; definedRefFlags	DEFINED_REF_RESTORE_FILE
+	mov r8,	10b						; refBaseFlags		REF_BASE_ITEM_DEFINED_REF
+	mov rdx, 10b						; minParamCount
+	mov rcx, [processDefinedRefs.nextRef]
+	call processRefItem
+	add rsp, 8*8
+
 	; processRetrieveFile
 	sub rsp, 8*8
 	mov r11, [processDefinedRefs.refRegistry]
@@ -1479,6 +1492,192 @@ processing.processStoreFile:
 	retn 0
 
 
+processing.processRestoreFile:
+	push rbp 
+	mov rbp, rsp 
+	sub rsp, (8*16);+(8*6)
+
+	;mov rcx, [rbp+8] 
+	;mov rdx, [rbp+12] 
+	label processRestoreFile.heapAddress qword at rbp-8  
+	label processRestoreFile.handleAllocatedMemory qword at rbp-16
+	label processRestoreFile.parsing qword at rbp-24 
+	label processRestoreFile.unprocessedCount qword at rbp-32
+	label processRestoreFile.newRef qword at rbp-40
+	label processRestoreFile.letters qword at rbp-48
+	label processRestoreFile.processedCount qword at rbp-56
+	label processRestoreFile.list qword at rbp-64
+	label processRestoreFile.prevItem qword at rbp-72
+	label processRestoreFile.refRegistry qword at rbp-80
+	label processRestoreFile.item qword at rbp-88
+	label processRestoreFile.unprocessedParamCount qword at rbp-96
+	label processRestoreFile.nextRef qword at rbp-104
+	label processRestoreFile.nesting qword at rbp-112
+	label processRestoreFile.definedRefFlags qword at rbp-120
+	label processRestoreFile.record qword at rbp-128
+	;virtual at rbp-64
+	;	.list List
+	;end virtual	
+
+
+	mov [processRestoreFile.parsing], rcx
+	mov [processRestoreFile.item], rdx	
+	mov [processRestoreFile.refRegistry], r8
+	mov [processRestoreFile.definedRefFlags], r9
+
+	and rsp, -32
+	push rbx 
+	push rbp 
+	push rdi 
+	push rsi
+	push rsp 
+	push r12 
+	push r13 
+	push r14 
+	push r15
+	sub rsp, 8
+
+	
+
+
+	mov rcx, [processRestoreFile.definedRefFlags]
+	mov r9, 100000b						; definedRefFlags	DEFINED_REF_RESTORE_FILE
+	cmp rcx, r9 
+	jne processRestoreFile.end				; Only attempt processing this definedRef
+
+	sub rsp, 8*8
+	mov rdx, [processRestoreFile.refRegistry]
+	mov rcx, [processRestoreFile.item]
+	call getUnprocessedRegisteredParams
+	add rsp, 8*8
+	cmp rax, 0
+	jne processRestoreFile.end				; This definedRef depends on param registeredRefs being processed, not just the param
+
+
+
+	mov rbx, [processRestoreFile.item]
+	add rbx, Ref.list
+	mov rcx, [rbx]
+	mov [processRestoreFile.list], rcx		; Cache
+
+	sub rsp, 8*8
+	mov rcx, [processRestoreFile.list]
+	call [resetIndex]
+	add rsp, 8*8
+
+
+
+
+	.nextRefItem:						; Ensure end is not reached
+	mov rbx, [processRestoreFile.list]
+	mov r8, rbx
+	add rbx, List.index
+	add r8, List.itemsCount
+	mov rcx, [rbx]
+	mov rdx, [r8]
+	cmp rcx, rdx
+	jnl processRestoreFile.endItemList
+
+
+	
+	sub rsp, 8*8
+	mov rcx, [processRestoreFile.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processRestoreFile.nextRef], rax
+
+
+
+	sub rsp, 8*8
+	call [newStorage]
+	add rsp, 8*8
+	mov [processRestoreFile.record], rax
+
+	sub rsp, 8*8
+	mov rcx, [processRestoreFile.nextRef]
+	call getRefLettersAlloc
+	add rsp, 8*8
+
+	mov rbx, [processRestoreFile.record]
+	add rbx, Record.builtLocation
+	mov [rbx], rax
+
+
+	sub rsp, 8*8
+	mov rcx, [processRestoreFile.list]
+	call [getNextItem]
+	add rsp, 8*8
+	mov [processRestoreFile.nextRef], rax
+
+	mov rbx, [processRestoreFile.nextRef]
+	add rbx, Ref.flags
+	mov rdx, [rbx]
+	mov rcx, 10b					; REF_LIST
+	cmp rcx, rdx
+	je processRestoreFile.listLetters
+
+	
+	sub rsp, 8*8
+	mov rcx, [processRestoreFile.nextRef]
+	call getRefLettersAlloc
+	add rsp, 8*8
+
+	jmp processRestoreFile.storeRefFile
+	.listLetters:
+
+	mov r8, [processRestoreFile.nextRef]
+	add r8, Ref.valueAlloc
+	mov rcx, [r8]
+	sub rsp, 8*8
+	call [listAsLetters]
+	add rsp, 8*8
+
+
+
+	.storeRefFile:
+
+	sub rsp, 8*8
+	mov rdx, rax 
+	mov rcx, [processRestoreFile.record]
+	call [restoreLetters]
+	add rsp, 8*8
+
+
+
+	;jmp processRestoreFile.nextRefItem
+	.endItemList:
+
+
+
+	sub rsp, 8*8
+	mov rdx, [processRestoreFile.refRegistry]
+	mov rcx, [processRestoreFile.item]
+	call defineAsProcessed				; Done, refs processed
+	add rsp, 8*8
+
+	.notReady:
+
+
+	.end:
+	mov rax, [processRestoreFile.nextRef]
+
+
+	add rsp, 8	
+	pop r15 
+	pop r14 
+	pop r13 
+	pop r12 
+	pop rsp 
+	pop rsi 
+	pop rdi 
+	pop rbp 
+	pop rbx
+
+	mov rsp, rbp
+	pop rbp
+
+	retn 0
+
 processing.processRetrieveFile:
 	push rbp 
 	mov rbp, rsp 
@@ -2195,6 +2394,14 @@ processing.processRefItem:
 	mov rdx, [processRefItem.item]
 	mov rcx, [processRefItem.parsing]
 	call processStoreFile	
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov r9, [processRefItem.definedRefFlags]
+	mov r8, [processRefItem.refRegistry]
+	mov rdx, [processRefItem.item]
+	mov rcx, [processRefItem.parsing]
+	call processRestoreFile	
 	add rsp, 8*8
 
 
