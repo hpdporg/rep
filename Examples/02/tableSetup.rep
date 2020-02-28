@@ -1,0 +1,14 @@
+
+tableName	 	testTable1	
+
+index	 	testIndexCol	
+
+condition	 	>	
+conditionVal	 	1500	
+
+
+sqlFileName	 	.\Templates\TemplateQuery.sql	
+
+generatedSQLFile	 	GeneratedSQL.sql	
+
+
