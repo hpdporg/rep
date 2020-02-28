@@ -2,7 +2,7 @@
 
 # rep #
 
-**Rep** project. x86_64 assembly with [fasmg](flatassembler.net) macro assembler.
+**Rep** project. x86_64 assembly with [fasmg](http://flatassembler.net) macro assembler.
 
 Scans **.rep** representation files and processes their contents. Out of the box, **rep** is a script-like, [sed](https://linux.die.net/man/1/sed)-like tool that can process and replace textual files, or a processed file generator like [Perl](https://www.perl.org/) that can compile output from textual templates and structured wildcard replacements. It is meant as an intermediary, overly simplistic tokenized format that defines the concept or *design* of the problem it is trying to solve. **.rep** files are stripped-down, .tsv-like (.csv, tab/comma separated value) files and are meant to provide a view, or *representation* of the 'significance' of a solution. **.rep** files should be worked on just in Notepad or a similar text editor, and encapsulate an efficient, wastefree perspective of the task you are trying to solve. **rep** has an exposed interface and can be extended with other tools (**hpdp** project extensions are planned). 
 
