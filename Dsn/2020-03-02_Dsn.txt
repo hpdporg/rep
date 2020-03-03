@@ -1,0 +1,19 @@
+
+
+
+Parse Param ind from letters
+
+
+Get filter letters from letters ("listname.filtername"->filtername)
+get filter ind from letters? ("listname.filtername", pass in list that has filtername as one of members, return that index)?
+
+retrieveLettersList	(none)
+	newline
+retrieveLettersLists	separator
+	newline + separator
+
+
+
+hpdp
+
+svg line chart?
