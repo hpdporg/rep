@@ -14,7 +14,47 @@ Rows where Rows.WBS same wbs_IDs.ID same WBS_IDs Rows.2 same WorkPackage
 RowCount per day
 
 
+
+
+
 conds
-	timestamp between 3/9/2020 and 3/14/2020
-	Rows.WBS same wbs_IDs.ID
-	WBS_IDs Rows.2 same WorkPackage
+	Rows.timestamp > 3/9/2020
+	Rows.timestamp < 3/14/2020
+	Rows.WBS same WBS_IDs.ID
+		WBS_IDs.2 same WorkPackage
+
+
+filteredFlow	conds
+
+
+acSum	 	= rows.AC
+
+taskEntryCount	 	= rows
+
+
+percentComplete	 	= rows.PercentComplete * 100
+
+sameDayCond
+	rows.timestamp.DAY_OF_WEEK same	rows.timestamp.DAY_OF_WEEK
+
+numericFlow	countByDay	= +1	sameDayCond
+
+taskCountCond
+	rows.task notSame rows.task
+
+numericFlow	taskCount	= +1	taskCountCond
+
+highlightCountConds
+	Rows.Highlight/Issue/Task contains H
+
+
+acPerTaskCond
+	rows.task same rows.task
+
+numericFlow	acPerTask	= rows.AC	acPerTaskCond
+
+
+
+
+
+
