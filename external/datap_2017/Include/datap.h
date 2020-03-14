@@ -1,0 +1,162 @@
+#ifndef DATAP_INCLUDES_H
+#define DATAP_INCLUDES_H
+
+#include <Windows.h>
+
+
+
+
+typedef struct ListItem {
+	void* item;
+	void* previous;
+	_int64 nesting;
+	void* next;
+} ListItem;
+
+typedef struct ItemMatch {
+	void* item;
+	_int64 index;
+	_int64 nesting;
+} ItemMatch;
+
+typedef struct List {
+	void* firstItem;
+	_int64	listSize;
+	_int64	itemsCount;
+	_int64	index;
+	void* indexItem;
+	_int64	indexedItemIndex;
+	void* itemMatch;
+} List;
+
+typedef struct Record {
+	void* allocAddr;
+	_int64	allocSize;
+	char* name;
+	char* location;
+	char* builtLocation;
+	HANDLE handle;
+} Record;
+
+typedef struct Matches {
+	_int64	flags;
+	_int64	transformFlags;
+	List* containsRangeList;
+	_int64 subRangeStartIndex;
+	_int64 subRangeEndIndex;
+} Matches;
+
+
+typedef struct MatchFlow {
+	_int64	contains;
+	_int64	start;
+	_int64	end;
+	_int64	firstMatch;
+	_int64	everyMatch;
+	_int64	matchIndexCount; 
+	_int64	startEndLength; 
+} MatchFlow;
+
+typedef enum MatchesFlags{
+	MATCH_START = 1,
+	MATCH_END = 2,
+	MATCH_FIRST = 4,
+	MATCH_EVERY = 8,
+	MATCH_TRANSFORM = 16,
+	MATCH_SUBRANGE = 32,
+	MATCH_SUBRANGE_START_IND = 64,
+	MATCH_SUBRANGE_END_IND = 128	
+} MatchesFlags;
+
+typedef enum TransformFlags{
+	TRANSFORM_INSENSITIVE_CASE = 1,
+	TRANSFORM_RANGE = 2,
+	TRANSFORM_CONTAINS = 4,
+	TRANSFORM_EXCLUDES = 8,
+	TRANSFORM_CONTAINS_DISCONTINUOUS = 16,
+	TRANSFORM_STARTS_WITH = 32,
+	TRANSFORM_ENDS_WITH = 64,
+	TRANSFORM_CONTAINS_SEQUENTIAL = 128,
+	TRANSFORM_CONTAIN_OPTIONAL_COUNT = 256		
+} TransformFlags;
+
+								
+typedef enum ReplaceFlags{
+	REPLACE_BETWEEN = 1,
+	REPLACE_INSERT = 2
+} ReplaceFlags;
+
+
+								
+typedef struct Time{
+	_int64	year;
+	_int64	month;
+} Time;
+
+
+
+///extern char* pathSepLettersChar;
+extern "C" {
+
+	// Letters
+	char* numAsLetters(_int64 num);
+	char* appendLetters(char* letters1, char* appendingLetters);
+	_int64 letterLength(char* letters);
+	char* lettersBetweenListsIndices(char* letters, List* indicesList);
+	char* lettersBetweenIndices(char* letters, _int64 startIndex, _int64 endIndex);
+
+	// Allocate
+	void* linearAllocate(int size);
+
+	// List
+	List* newList();
+	void newLastItem(List* list, void* item);
+	void* getNextItem(List* list);
+	void* getLastDivergedItem(List* list);
+	void* getLastDivergedItemNesting(List* list);
+	_int64 getNextItemNesting(List* list);
+	_int64 getConvergedItemCount(List* list);
+	void* getNextTangentItem(List* list, _int64 nesting);
+	void* nextItemNesting(List* list, _int64 nesting);						// Updates next item's nesting
+	void* lastItemNesting(List* list, _int64 nesting);						// Updates last item's nesting
+	void resetIndex(List* list);
+	void* newNextItem(List* list, void* item);
+	void* getPriorItem(List* list);
+	void* getNextItemMatch(List* list, void* itemMatch);
+	void* getNextItemMatchComp(List* list, void* itemMatch, _int64 comp);
+	List* extendList(List* list, List* extensionList);
+
+	//Storage
+	Record* newStorage();
+	Record* defineRecordPath(Record* record, char* name, char* location);
+	Record* retrieve(Record* record);
+	Record* storeLetters(Record* record, char* letters);
+	Record* restoreLetters(Record* record, char* letters);
+	List* retrieveRecordNames(Record* record);
+	void removeRecord(Record* record);
+	void debugNum(_int64 num);
+	void debugLetters(char* letters);
+	void debugNumMsg(_int64 num);
+	void debugLettersMsg(char* letters);
+
+	//Matches
+	Matches* newMatches();
+	MatchFlow* processMatchFlags(Matches* matches);
+	List* getMatches(Matches* matches, char* letters);
+	List* lettersSame(char* letters, char* containsLetters);
+	_int64 lettersSameExact(char* letters, char* containsExactLetters);
+	_int64 getNextMatchIndex(char* letters, char* containsLetters);
+	_int64 hasMatch(char* letters, char* containsLetters);
+
+	//Replacement
+	char* replaceLettersWithList(ReplaceFlags flags, char* letters, List* list, List* matchResultsList);
+	char* replaceContainsLettersWithList(char* letters, List* list, char* containsLetters);
+
+	//Time
+	Time* newTime();
+	Time* getNow();
+}
+
+
+
+#endif
