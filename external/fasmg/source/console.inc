@@ -16,6 +16,8 @@ show_display_data:
 show_errors:
 	mov	esi,[first_error]
     display_error:
+	test	esi,esi
+	jz	display_data_shown
 	push	esi
 	mov	eax,[esi+sizeof.Error+SourceContext.number_of_entries]
 	test	eax,eax
@@ -43,7 +45,11 @@ show_errors:
 	je	display_memory_source
 	cmp	[ebx+SourceEntry.type],SOURCE_MACRO
 	jne	display_source_name
-	mov	esi,_macro
+	mov	esi,_macro_source
+	test	[ebx+SourceEntry.flags],SRCF_PREPROCESSED
+	jz	display_source_type
+	mov	esi,_preprocessed_source
+      display_source_type:
 	xor	ecx,ecx
 	call	display_error_string
       display_source_name:
@@ -67,14 +73,15 @@ show_errors:
 	xor	ecx,ecx
 	call	display_error_string
 	mov	eax,[ebx+SourceEntry.line_number]
-	mov	edi,string_buffer
+	xor	edx,edx
 	call	itoa
 	call	display_error_string
 	mov	esi,_line_number_suffix
 	xor	ecx,ecx
 	call	display_error_string
-	mov	ebx,[esp]
-	mov	esi,[esp+4]
+	pop	ebx
+	mov	esi,[esp]
+	push	ebx
 	cmp	[ebx+SourceEntry.line_number],0
 	je	skip_line_content
 	test	[trace_mode],TRACE_ERROR_STACK
@@ -87,20 +94,34 @@ show_errors:
 	mov	esi,_space
       next_source_entry:
 	pop	ebx
+      find_next_source_entry:
 	cmp	ebx,[last_source_entry]
 	je	source_context_shown
+	add	ebx,sizeof.SourceEntry
+	test	[trace_mode],TRACE_ERROR_STACK
+	jnz	show_source_entry
+	test	[ebx+SourceEntry.flags],SRCF_PREPROCESSED
+	jnz	find_next_source_entry
+      show_source_entry:
 	xor	ecx,ecx
 	call	display_error_string
-	add	ebx,sizeof.SourceEntry
 	jmp	show_source_context
       last_source_entry_line_content:
 	test	[esi+Error.flags],ERR_CUSTOM
 	jnz	skip_line_content
       show_source_line:
+	cmp	[ebx+SourceEntry.type],SOURCE_CALM
+	je	show_calm_source
 	mov	esi,_line_content_prefix
 	xor	ecx,ecx
 	call	display_error_string
 	call	show_line_content
+	mov	esi,_new_line
+	jmp	next_source_entry
+      show_calm_source:
+	mov	esi,_calm_source
+	xor	ecx,ecx
+	call	display_error_string
 	mov	esi,_new_line
 	jmp	next_source_entry
       source_context_shown:
@@ -139,9 +160,7 @@ show_errors:
 	mov	esi,ebx
     next_error:
 	mov	esi,[esi+Error.next]
-	test	esi,esi
-	jnz	display_error
-	retn
+	jmp	display_error
 
 show_line_content:
 ; in:
@@ -150,6 +169,9 @@ show_line_content:
 	je	show_line_from_macro
 	mov	esi,[ebx+SourceEntry.text]
 	add	esi,[ebx+SourceEntry.line_offset]
+	mov	ecx,[ebx+SourceEntry.number_of_attached_lines]
+	inc	ecx
+	mov	[number_of_lines],ecx
     show_token:
 	mov	al,[esi]
 	test	al,al
@@ -165,7 +187,9 @@ show_line_content:
 	cmp	al,'\'
 	jne	show_basic_token
 	cmp	byte [esi+1],0Ah
-	je	show_attached_line
+	jne	show_basic_token
+	dec	[number_of_lines]
+	jnz	show_attached_line
     show_basic_token:
 	mov	ecx,1
 	call	display_error_string
@@ -176,7 +200,7 @@ show_line_content:
 	mov	ecx,[esi-4]
 	call	display_error_string
 	add	esi,[esi-4]
-	add	esi,8
+	add	esi,12
 	jmp	show_token
     show_string_token:
 	mov	ebx,esi
@@ -232,7 +256,7 @@ show_line_content:
 	add	esi,[ebx+SourceEntry.line_offset]
 	call	show_preprocessed_line
     line_content_shown:
-	 retn
+	retn
 
 show_preprocessed_line:
 ; in:
@@ -296,40 +320,17 @@ show_preprocessed_line:
 
 itoa:
 ; in:
-;  eax = unsigned number
-;  edi - buffer
+;  edx:eax = unsigned number
 ; out:
-;  esi - buffer containing decimal digits
+;  esi - temporary buffer containing decimal digits
 ;  ecx = length of string (number of digits)
-;  edi - first byte in buffer after the digits
-; note:
-;  the buffer must be at least 10 bytes long
-	mov	esi,edi
-	mov	ecx,1000000000
-	xor	edx,edx
-	xor	bl,bl
-    itoa_loop:
-	div	ecx
-	push	edx
-	cmp	ecx,1
-	je	display_digit
-	or	bl,bl
-	jnz	display_digit
-	or	al,al
-	jz	digit_ok
-	not	bl
-      display_digit:
-	add	al,30h
-	stosb
-      digit_ok:
-	mov	eax,ecx
-	xor	edx,edx
-	mov	ecx,10
-	div	ecx
-	mov	ecx,eax
-	pop	eax
-	or	ecx,ecx
-	jnz	itoa_loop
-	mov	ecx,edi
-	sub	ecx,esi
+	mov	edi,temporary_value+4
+	stosd
+	mov	eax,edx
+	stosd
+	mov	edx,temporary_value
+	mov	dword [edx],8
+	call	convert_number_back
+	lea	esi,[edx+4]
+	mov	ecx,[edx]
 	retn

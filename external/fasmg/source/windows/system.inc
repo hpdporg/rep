@@ -38,39 +38,35 @@ malloc:
 malloc_fixed:
 malloc_growable:
 ; in: ecx = requested size
-; out: eax - allocated block, ecx = allocated size, cf set on error
+; out: eax - allocated block, ecx = allocated size, on error jumps to out_of_memory (does not return)
 ; preserves: ebx, esi, edi
 ; note:
 ;  use of malloc_fixed hints that block will be kept as is until the end of assembly
 ;  use of malloc_growable hints that block is likely to be resized
 	invoke	HeapAlloc,[memory],0,ecx
 	test	eax,eax
-	jz	interface_error
+	jz	out_of_memory
     memory_allocated:
 	push	eax
 	invoke	HeapSize,[memory],0,eax
 	mov	ecx,eax
 	pop	eax
 	cmp	ecx,-1
-	je	interface_error
-	clc
-	retn
-    interface_error:
-	stc
+	je	out_of_memory
 	retn
 realloc:
 ; in: eax - memory block, ecx = requested size
-; out: eax - resized block, ecx = allocated size, cf set on error
+; out: eax - resized block, ecx = allocated size, on error jumps to out_of_memory (does not return)
 ; preserves: ebx, esi, edi
 	invoke	HeapReAlloc,[memory],0,eax,ecx
 	test	eax,eax
 	jnz	memory_allocated
-	stc
-	retn
+	jmp	out_of_memory
 mfree:
 ; in: eax - memory block
 ; out: cf set on error
 ; preserves: ebx, esi, edi
+; note: eax may have value 0 or -1, it should be treated as invalid input then
 	test	eax,eax
 	jz	interface_error
 	cmp	eax,-1
@@ -79,6 +75,9 @@ mfree:
 	test	eax,eax
 	jz	interface_error
 	clc
+	retn
+    interface_error:
+	stc
 	retn
 
 open:
@@ -211,5 +210,12 @@ get_environment_variable:
 ; out:
 ;  eax = length of value
 ; preserves: ebx, esi, edi
+	push	ecx
 	invoke	GetEnvironmentVariable,esi,edi,ecx
+	pop	ecx
+	cmp	eax,ecx
+	jae	environment_variable_ready
+	mov	byte [edi+eax],0
+   environment_variable_ready:
+	inc	eax
 	retn

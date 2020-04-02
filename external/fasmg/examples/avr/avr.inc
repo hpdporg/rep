@@ -64,6 +64,23 @@ iterate <instr,opcode>, ADIW,10010110b, SBIW,10010111b
 			else
 				err 'invalid operand'
 			end if
+		else match Rd,RRd
+			value = +Rd
+			if value metadata 1 relativeto R & value eq value element 1
+				d = value metadata 1 - R
+				if d = 24 | d = 26 | d = 28 | d = 30
+					value = +K
+					if value >= 0 & value <= 63
+						dw value and 1111b + ((d-24) shr 1) shl 4 + (value shr 4) shl 6 + opcode shl 8
+					else
+						err 'immediate value out of range'
+					end if
+				else
+					err 'specified register not allowed for this instruction'
+				end if
+			else
+				err 'invalid operand'
+			end if
 		else
 			err 'invalid operand'
 		end match
@@ -797,8 +814,12 @@ macro WDR?
 	dw 1001'0101'1010'1000b
 end macro
 
-macro _BREAK?
-	dw 1001'0101'1001'1000b
+macro BREAK?
+	if defined %
+		break	; loop control directive
+	else
+		dw 1001'0101'1001'1000b
+	end if
 end macro
 
 PC? equ ($ shr 1)
@@ -825,9 +846,7 @@ struc ? definition&
 end struc
 
 macro ? line&
-	match =BREAK?, line
-		_BREAK
-	else match .=ORG? addr, line
+	match .=ORG? addr, line
 		if ~ DSEG?
 			org (addr) shl 1
 		else

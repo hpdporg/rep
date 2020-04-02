@@ -51,9 +51,12 @@ maximum_number_of_errors dd ?
 maximum_depth_of_stack dd ?
 
 current_area dd ?
-first_output_area_entry dd ?
+output_areas_list dd ?
+output_areas_list_end dd ?
+initial_output_area_entry dd ?
 current_output_area_entry dd ?
-virtual_area_entry dd ?
+prior_uninitialized_length dq ?
+virtual_area dd ?
 auxiliary_output_areas dd ?
 
 base_path dd ?
@@ -67,6 +70,7 @@ identifier_workspace Workspace
 value_workspace Workspace
 expression_workspace Workspace
 calculation_workspace Workspace
+auxiliary_workspace Workspace
 
 line_start dd ?
 line_end dd ?
@@ -110,12 +114,25 @@ display_data_length dd ?
 macro_buffer dd ?
 macro_buffer_length dd ?
 macro_leaf dd ?
-macro_position dd ?
 macro_end_position dd ?
 
 constituent_symbol dd ?
 constituent_value dd ?
 constituent_whitespace dd ?
+
+alm_namespace dd ?
+calm_code_buffer Workspace
+calm_code_cursor dd ?
+calm_literals_buffer Workspace
+calm_literals_cursor dd ?
+calm_auxiliary_buffer Workspace
+calm_auxiliary_cursor dd ?
+calm_line_number dd ?
+calm_instruction_number dd ?
+calm_value dd ?
+calm_literals dd ?
+calm_source_pointer dd ?
+calm_rollback_offset dd ?
 
 value_position dd ?
 kept_value dd ?
@@ -126,6 +143,7 @@ operator_stack dd ?
 operator_stack_position dd ?
 operator_stack_base dd ?
 operator_stack_end dd ?
+calculation_position dd ?
 source_term dd ?
 destination_term dd ?
 temporary_terms dd ?
@@ -147,8 +165,7 @@ condition_stack_base dd ?
 condition_stack_end dd ?
 initial_parentheses dd ?
 comparator dd ?
-preceding_argument_length dd ?
-succeeding_argument_length dd ?
+outer_expression dd ?
 
 assembly_stack_base dd ?
 assembly_stack_end dd ?
@@ -187,7 +204,7 @@ file_cache_pointer dd ?
 
 address_length dd ?
 data_unit_length dd ?
-uninitialized_data_length dq ?
+uninitialized_length dq ?
 
 directive_block dd ?
 number_of_iterations dd ?
@@ -197,10 +214,14 @@ parameter_index dd ?
 value_index dd ?
 value dd ?
 value_length dd ?
+metadata_length dd ?
 sequence_header_cursor dd ?
 sequence_header_length dd ?
 expression_sequence_cursor dd ?
 expression_sequence_end dd ?
+context_boundary dd ?
+whitespace_boundary dd ?
+transforming_namespace dd ?
 
 pattern_start dd ?
 pattern_end dd ?
@@ -210,11 +231,15 @@ stored_position dd ?
 stored_substitution dd ?
 stored_context dd ?
 stored_pattern dd ?
+brackets dd ?
 
 instruction_value dd ?
 instruction_branch dd ?
 instruction_body dd ?
 
+number_of_lines dd ?
+
+preprocessing_mode db ?
 assembly_mode db ?
 next_pass_needed db ?
 shift_tracking db ?
@@ -228,12 +253,16 @@ symbol_expected db ?
 kept_symbol_flags db ?
 chosen_class db ?
 expected_class db ?
-forced_definition db ?
 symbol_definition db ?
+symbol_solid db ?
+recognizer_setting db ?
+label_solid db ?
 value_type db ?
 waiting_for_digit db ?
 literal_exponent_sign db ?
 literal_fractional_part db ?
+float_literal_status db ?
+use_raw_values db ?
 
 last_token db ?
 breakpoint_token db ?
@@ -250,6 +279,7 @@ first_sign db ?
 second_sign db ?
 comparator_priority db ?
 result_type db ?
+defined_element db ?
 
 source_context_affected db ?
 raw_value db ?
@@ -258,11 +288,15 @@ stored_substitution_activity db ?
 unprocessed_matching db ?
 whitespace_matching db ?
 macro_definition_active db ?
-macro_unconditional db ?
+macro_flags db ?
 macro_greedy db ?
+calm_definition_active db ?
 
-metadata_available db ?
 size_specified db ?
 
 message_volatile db ?
 displayed_byte db ?
+
+alm_statement db ?
+calm_result db ?
+hidden_context db ?

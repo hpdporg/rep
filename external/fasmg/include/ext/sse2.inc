@@ -2,7 +2,7 @@
 if ~ defined SSE2
 
 	restore SSE2	; this ensures that symbol cannot be forward-referenced
-	define SSE2 1
+	SSE2 = 1
 
 	include 'sse.inc'
 
@@ -29,13 +29,16 @@ if ~ defined SSE2
 		SSE.basic_instruction_imm8 0F2h,0C2h,8,dest,src,code
 	end macro
 
-	macro cmpsd? args&
-		match , args
-			cmpsd
-		else
-			SSE.cmpsd args
-		end match
-	end macro
+	calminstruction cmpsd? args&
+		match	, args
+		jno	sse
+		assemble x86.o32
+		assemble x86.cmpsw
+		exit
+	    sse:
+		arrange args, =SSE.=cmpsd args
+		assemble args
+	end calminstruction
 
 	iterate <cond,code>, eq,0, lt,1, le,2, unord,3, neq,4, nlt,5, nle,6, ord,7
 		macro cmp#cond#pd? dest*,src*
@@ -111,13 +114,16 @@ if ~ defined SSE2
 		end if
 	end macro
 
-	macro movsd? args&
-		match , args
-			movsd
-		else
-			SSE.movsd args
-		end match
-	end macro
+	calminstruction movsd? args&
+		match	, args
+		jno	sse
+		assemble x86.o32
+		assemble x86.movsw
+		exit
+	    sse:
+		arrange args, =SSE.=movsd args
+		assemble args
+	end calminstruction
 
 	iterate <instr,pre>, movdqa,66h, movdqu,0F3h
 		macro instr? dest*,src*
@@ -330,47 +336,65 @@ if ~ defined SSE2
 		end macro
 	end iterate
 
-	macro MMX.select_operand_prefix rm_operand*,size*
-		if size = 16
-			rm_operand.prefix = 66h
-		else if size <> 8
-			err 'invalid operand size'
-		end if
-	end macro
+	calminstruction MMX.select_operand_prefix rm_operand*,size*
+		local	sym, prefix
+		check	size = 16
+		jno	no_prefix
+		compute prefix, 66h
+		arrange sym, rm_operand.=prefix
+		publish sym, prefix
+		exit
+	    no_prefix:
+		check	size <> 8
+		jno	done
+		asmcmd	=err 'invalid operand size'
+	    done:
+	end calminstruction
 
-	macro MMX.basic_instruction ext,dest,src
-		SSE.parse_operand @dest,dest
-		SSE.parse_operand @src,src
-		if @dest.type = 'mmreg' & (@src.type = 'mem' | @src.type = 'mmreg')
-			if @src.size and not @dest.size
-				err 'operand sizes do not match'
-			end if
-			MMX.select_operand_prefix @src,@dest.size
-			x86.store_instruction <0Fh,ext>,@src,@dest.rm
-		else
-			err 'invalid combination of operands'
-		end if
-	end macro
+	calminstruction MMX.basic_instruction ext,dest,src
+		asmcmd	=SSE.=parse_operand =@dest,dest
+		asmcmd	=SSE.=parse_operand =@src,src
+		check	@src.size and not @dest.size
+		jno	size_ok
+		asmcmd	=err 'operand sizes do not match'
+	    size_ok:
+		check	@dest.type = 'mmreg' & (@src.type = 'mem' | @src.type = 'mmreg')
+		jno	invalid_combination_of_operands
+		asmcmd	=MMX.=select_operand_prefix =@src,=@dest.=size
+		asmcmd	=x86.=store_instruction <0Fh,ext>,=@src,=@dest.=rm
+		exit
+	    invalid_combination_of_operands:
+		asmcmd	=err 'invalid combination of operands'
+	end calminstruction
 
-	macro MMX.bit_shift_instruction ext,dest,src
-		SSE.parse_operand @dest,dest
-		SSE.parse_operand @src,src
-		if @dest.type = 'mmreg' & (@src.type = 'mem' | @src.type = 'mmreg')
-			if @src.size and not @dest.size
-				err 'operand sizes do not match'
-			end if
-			MMX.select_operand_prefix @src,@dest.size
-			x86.store_instruction <0Fh,ext>,@src,@dest.rm
-		else if @dest.type = 'mmreg' & @src.type = 'imm'
-			if @src.size and not 1
-				err 'invalid operand size'
-			end if
-			MMX.select_operand_prefix @dest,@dest.size
-			x86.store_instruction <0Fh,70h+(ext and 0Fh)>,@dest,((ext shr 4)-0Ch) shl 1,1,@src.imm
-		else
-			err 'invalid combination of operands'
-		end if
-	end macro
+	calminstruction MMX.bit_shift_instruction ext,dest,src
+		asmcmd	=SSE.=parse_operand =@dest,dest
+		asmcmd	=SSE.=parse_operand =@src,src
+		check	@dest.type = 'mmreg' & (@src.type = 'mem' | @src.type = 'mmreg')
+		jyes	mmreg_rm
+		check	@dest.type = 'mmreg' & @src.type = 'imm'
+		jyes	mmreg_imm
+		asmcmd	=err 'invalid combination of operands'
+		exit
+	    mmreg_rm:
+		check	@src.size and not @dest.size
+		jno	mmreg_rm_ok
+		asmcmd	=err 'operand sizes do not match'
+	      mmreg_rm_ok:
+		asmcmd	=MMX.=select_operand_prefix =@src,=@dest.=size
+		asmcmd	=x86.=store_instruction <0Fh,ext>,=@src,=@dest.=rm
+		exit
+	    mmreg_imm:
+		check	@src.size and not 1
+		jno	rm_mmreg_ok
+		asmcmd	=err 'invalid operand size'
+	      rm_mmreg_ok:
+		local	iext, irm
+		compute iext, 70h+(ext and 0Fh)
+		compute irm, ((ext shr 4)-0Ch) shl 1
+		asmcmd	=MMX.=select_operand_prefix =@dest,=@dest.=size
+		asmcmd	=x86.=store_instruction <0Fh,iext>,=@dest,irm,1,=@src.=imm
+	end calminstruction
 
 	iterate <instr,ext>, paddq,0D4h, pmuludq,0F4h, psubq,0FBh
 		macro instr? dest*,src*
@@ -544,9 +568,12 @@ if ~ defined SSE2
 		x86.parse_operand @dest,dest
 		x86.parse_operand @src,src
 		if @dest.type = 'mem' & @src.type = 'reg'
-			if (@dest.size or @src.size) <> 4
+			if @dest.size and not @src.size
+				err 'operand sizes do not match'
+			else if @src.size <> 4 & @src.size <> 8
 				err 'invalid operand size'
 			end if
+			x86.select_operand_prefix @dest,@src.size
 			x86.store_instruction <0Fh,0C3h>,@dest,@src.rm
 		else
 			err 'invalid combination of operands'

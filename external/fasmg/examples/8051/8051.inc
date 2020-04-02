@@ -14,26 +14,6 @@ element @
 element @R0? : @
 element @R1? : @ + 1
 
-macro bitaddr value
-	match any., value
-		err "syntax error"
-	else match base.index, value
-		match any.other, base index
-			err "syntax error"
-		else
-			if base and 111b
-				err "not bit addressable"
-			else
-				db base+index
-			end if
-		end match
-	else match .any, value
-		err "syntax error"
-	else
-		db +value
-	end match
-end macro
-
 macro AJMP? addr
 	local value
 	value = +addr
@@ -168,9 +148,7 @@ macro JBC? operand,addr
 	local offset
 	offset = -($+3)+addr
 	if offset>=-80h & offset<80h
-		db 10h
-		bitaddr operand
-		db offset
+		db 10h,operand,offset
 	else
 		err "relative jump out of range"
 	end if
@@ -180,9 +158,7 @@ macro JB? operand,addr
 	local offset
 	offset = -($+3)+addr
 	if offset>=-80h & offset<80h
-		db 20h
-		bitaddr operand
-		db offset
+		db 20h,operand,offset
 	else
 		err "relative jump out of range"
 	end if
@@ -192,9 +168,7 @@ macro JNB? operand,addr
 	local offset
 	offset = -($+3)+addr
 	if offset>=-80h & offset<80h
-		db 30h
-		bitaddr operand
-		db offset
+		db 30h,operand,offset
 	else
 		err "relative jump out of range"
 	end if
@@ -345,11 +319,9 @@ macro ANL? dest,src
 		end match
 	else match =C?, dest
 		match /addr,src
-			db 0B0h
-			bitaddr addr
+			db 0B0h,addr
 		else
-			db 82h
-			bitaddr src
+			db 82h,src
 		end match
 	else
 		match =A?, src
@@ -389,11 +361,9 @@ macro ORL? dest,src
 		end match
 	else match =C?, dest
 		match /addr,src
-			db 0A0h
-			bitaddr addr
+			db 0A0h,addr
 		else
-			db 72h
-			bitaddr src
+			db 72h,src
 		end match
 	else
 		match =A?, src
@@ -451,8 +421,7 @@ macro CLR? operand
 	else match =C?, operand
 		db 0C3h
 	else
-		db 0C2h
-		bitaddr operand
+		db 0C2h,operand
 	end match
 end macro
 
@@ -462,8 +431,7 @@ macro CPL? operand
 	else match =C?, operand
 		db 0B3h
 	else
-		db 0B2h
-		bitaddr operand
+		db 0B2h,operand
 	end match
 end macro
 
@@ -471,8 +439,7 @@ macro SETB? operand
 	match =C?, operand
 		db 0D3h
 	else
-		db 0D2h
-		bitaddr operand
+		db 0D2h,operand
 	end match
 end macro
 
@@ -545,11 +512,9 @@ macro MOV? dest,src
 			end if
 		end match
 	else match =C?, dest
-		db 0A2h
-		bitaddr src
+		db 0A2h,src
 	else match =C?, src
-		db 92h
-		bitaddr dest
+		db 92h,dest
 	else match =DPTR?, dest
 		value = src
 		db 90h
@@ -774,11 +739,7 @@ macro XCHD? accu,src
 end macro
 
 struc EQU? value
-	match base.index, value
-		. equ base.index
-	else
-		. = value
-	end match
+	. = value
 end struc
 
 DSEG?.$ = 0
@@ -810,29 +771,40 @@ macro CSEG? @
 	end match
 end macro
 
+macro bitslabel definition
+	match name =at? address, definition
+		label name at address
+		repeat 8, i:0
+			label name.i at address+i
+		end repeat
+	else
+		err 'syntax error'
+	end match
+end macro
+
 ; Data addresses:
 
-label P0	at 080h
-label SP	at 081h
-label DPL	at 082h
-label DPH	at 083h
-label PCON	at 087h
-label TCON	at 088h
-label TMOD	at 089h
-label TL0	at 08Ah
-label TL1	at 08Bh
-label TH0	at 08Ch
-label TH1	at 08Dh
-label P1	at 090h
-label SCON	at 098h
-label SBUF	at 099h
-label P2	at 0A0h
-label IE	at 0A8h
-label P3	at 0B0h
-label IP	at 0B8h
-label PSW	at 0D0h
-label ACC	at 0E0h
-label B 	at 0F0h
+bitslabel P0	at 080h
+bitslabel SP	at 081h
+bitslabel DPL	at 082h
+bitslabel DPH	at 083h
+bitslabel PCON	at 087h
+bitslabel TCON	at 088h
+bitslabel TMOD	at 089h
+bitslabel TL0	at 08Ah
+bitslabel TL1	at 08Bh
+bitslabel TH0	at 08Ch
+bitslabel TH1	at 08Dh
+bitslabel P1	at 090h
+bitslabel SCON	at 098h
+bitslabel SBUF	at 099h
+bitslabel P2	at 0A0h
+bitslabel IE	at 0A8h
+bitslabel P3	at 0B0h
+bitslabel IP	at 0B8h
+bitslabel PSW	at 0D0h
+bitslabel ACC	at 0E0h
+bitslabel B	at 0F0h
 
 ; Bit addresses:
 

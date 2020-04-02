@@ -12,7 +12,7 @@ malloc:
 malloc_fixed:
 malloc_growable:
 ; in: ecx = requested size
-; out: eax - allocated block, ecx = allocated size, cf set on error
+; out: eax - allocated block, ecx = allocated size, on error jumps to out_of_memory (does not return)
 ; preserves: ebx, esi, edi
 ; note:
 ;  use of malloc_fixed hints that block will be kept as is until the end of assembly
@@ -21,27 +21,23 @@ malloc_growable:
 	ccall	libc.malloc,ecx
 	pop	edi esi ecx ebx
 	test	eax,eax
-	jz	interface_error
-	clc
-	retn
-    interface_error:
-	stc
+	jz	out_of_memory
 	retn
 realloc:
 ; in: eax - memory block, ecx = requested size
-; out: eax - resized block, ecx = allocated size, cf set on error
+; out: eax - resized block, ecx = allocated size, on error jumps to out_of_memory (does not return)
 ; preserves: ebx, esi, edi
 	push	ebx ecx esi edi
 	ccall	libc.realloc,eax,ecx
 	pop	edi esi ecx ebx
 	test	eax,eax
-	jz	interface_error
-	clc
+	jz	out_of_memory
 	retn
 mfree:
 ; in: eax - memory block
 ; out: cf set on error
 ; preserves: ebx, esi, edi
+; note: eax may have value 0 or -1, it should be treated as invalid input then
 	test	eax,eax
 	jz	interface_error
 	cmp	eax,-1
@@ -50,6 +46,9 @@ mfree:
 	ccall	libc.free,eax
 	pop	edi esi ebx
 	clc
+	retn
+    interface_error:
+	stc
 	retn
 
 open:

@@ -103,6 +103,7 @@ EM_68K	 = 4
 EM_88K	 = 5
 EM_860	 = 7
 EM_MIPS  = 8
+EM_X86_64 = 62
 
 EV_NONE    = 0
 EV_CURRENT = 1
@@ -163,9 +164,43 @@ R_386_RELATIVE = 8
 R_386_GOTOFF   = 9
 R_386_GOTPC    = 10
 
+R_X86_64_NONE	   = 0
+R_X86_64_64	   = 1
+R_X86_64_PC32	   = 2
+R_X86_64_GOT32	   = 3
+R_X86_64_PLT32	   = 4
+R_X86_64_COPY	   = 5
+R_X86_64_GLOB_DAT  = 6
+R_X86_64_JUMP_SLOT = 7
+R_X86_64_RELATIVE  = 8
+R_X86_64_GOTPCREL  = 9
+R_X86_64_32	   = 10
+R_X86_64_32S	   = 11
+R_X86_64_16	   = 12
+R_X86_64_PC16	   = 13
+R_X86_64_8	   = 14
+R_X86_64_PC8	   = 15
+R_X86_64_DPTMOD64  = 16
+R_X86_64_DTPOFF64  = 17
+R_X86_64_TPOFF64   = 18
+R_X86_64_TLSGD	   = 19
+R_X86_64_TLSLD	   = 20
+R_X86_64_DTPOFF32  = 21
+R_X86_64_GOTTPOFF  = 22
+R_X86_64_TPOFF32   = 23
+R_X86_64_PC64	   = 24
+R_X86_64_GOTOFF64  = 25
+R_X86_64_GOTPC32   = 26
+
 ELF::
 
 namespace ELF
+
+	if defined Settings.Machine
+		MACHINE := Settings.Machine
+	else
+		MACHINE := EM_386
+	end if
 
 	if defined Settings.ABI
 		ABI := Settings.ABI
@@ -173,11 +208,22 @@ namespace ELF
 		ABI := ELFOSABI_NONE
 	end if
 
+	if MACHINE = EM_386
+		R_32 = R_386_32
+		R_PC32 = R_386_PC32
+		R_GOTOFF = R_386_GOTOFF
+		R_PLT32 = R_386_PLT32
+	else if MACHINE = EM_X86_64
+		R_32 = R_X86_64_32
+		R_PC32 = R_X86_64_PC32
+		R_PLT32 = R_X86_64_PLT32
+	end if
+
 	Header:
 
 	e_ident 	db 0x7F,'ELF',ELFCLASS32,ELFDATA2LSB,EV_CURRENT,ABI,(16-$) dup 0
 	e_type		dw ET_REL
-	e_machine	dw EM_386
+	e_machine	dw MACHINE
 	e_version	dd EV_CURRENT
 	e_entry 	dd 0
 	e_phoff 	dd 0
@@ -357,13 +403,17 @@ macro section? declaration*
 	end namespace
 end macro
 
-macro align? boundary,value:?
-	if ELF.SECTION_ALIGN mod (boundary) = 0
-		db (boundary-1)-($-ELF.SECTION_BASE+boundary-1) mod boundary dup value
-	else
-		err 'section not aligned enough'
-	end if
-end macro
+calminstruction align? boundary,value:?
+	check	ELF.SECTION_ALIGN mod (boundary) = 0
+	jyes	allowed
+	arrange value, =err 'section not aligned enough'
+	assemble value
+	exit
+    allowed:
+	compute boundary, (boundary-1)-($-ELF.SECTION_BASE+boundary-1) mod boundary
+	arrange value, =db boundary =dup value
+	assemble value
+end calminstruction
 
 macro public? declaration*
 	namespace ELF
@@ -436,109 +486,120 @@ element _GLOBAL_OFFSET_TABLE_
 RVA? equ -_GLOBAL_OFFSET_TABLE_+
 element PLT?
 
-macro dword? value
-	local v
-	v = value
-	if ~ v relativeto 0 & v relativeto 1 elementof v & 1 elementof (1 metadataof v) relativeto ELF.relocatable
-		namespace ELF
-			store $% - SECTION_OFFSET at relocations : Elf32_Rel.r_offset + RELOCATION_INDEX * sizeof Elf32_Rel
-			store R_386_32 + (0 scaleof (1 metadataof v)) shl 8 at relocations : Elf32_Rel.r_info + RELOCATION_INDEX * sizeof Elf32_Rel
-			RELOCATION_INDEX = RELOCATION_INDEX + 1
-		end namespace
-		dd 0 scaleof v
-	else if ~ v relativeto 0 & (v + _GLOBAL_OFFSET_TABLE_) relativeto 1 elementof (v + _GLOBAL_OFFSET_TABLE_) & 1 elementof (1 metadataof (v + _GLOBAL_OFFSET_TABLE_)) relativeto ELF.relocatable
-		namespace ELF
-			v = v + _GLOBAL_OFFSET_TABLE_
-			store $% - SECTION_OFFSET at relocations : Elf32_Rel.r_offset + RELOCATION_INDEX * sizeof Elf32_Rel
-			store R_386_GOTOFF + (0 scaleof (1 metadataof v)) shl 8 at relocations : Elf32_Rel.r_info + RELOCATION_INDEX * sizeof Elf32_Rel
-			RELOCATION_INDEX = RELOCATION_INDEX + 1
-		end namespace
-		dd 0 scaleof v
-	else if ~ v relativeto 0 & (v + ELF.SECTION_BASE) relativeto 1 elementof (v + ELF.SECTION_BASE)
-		if 1 elementof (1 metadataof (v + ELF.SECTION_BASE)) relativeto ELF.relocatable
-			namespace ELF
-				v = v + (SECTION_BASE + $% - SECTION_OFFSET)
-				store $% - SECTION_OFFSET at relocations : Elf32_Rel.r_offset + RELOCATION_INDEX * sizeof Elf32_Rel
-				store R_386_PC32 + (0 scaleof (1 metadataof v)) shl 8 at relocations : Elf32_Rel.r_info + RELOCATION_INDEX * sizeof Elf32_Rel
-				RELOCATION_INDEX = RELOCATION_INDEX + 1
-			end namespace
-			dd 0 scaleof v
-		else if 1 elementof (1 metadataof (v + ELF.SECTION_BASE)) relativeto PLT
-			namespace ELF
-				v = v + (SECTION_BASE + $% - SECTION_OFFSET)
-				store $% - SECTION_OFFSET at relocations : Elf32_Rel.r_offset + RELOCATION_INDEX * sizeof Elf32_Rel
-				store R_386_PLT32 + (0 scaleof (1 metadataof v)) shl 8 at relocations : Elf32_Rel.r_info + RELOCATION_INDEX * sizeof Elf32_Rel
-				RELOCATION_INDEX = RELOCATION_INDEX + 1
-			end namespace
-			dd 0 scaleof v
-		else
-			dd v
-		end if
-	else
-		dd v
-	end if
-end macro
+calminstruction calminstruction?.init? var*, val:0
+	compute val, val
+	publish var, val
+end calminstruction
 
-macro dd? definitions&
-	iterate value,definitions
-		match ?, value
-			dd ?
-		else match n =dup? ?, value
-			dd n dup ?
-		else match n =dup? (?), value
-			dd n dup ?
-		else match n =dup? v, value
-			repeat n
-				dword v
-			end repeat
-		else
-			dword value
-		end match
-	end iterate
-end macro
+calminstruction calminstruction?.initsym? var*, val&
+	publish var, val
+end calminstruction
 
-struc dd? definitions&
-	label . : dword
-	iterate value,definitions
-		match ?, value
-			dd ?
-		else match n =dup? ?, value
-			dd n dup ?
-		else match n =dup? (?), value
-			dd n dup ?
-		else match n =dup? v, value
-			repeat n
-				dword v
-			end repeat
-		else
-			dword value
-		end match
-	end iterate
-end struc
+calminstruction calminstruction?.unique? name
+	local counter, buffer
+	init counter
+	compute counter, counter + 1
+	arrange buffer, name#counter
+	publish name, buffer
+end calminstruction
 
-macro store? disposition
-	match data =at? area:address, disposition
-		store data at area:address
-	else match data =at? address, disposition
-		local value,length
-		match val:len, data
-			value = val
-			length = len
-		else
-			value = data
-			length = sizeof(address)
-		end match
-		if elementsof value & length = 4
-			virtual at address
-				dword value
-				load value:dword from address
-			end virtual
-		end if
-		store value:length at address
-	else
-		store disposition
-	end match
-end macro
+calminstruction calminstruction?.asm? line&
+	local tmp, ln, buffer
+	initsym tmp, unique ln
+	assemble tmp
+	publish ln, line
+	arrange buffer, =assemble ln
+	assemble buffer
+end calminstruction
+
+calminstruction dword? value
+	compute value, value
+	check	~ value relativeto 0 & value relativeto 1 elementof value & 1 elementof (1 metadataof value) relativeto ELF.relocatable
+	jyes	r_32
+	check	~ value relativeto 0 & (value + _GLOBAL_OFFSET_TABLE_) relativeto 1 elementof (value + _GLOBAL_OFFSET_TABLE_) & 1 elementof (1 metadataof (value + _GLOBAL_OFFSET_TABLE_)) relativeto ELF.relocatable
+	jyes	r_gotoff
+	check	~ value relativeto 0 & (value + ELF.SECTION_BASE) relativeto 1 elementof (value + ELF.SECTION_BASE)
+	jno	plain
+	check	1 elementof (1 metadataof (value + ELF.SECTION_BASE)) relativeto ELF.relocatable
+	jyes	r_pc32
+	check	1 elementof (1 metadataof (value + ELF.SECTION_BASE)) relativeto PLT
+	jyes	r_plt32
+    plain:
+	asm	emit 4: value
+	exit
+	local	offset, info
+    r_32:
+	compute info, ELF.R_32 + (0 scaleof (1 metadataof value)) shl 8
+	jump	add_relocation
+    r_gotoff:
+	compute value, value + _GLOBAL_OFFSET_TABLE_
+	compute info, ELF.R_GOTOFF + (0 scaleof (1 metadataof value)) shl 8
+	jump	add_relocation
+    r_pc32:
+	compute value, value + (ELF.SECTION_BASE + $% - ELF.SECTION_OFFSET)
+	compute info, ELF.R_PC32 + (0 scaleof (1 metadataof value)) shl 8
+	jump	add_relocation
+    r_plt32:
+	compute value, value + (ELF.SECTION_BASE + $% - ELF.SECTION_OFFSET)
+	compute info, ELF.R_PLT32 + (0 scaleof (1 metadataof value)) shl 8
+	jump	add_relocation
+    add_relocation:
+	compute offset, $%
+	asm	emit 4: 0 scaleof value
+	check	$% > offset
+	jno	done
+	compute offset, offset - ELF.SECTION_OFFSET
+	local	Rel
+	compute Rel, ELF.RELOCATION_INDEX * sizeof Elf32_Rel
+	asm	store offset at ELF.relocations : Rel + Elf32_Rel.r_offset
+	asm	store info at ELF.relocations : Rel + Elf32_Rel.r_info
+	compute ELF.RELOCATION_INDEX, ELF.RELOCATION_INDEX + 1
+    done:
+end calminstruction
+
+calminstruction dd? definitions&
+	local	value, n
+    start:
+	match	value=,definitions, definitions, ()
+	jyes	recognize
+	match	value, definitions
+	arrange definitions,
+    recognize:
+	match	n =dup? value, value, ()
+	jyes	duplicate
+	match	?, value
+	jyes	reserve
+	arrange value, =dword value
+	assemble value
+    next:
+	match	, definitions
+	jno	start
+	take	, definitions
+	take	definitions, definitions
+	jyes	next
+	exit
+    reserve:
+	arrange value, =dd ?
+	assemble value
+	jump	next
+    duplicate:
+	match	(value), value
+    stack:
+	check	n
+	jno	next
+	take	definitions, value
+	arrange value, definitions
+	compute n, n - 1
+	jump	stack
+end calminstruction
+
+calminstruction (label) dd? definitions&
+	local	cmd
+	arrange cmd, =label label : =dword
+	assemble cmd
+	arrange cmd, =dd definitions
+	assemble cmd
+end calminstruction
 
 postpone
 	purge section?

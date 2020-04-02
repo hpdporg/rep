@@ -54,15 +54,16 @@ section '.text' code readable writeable executable align 16
 
 runCycles:
 namespace runCycles
-runCycles.new:
+new:
+namespace new
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*2);+(8*0)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label new.heapAddress qword at rbp-8  
-	label new.handleAllocatedMemory qword at rbp-16
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -85,7 +86,7 @@ runCycles.new:
 
 	sub rsp, 8*4
 	call [GetProcessHeap]
-	mov [new.heapAddress], rax
+	mov [heapAddress], rax
 	add rsp, 8*4
 	
 
@@ -96,35 +97,35 @@ runCycles.new:
 	sub rsp, 8*4
 	mov r8, rcx		
 	mov rdx, 000001000b
-	mov rcx, [new.heapAddress]
+	mov rcx, [heapAddress]
 	call [ HeapAlloc] 
-	mov [new.handleAllocatedMemory], rax
+	mov [handleAllocatedMemory], rax
 	add rsp, 8*4
 
 
 
 
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, RunCycles.refRegistry
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, RunCycles.parsing
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, RunCycles.repRecordList
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, RunCycles.cycleIndex
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, RunCycles.maxCycleCount
 	mov rax, 50						; 50 cycles can occur maximum, far fewer should be required, change this later if needed.
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, RunCycles.repAllocation
 	mov rax, 0
 	mov [rbx], rax
@@ -133,21 +134,21 @@ runCycles.new:
 	mov [newlineLetters], rdx
 
 
-	;lea rax, [new.list]
-	;lea rcx, [new.list.indexedItemIndex]
+	;lea rax, [list]
+	;lea rcx, [list.indexedItemIndex]
 
 	;sub rcx, rax
 	;add rcx, 1000b
 
 	;cld
 
-	;lea rsi, [new.list]
-	;mov rdi, [storage.new.handleAllocatedMemory]
+	;lea rsi, [list]
+	;mov rdi, [storage.handleAllocatedMemory]
 
 	;rep movsb
 
 
-	mov rax, [new.handleAllocatedMemory]
+	mov rax, [handleAllocatedMemory]
 
 
 	add rsp, 8	
@@ -165,31 +166,33 @@ runCycles.new:
 	pop rbp
 
 	retn 0
+end namespace
 
-runCycles.begin:
+begin:
+namespace begin
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*11);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label begin.heapAddress qword at rbp-8  
-	label begin.handleAllocatedMemory qword at rbp-16
-	label begin.list qword at rbp-24 
-	label begin.parsing qword at rbp-32
-	label begin.repRecordList qword at rbp-40
-	label begin.runCyclesAddr qword at rbp-48
-	label begin.nextRef qword at rbp-56
-	label begin.storageRecord qword at rbp-64
-	label begin.lettersIndex qword at rbp-72
-	label begin.refRegistry qword at rbp-80
-	label begin.newRef qword at rbp-88
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label list qword at rbp-24 
+	label parsingAddr qword at rbp-32
+	label repRecordList qword at rbp-40
+	label runCyclesAddr qword at rbp-48
+	label nextRef qword at rbp-56
+	label storageRecord qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newRef qword at rbp-88
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [begin.runCyclesAddr], rcx
+	mov [runCyclesAddr], rcx
 
 
 	and rsp, -32
@@ -210,21 +213,21 @@ runCycles.begin:
 	sub rsp, 8*8
 	call refRegistry.new
 	add rsp, 8*8
-	mov [begin.refRegistry], rax
+	mov [refRegistryAddr], rax
 
 
 
-	mov rbx, [begin.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.refRegistry
-	mov rdx, [begin.refRegistry]
+	mov rdx, [refRegistryAddr]
 	mov [rbx], rdx					; Cache RefRegistry
 
 
-	.loadRefRegistryDefinedRefs:
+	loadRefRegistryDefinedRefs:
 
 
 	sub rsp, 8*8
-	mov rcx, [begin.runCyclesAddr]	
+	mov rcx, [runCyclesAddr]	
 	call loadRefRegistry
 	add rsp, 8*8
 
@@ -233,20 +236,20 @@ runCycles.begin:
 	sub rsp, 8*8
 	call parsing.new
 	add rsp, 8*8
-	mov [begin.parsing], rax
+	mov [parsingAddr], rax
 
 
 
 
-	mov rbx, [begin.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.parsing
-	mov rdx, [begin.parsing]
+	mov rdx, [parsingAddr]
 	mov [rbx], rdx					; Cache Parsing
 
 
 
 	sub rsp, 8*8
-	mov rcx, [begin.runCyclesAddr]	
+	mov rcx, [runCyclesAddr]	
 	call loadReps
 	add rsp, 8*8
 
@@ -254,7 +257,7 @@ runCycles.begin:
 
 
 	sub rsp, 8*8
-	mov rcx, [begin.runCyclesAddr]	
+	mov rcx, [runCyclesAddr]	
 	call loadRepAllocation
 	add rsp, 8*8
 
@@ -262,16 +265,16 @@ runCycles.begin:
 
 
 
-	.nextCycle:
-	mov rbx, [begin.runCyclesAddr]
+	nextCycle:
+	mov rbx, [runCyclesAddr]
 	mov rdx, rbx
 	add rbx, RunCycles.cycleIndex
 	mov rcx, [rbx]
 	add rdx, RunCycles.maxCycleCount
 	mov r8, [rdx]
 	cmp rcx, r8
-	jnl begin.endCycles
-	mov rbx, [begin.runCyclesAddr]
+	jnl endCycles
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.parsing
 	mov rdx, [rbx]
 	mov r8, rdx
@@ -280,17 +283,17 @@ runCycles.begin:
 	mov rcx, [rdx]
 	mov r9, [r8]
 	cmp r9, 0
-	je begin.firstCycle
+	je firstCycle
 	cmp rcx, r9
-	jnl begin.parsingComplete
+	jnl parsingComplete
 
 
 
 	
-	.firstCycle:	
+	firstCycle:	
 
 	sub rsp, 8*8
-	mov rbx, [begin.parsing]
+	mov rbx, [parsingAddr]
 	add rbx, Parsing.index
 	mov rcx, [rbx]
 	;call [debugNumMsg]
@@ -298,13 +301,13 @@ runCycles.begin:
 
 
 	sub rsp, 8*8
-	mov rbx, [begin.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.refRegistry
 	mov r8, [rbx]
-	mov rbx, [begin.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.repAllocation
 	mov rdx, [rbx]
-	mov rcx, [begin.parsing]
+	mov rcx, [parsingAddr]
 	call parsing.parseRep
 	add rsp, 8*8
 
@@ -314,19 +317,19 @@ runCycles.begin:
 	add rsp, 8*8
 	
 	sub rsp, 8*8
-	mov rbx, [begin.parsing]
+	mov rbx, [parsingAddr]
 	add rbx, Parsing.index
 	mov rcx, [rbx]
 	;call [debugNumMsg]
 	add rsp, 8*8
 		
-	mov rbx, [begin.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.cycleIndex
 	mov rcx, 0
 	mov [rbx], rcx					; Parsing resets cycleIndex when still within Parsing range
 
-	jmp begin.nextCycle				; This must change when working with separators
-	.parsingComplete:
+	jmp nextCycle				; This must change when working with separators
+	parsingComplete:
 
 
 	sub rsp, 8*8
@@ -335,26 +338,26 @@ runCycles.begin:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [begin.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.refRegistry
 	mov rcx, [rbx]
 	;call refRegistry.unprocessedRefsCount
 	add rsp, 8*8
 	cmp rax, 0
-	;je begin.processingComplete
+	;je processingComplete
 
 
 
 
 
 	sub rsp, 8*8
-	mov rbx, [begin.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.refRegistry
 	mov r8, [rbx]
-	mov rbx, [begin.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.repAllocation
 	mov rdx, [rbx]
-	mov rcx, [begin.parsing]
+	mov rcx, [parsingAddr]
 	call processing.processRep
 	add rsp, 8*8
 
@@ -363,25 +366,25 @@ runCycles.begin:
 
 
 
-	.processingComplete:
+	processingComplete:
 
-	mov rbx, [begin.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.cycleIndex
 	mov rcx, [rbx]
 	add rcx, 1b
 	mov [rbx], rcx
 
 
-	jmp begin.nextCycle
+	jmp nextCycle
 	
-	.endCycles:
+	endCycles:
 
-	.endList:
-
-
+	endList:
 
 
-	mov rax, 0;[begin.nextRef]
+
+
+	mov rax, 0;[nextRef]
 
 
 
@@ -400,31 +403,33 @@ runCycles.begin:
 	pop rbp
 
 	retn 0
+end namespace
 
-runCycles.loadReps:
+loadReps:
+namespace loadReps
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*11);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label loadReps.heapAddress qword at rbp-8  
-	label loadReps.handleAllocatedMemory qword at rbp-16
-	label loadReps.list qword at rbp-24 
-	label loadReps.parsing qword at rbp-32
-	label loadReps.repRecordList qword at rbp-40
-	label loadReps.runCyclesAddr qword at rbp-48
-	label loadReps.nextRef qword at rbp-56
-	label loadReps.storageRecord qword at rbp-64
-	label loadReps.lettersIndex qword at rbp-72
-	label loadReps.refRegistry qword at rbp-80
-	label loadReps.newRef qword at rbp-88
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label list qword at rbp-24 
+	label parsingAddr qword at rbp-32
+	label repRecordList qword at rbp-40
+	label runCyclesAddr qword at rbp-48
+	label nextRef qword at rbp-56
+	label storageRecord qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newRef qword at rbp-88
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [loadReps.runCyclesAddr], rcx
+	mov [runCyclesAddr], rcx
 
 
 	and rsp, -32
@@ -447,12 +452,12 @@ runCycles.loadReps:
 	sub rsp, 8*8
 	call [newStorage]
 	add rsp, 8*8
-	mov [loadReps.storageRecord], rax
+	mov [storageRecord], rax
 
 
 
 
-	mov rbx, [loadReps.storageRecord]
+	mov rbx, [storageRecord]
 	add rbx, Record.location
 	mov r8, currentDirLetter;currentDirRepFileExtensionLettersMatcher
 	mov [rbx], r8
@@ -464,27 +469,27 @@ runCycles.loadReps:
 
 	sub rsp, 8*8
 	mov rdx, repFileExtensionLetters
-	mov rcx, [loadReps.storageRecord]
+	mov rcx, [storageRecord]
 	call [retrieveRecordNamesExtension]
 	add rsp, 8*8
-	mov [loadReps.repRecordList], rax
+	mov [repRecordList], rax
 
 
-	mov rbx, [loadReps.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.repRecordList
-	mov rdx, [loadReps.repRecordList]
+	mov rdx, [repRecordList]
 	mov [rbx], rdx	
 
 
 
 
 
-	.endList:
+	endList:
 
 
 
 
-	mov rax, 0;[loadReps.nextRef]
+	mov rax, 0;[nextRef]
 
 
 
@@ -503,31 +508,33 @@ runCycles.loadReps:
 	pop rbp
 
 	retn 0
+end namespace
 
-runCycles.loadRepAllocation:
+loadRepAllocation:
+namespace loadRepAllocation
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*11);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label loadRepAllocation.heapAddress qword at rbp-8  
-	label loadRepAllocation.handleAllocatedMemory qword at rbp-16
-	label loadRepAllocation.list qword at rbp-24 
-	label loadRepAllocation.parsing qword at rbp-32
-	label loadRepAllocation.repRecordList qword at rbp-40
-	label loadRepAllocation.runCyclesAddr qword at rbp-48
-	label loadRepAllocation.storageRecordName qword at rbp-56
-	label loadRepAllocation.storageRecord qword at rbp-64
-	label loadRepAllocation.lettersIndex qword at rbp-72
-	label loadRepAllocation.refRegistry qword at rbp-80
-	label loadRepAllocation.newRef qword at rbp-88
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label list qword at rbp-24 
+	label parsingAddr qword at rbp-32
+	label repRecordList qword at rbp-40
+	label runCyclesAddr qword at rbp-48
+	label storageRecordName qword at rbp-56
+	label storageRecord qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newRef qword at rbp-88
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [loadRepAllocation.runCyclesAddr], rcx
+	mov [runCyclesAddr], rcx
 
 
 	and rsp, -32
@@ -543,89 +550,89 @@ runCycles.loadRepAllocation:
 	sub rsp, 8
 
 
-	mov rbx, [loadRepAllocation.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.repRecordList
 	mov rdx, [rbx]
-	mov [loadRepAllocation.repRecordList], rdx
+	mov [repRecordList], rdx
 
 
 	sub rsp, 8*8
-	mov rcx, [loadRepAllocation.repRecordList]
+	mov rcx, [repRecordList]
 	call [resetIndex]
 	add rsp, 8*8
 	
-	.nextRepRecord:
-	mov rbx, [loadRepAllocation.repRecordList]
+	nextRepRecord:
+	mov rbx, [repRecordList]
 	mov rdx, rbx
 	add rbx, List.index
 	add rdx, List.itemsCount
 	mov rcx, [rbx]
 	mov r8, [rdx]
 	cmp rcx, r8
-	jnl loadRepAllocation.endList
+	jnl endList
 
 
 	sub rsp, 8*8
-	mov rcx, [loadRepAllocation.repRecordList]
+	mov rcx, [repRecordList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [loadRepAllocation.storageRecordName], rax
+	mov [storageRecordName], rax
 
 	sub rsp, 8*8
 	call [newStorage]
 	add rsp, 8*8
-	mov [loadRepAllocation.storageRecord], rax
+	mov [storageRecord], rax
 	
 	
 
-	mov rbx, [loadRepAllocation.storageRecord]
+	mov rbx, [storageRecord]
 	add rbx, Record.builtLocation
-	mov r8, [loadRepAllocation.storageRecordName];repFileExtensionLettersMatcher		; TO-DO: Handle other base dirs
+	mov r8, [storageRecordName];repFileExtensionLettersMatcher		; TO-DO: Handle other base dirs
 	mov [rbx], r8
 
 	
 
 	sub rsp, 8*8
-	mov rcx, [loadRepAllocation.storageRecord]
+	mov rcx, [storageRecord]
 	call [retrieve]
 	add rsp, 8*8
 	
 
 	sub rsp, 8*8
-	mov rbx, [loadRepAllocation.storageRecord]
+	mov rbx, [storageRecord]
 	add rbx, Record.allocAddr
 	mov rcx, [rbx]
 	call [copyLetters]				; allocate first, do not append
 	add rsp, 8*8
 	
-	mov rbx, [loadRepAllocation.repRecordList]
+	mov rbx, [repRecordList]
 	add rbx, List.index
 	mov rcx, [rbx]
 	cmp rcx, 1b
-	je loadRepAllocation.endCopy			; CopyLetters only on first index, index incremented implicitly following getNextItem
+	je endCopy			; CopyLetters only on first index, index incremented implicitly following getNextItem
 
 
 	sub rsp, 8*8
 	mov rdx, rax	
-	mov rbx, [loadRepAllocation.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.repAllocation	
 	mov rcx, [rbx]
 	call [appendLetters]
 	add rsp, 8*8
 
-	.endCopy:
-	mov rbx, [loadRepAllocation.runCyclesAddr]
+	endCopy:
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.repAllocation	
 	mov [rbx], rax
 
 
-	jmp loadRepAllocation.nextRepRecord
-	.endList:
+	jmp nextRepRecord
+	endList:
 
 
 
 
-	mov rax, 0;[loadRepAllocation.nextRef]
+	mov rax, 0;[nextRef]
 
 
 
@@ -644,31 +651,33 @@ runCycles.loadRepAllocation:
 	pop rbp
 
 	retn 0
+end namespace
 
-runCycles.loadRefRegistry:
+loadRefRegistry:
+namespace loadRefRegistry
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*11);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label loadRefRegistry.heapAddress qword at rbp-8  
-	label loadRefRegistry.handleAllocatedMemory qword at rbp-16
-	label loadRefRegistry.list qword at rbp-24 
-	label loadRefRegistry.parsing qword at rbp-32
-	label loadRefRegistry.repRecordList qword at rbp-40
-	label loadRefRegistry.runCyclesAddr qword at rbp-48
-	label loadRefRegistry.nextRef qword at rbp-56
-	label loadRefRegistry.storageRecord qword at rbp-64
-	label loadRefRegistry.lettersIndex qword at rbp-72
-	label loadRefRegistry.refRegistry qword at rbp-80
-	label loadRefRegistry.newRef qword at rbp-88
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label list qword at rbp-24 
+	label parsingAddr qword at rbp-32
+	label repRecordList qword at rbp-40
+	label runCyclesAddr qword at rbp-48
+	label nextRef qword at rbp-56
+	label storageRecord qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newRef qword at rbp-88
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [loadRefRegistry.runCyclesAddr], rcx
+	mov [runCyclesAddr], rcx
 
 	and rsp, -32
 	push rbx 
@@ -683,191 +692,191 @@ runCycles.loadRefRegistry:
 	sub rsp, 8
 
 
-	mov rbx, [loadRefRegistry.runCyclesAddr]
+	mov rbx, [runCyclesAddr]
 	add rbx, RunCycles.refRegistry
 	mov rdx, [rbx]
-	mov [loadRefRegistry.refRegistry], rdx
+	mov [refRegistryAddr], rdx
 	
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [loadRefRegistry.newRef], rax
+	mov [newRef], rax
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.ref
 	mov r9, storeFileDefinedRefLetters		; Ref ref
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.paramCount				; Param count
 	mov r9, 10b
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.definedRefFlags			; definedRefFlags
 	mov r9, 1b								; DEFINED_REF_STORE_FILE
 	mov [rbx], r9
 
 	sub rsp, 8*8
-	mov rdx, [loadRefRegistry.newRef]
-	mov rcx, [loadRefRegistry.refRegistry]
+	mov rdx, [newRef]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredDefinedRef
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [loadRefRegistry.newRef], rax
+	mov [newRef], rax
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.ref
 	mov r9, restoreFileDefinedRefLetters		; Ref ref
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.paramCount				; Param count
 	mov r9, 10b
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.definedRefFlags			; definedRefFlags
 	mov r9, 100000b							; DEFINED_REF_RESTORE_FILE
 	mov [rbx], r9
 
 	sub rsp, 8*8
-	mov rdx, [loadRefRegistry.newRef]
-	mov rcx, [loadRefRegistry.refRegistry]
+	mov rdx, [newRef]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredDefinedRef
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [loadRefRegistry.newRef], rax
+	mov [newRef], rax
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.ref
 	mov r9, retrieveFileDefinedRefLetters		; Ref ref
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.paramCount				; Param count
 	mov r9, 10b							; DEFINED_REF_RETRIEVE_FILE
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.definedRefFlags			; definedRefFlags
 	mov r9, 10b
 	mov [rbx], r9
 
 	sub rsp, 8*8
-	mov rdx, [loadRefRegistry.newRef]
-	mov rcx, [loadRefRegistry.refRegistry]
+	mov rdx, [newRef]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredDefinedRef
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [loadRefRegistry.newRef], rax
+	mov [newRef], rax
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.ref
 	mov r9, lettersDefinedRefLetters		; Ref ref
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.paramCount				; Param count
 	mov r9, 1b
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.definedRefFlags			; definedRefFlags
 	mov r9, 100b							; DEFINED_REF_LETTERS
 	mov [rbx], r9
 
 	sub rsp, 8*8
-	mov rdx, [loadRefRegistry.newRef]
-	mov rcx, [loadRefRegistry.refRegistry]
+	mov rdx, [newRef]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredDefinedRef
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [loadRefRegistry.newRef], rax
+	mov [newRef], rax
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.ref
 	mov r9, lettersSpaceDefinedRefLetters		; Ref ref
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.paramCount				; Param count
 	mov r9, 1b
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.definedRefFlags			; definedRefFlags
 	mov r9, 100b
 	mov [rbx], r9
 
 	sub rsp, 8*8
-	mov rdx, [loadRefRegistry.newRef]
-	mov rcx, [loadRefRegistry.refRegistry]
+	mov rdx, [newRef]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredDefinedRef
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [loadRefRegistry.newRef], rax
+	mov [newRef], rax
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.ref
 	mov r9, replaceLettersListDefinedRefLetters	; Ref ref
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.paramCount				; Param count
 	mov r9, 11b
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.definedRefFlags			; definedRefFlags
 	mov r9, 1000b
 	mov [rbx], r9
 
 	sub rsp, 8*8
-	mov rdx, [loadRefRegistry.newRef]
-	mov rcx, [loadRefRegistry.refRegistry]
+	mov rdx, [newRef]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredDefinedRef
 	add rsp, 8*8
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [loadRefRegistry.newRef], rax
+	mov [newRef], rax
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.ref
 	mov r9, separatorDefinedRefLetters		; Ref ref
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.paramCount				; Param count
 	mov r9, 1b
 	mov [rbx], r9
 
-	mov rbx, [loadRefRegistry.newRef]
+	mov rbx, [newRef]
 	add rbx, Ref.definedRefFlags			; definedRefFlags
 	mov r9, 10000b
 	mov [rbx], r9
 
 	sub rsp, 8*8
-	mov rdx, [loadRefRegistry.newRef]
-	mov rcx, [loadRefRegistry.refRegistry]
+	mov rdx, [newRef]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredDefinedRef
 	add rsp, 8*8
 
@@ -875,7 +884,7 @@ runCycles.loadRefRegistry:
 
 
 
-	mov rax, 0;[loadRefRegistry.nextRef]
+	mov rax, 0;[nextRef]
 
 
 
@@ -894,7 +903,7 @@ runCycles.loadRefRegistry:
 	pop rbp
 
 	retn 0
-
+end namespace
 
 
 end namespace
