@@ -17,10 +17,10 @@ PREPOSITION_FROM = 1
 PREPOSITION_AS = 2
 PREPOSITION_DUP = 3
 
-control_characters db 0,9,0Ah,0Dh,1Ah,20h,3Bh
+control_characters db 0,9,0Ah,0Dh,1Ah,20h
 .count = $-control_characters
 
-syntactical_characters db '+-/*=<>()[]{}:?!,.|&~#`\'
+syntactical_characters db '+-/*=<>()[]{}:?!,.|&~#`\;'
 .count = $-syntactical_characters
 
 include_variable db 'INCLUDE',0
@@ -157,6 +157,9 @@ symbols:
   db 4,'used',SYMCLASS_EXPRESSION,VALTYPE_NATIVE_COMPARATOR,VAL_INTERNAL,0
   dd check_if_used
 
+  db 8,'definite',SYMCLASS_EXPRESSION,VALTYPE_NATIVE_COMPARATOR,VAL_INTERNAL,0
+  dd check_if_defined_earlier
+
   db 6,'eqtype',SYMCLASS_EXPRESSION,VALTYPE_NATIVE_COMPARATOR,VAL_INTERNAL,0
   dd check_if_type_equal
 
@@ -232,11 +235,35 @@ symbols:
   db 7,'restruc',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,SYMCLASS_STRUCTURE
   dd restore_variables
 
+  db 7,'mvmacro',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,SYMCLASS_INSTRUCTION
+  dd move_variable_values
+
+  db 7,'mvstruc',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,SYMCLASS_STRUCTURE
+  dd move_variable_values
+
+  db 15,'calminstruction',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL + VAL_UNCONDITIONAL,0
+  dd define_calm_instruction
+
+  db 14,'removecomments',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd choose_to_remove_comments
+
+  db 14,'retaincomments',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd choose_to_retain_comments
+
+  db 12,'combinelines',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd choose_to_combine_lines
+
+  db 12,'isolatelines',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd choose_to_isolate_lines
+
   db 3,'org',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
   dd set_base_address
 
   db 7,'section',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
   dd begin_new_section
+
+  db 10,'restartout',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd restart_output
 
   db 6,'format',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
   dd format_directive
@@ -385,6 +412,12 @@ symbols:
   db 2,'%t',SYMCLASS_EXPRESSION,VALTYPE_NATIVE_FUNCTION,VAL_INTERNAL,0
   dd current_time_value
 
+  db 8,'__time__',SYMCLASS_EXPRESSION,VALTYPE_NATIVE_FUNCTION,VAL_INTERNAL,0
+  dd current_time_value
+
+  db 10,'__source__',SYMCLASS_EXPRESSION,VALTYPE_NATIVE_FUNCTION,VAL_INTERNAL,0
+  dd main_file_name_value
+
   db 8,'__file__',SYMCLASS_EXPRESSION,VALTYPE_NATIVE_FUNCTION,VAL_INTERNAL,0
   dd current_file_name_value
 
@@ -531,6 +564,56 @@ db 6,'format'
 
   db 0
 
+db 15,'calminstruction'
+
+  db 5,'local',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_local
+
+  db 7,'arrange',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_arrange
+
+  db 5,'match',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_match
+
+  db 8,'assemble',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_assemble
+
+  db 9,'transform',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_transform
+
+  db 9,'stringify',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_stringify
+
+  db 7,'publish',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_publish
+
+  db 4,'take',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_take
+
+  db 7,'compute',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_compute
+
+  db 5,'check',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_check
+
+  db 4,'jyes',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_jyes
+
+  db 3,'jno',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_jno
+
+  db 4,'jump',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_jump
+
+  db 4,'exit',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_exit
+
+  db 3,'end',SYMCLASS_INSTRUCTION,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL + VAL_UNCONDITIONAL,0
+  dd alm_end
+
+  db 15,'calminstruction',SYMCLASS_STRUCTURE,VALTYPE_NATIVE_COMMAND,VAL_INTERNAL,0
+  dd alm_end
+
 db 0
 
 zero_value dd 0
@@ -539,3 +622,9 @@ zero_value dd 0
 singular_value dd 1
 	       db 1
 	       dd 0
+
+subtraction_operator dd EXPR_OPERATOR,calculate_sub
+		     dd 0
+
+area_metadata dd 2
+	      db '::'

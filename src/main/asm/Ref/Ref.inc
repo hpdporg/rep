@@ -44,15 +44,16 @@ section '.text' code readable writeable executable align 16
 
 ref:
 namespace ref
-ref.new:
+new:
+namespace new
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*2);+(8*0)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label new.heapAddress qword at rbp-8  
-	label new.handleAllocatedMemory qword at rbp-16
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -75,7 +76,7 @@ ref.new:
 
 	sub rsp, 8*4
 	call [GetProcessHeap]
-	mov [new.heapAddress], rax
+	mov [heapAddress], rax
 	add rsp, 8*4
 	
 
@@ -86,46 +87,46 @@ ref.new:
 	sub rsp, 8*4
 	mov r8, rcx		
 	mov rdx, 000001000b
-	mov rcx, [new.heapAddress]
+	mov rcx, [heapAddress]
 	call [ HeapAlloc] 
-	mov [new.handleAllocatedMemory], rax
+	mov [handleAllocatedMemory], rax
 	add rsp, 8*4
 
 
 
 
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Ref.ref
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Ref.flags
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Ref.unprocessed
 	mov rax, 1
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Ref.paramCount
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Ref.repIndex
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Ref.valueAlloc
 	mov rax, 0
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Ref.listAlloc
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Ref.definedRefFlags
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Ref.list
 	sub rsp, 8*8
 	call [newList]
@@ -135,21 +136,21 @@ ref.new:
 
 
 
-	;lea rax, [new.list]
-	;lea rcx, [new.list.indexedItemIndex]
+	;lea rax, [list]
+	;lea rcx, [list.indexedItemIndex]
 
 	;sub rcx, rax
 	;add rcx, 1000b
 
 	;cld
 
-	;lea rsi, [new.list]
-	;mov rdi, [storage.new.handleAllocatedMemory]
+	;lea rsi, [list]
+	;mov rdi, [storage.handleAllocatedMemory]
 
 	;rep movsb
 
 
-	mov rax, [new.handleAllocatedMemory]
+	mov rax, [handleAllocatedMemory]
 
 
 	add rsp, 8	
@@ -167,7 +168,7 @@ ref.new:
 	pop rbp
 
 	retn 0
-
+end namespace
 
 
 end namespace

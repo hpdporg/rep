@@ -1,5 +1,6 @@
 
-_macro db 'macro ',0
+_macro_source db 'macro ',0
+_preprocessed_source db 'assemble ',0
 _unnamed_source db '?',0
 _memory_source db 'eval',0
 _space db ' ',0
@@ -7,6 +8,7 @@ _line_number_prefix db ' [',0
 _line_number_suffix db ']',0
 _line_content_prefix db ':'
 _line_segment_prefix db LINE_FEED,9,0
+_calm_source db ' (CALM)',0
 _single_quote db 27h,0
 _preprocessed_text_prefix db 'Processed: ',0
 _error_prefix db 'Error: ',0
@@ -28,7 +30,6 @@ _invalid_symbol db "invalid use of symbol",0
 _conflicting_definition db "definition in conflict with already defined symbol",0
 _cannot_apply_to_constant db "cannot apply this operation to constant",0
 _symbolic_self_reference db "detected a circular reference of symbolic values",0
-_unconditional_instruction_conflict db "unconditional instruction must remain unconditional",0
 _unexpected_instruction db "unexpected instruction",0
 _missing_end_directive db "missing end directive",0
 _missing_closing_chevron db "missing closing chevron",0
@@ -48,5 +49,7 @@ _address_out_of_range db "address out of range",0
 _invalid_area db "invalid or inaccessible addressing area",0
 _stack_limit_exceeded db "exceeded the maximum allowed depth of stack",0
 _repeated_declaration db "choice has already been declared",0
+_undefined_jump_target db "the target of the jump is not defined in this instruction",0
+_invalid_symbol_value db "the value of symbol '%' is not valid for this use",0
 
 _not_implemented_yet db "this feature is not implemented yet",0

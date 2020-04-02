@@ -80,17 +80,19 @@ section '.data' data readable writeable align 16
 section '.text' code readable writeable executable align 16
 
 
+
 parsing:
 namespace parsing
-parsing.new:
+new:
+namespace new
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*2);+(8*0)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label new.heapAddress qword at rbp-8  
-	label new.handleAllocatedMemory qword at rbp-16
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -113,7 +115,7 @@ parsing.new:
 
 	sub rsp, 8*4
 	call [GetProcessHeap]
-	mov [new.heapAddress], rax
+	mov [heapAddress], rax
 	add rsp, 8*4
 	
 
@@ -124,68 +126,68 @@ parsing.new:
 	sub rsp, 8*4
 	mov r8, rcx		
 	mov rdx, 000001000b
-	mov rcx, [new.heapAddress]
+	mov rcx, [heapAddress]
 	call [ HeapAlloc] 
-	mov [new.handleAllocatedMemory], rax
+	mov [handleAllocatedMemory], rax
 	add rsp, 8*4
 
 
 
 
 
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.delimiter
 	mov rdx, tabLetters
 	mov [rbx], rdx
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.baseRepOffset
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.repOffset
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.endDelimiter
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.index
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.unParsedIndex
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.lineRefCount
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.multilineRefCount
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.parsingRefs
 	sub rsp, 8*8
 	call [newList]
 	add rsp, 8*8
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.nestedParsingRefs
 	sub rsp, 8*8
 	call [newList]
 	add rsp, 8*8
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.parsingDefinedRef
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.flags
 	mov rax, 0
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, Parsing.endIndex
 	mov rax, 0
 	mov [rbx], rax
@@ -193,21 +195,21 @@ parsing.new:
 
 
 
-	;lea rax, [new.list]
-	;lea rcx, [new.list.indexedItemIndex]
+	;lea rax, [list]
+	;lea rcx, [list.indexedItemIndex]
 
 	;sub rcx, rax
 	;add rcx, 1000b
 
 	;cld
 
-	;lea rsi, [new.list]
-	;mov rdi, [storage.new.handleAllocatedMemory]
+	;lea rsi, [list]
+	;mov rdi, [storage.handleAllocatedMemory]
 
 	;rep movsb
 
 
-	mov rax, [new.handleAllocatedMemory]
+	mov rax, [handleAllocatedMemory]
 
 
 	add rsp, 8	
@@ -225,29 +227,31 @@ parsing.new:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.getNext:
+getNext:
+namespace getNext
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*8);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label getNext.heapAddress qword at rbp-8  
-	label getNext.handleAllocatedMemory qword at rbp-16
-	label getNext.parsing qword at rbp-24 
-	label getNext.matchIndex qword at rbp-32
-	label getNext.matches qword at rbp-40
-	label getNext.letters qword at rbp-48
-	label getNext.matchList qword at rbp-56
-	label getNext.parsedLetters qword at rbp-64
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label matches qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label matchList qword at rbp-56
+	label parsedLetters qword at rbp-64
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [getNext.parsing], rcx
-	mov [getNext.letters], rdx	
+	mov [parsing], rcx
+	mov [lettersAddr], rdx	
 
 	and rsp, -32
 	push rbx 
@@ -265,36 +269,36 @@ parsing.getNext:
 
 	sub rsp, 8*4
 	call [GetProcessHeap]
-	mov [getNext.heapAddress], rax
+	mov [heapAddress], rax
 	add rsp, 8*4
 
 
 
 
 	mov rcx, 0
-	mov [getNext.parsedLetters], rcx		; Begin as 0
-	mov [getNext.matchIndex], rcx			; Begin as 0
+	mov [parsedLetters], rcx		; Begin as 0
+	mov [matchIndex], rcx			; Begin as 0
 
 	sub rsp, 8*8
 	call [newMatches]
 	add rsp, 8*8
-	mov [getNext.matches], rax
+	mov [matches], rax
 
-	mov rbx, [getNext.matches]
+	mov rbx, [matches]
 	add rbx, Matches.flags
 	mov rcx, 10101b
 	mov [rbx], rcx
-	mov rbx, [getNext.matches]
+	mov rbx, [matches]
 	add rbx, Matches.transformFlags
 	mov rcx, 100b
 	mov [rbx], rcx
 
 
 	sub rsp, 8*8
-	mov rbx, [getNext.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.delimiter
 	mov rdx, [rbx]
-	mov rbx, [getNext.matches]
+	mov rbx, [matches]
 	add rbx, Matches.containsRangeList
 	mov rcx, [rbx]
 	call [newLastItem]
@@ -302,79 +306,79 @@ parsing.getNext:
 
 
 	sub rsp, 8*8
-	mov rbx, [getNext.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov r8, [rbx]
-	mov rdx, [getNext.letters]
+	mov rdx, [lettersAddr]
 	add rdx, r8
-	mov rcx, [getNext.matches]
+	mov rcx, [matches]
 	call [getMatches]
 	add rsp, 8*8
-	mov [getNext.matchList], rax
+	mov [matchList], rax
 
 
-	mov rbx,[getNext.matchList]
+	mov rbx,[matchList]
 	add rbx, List.itemsCount
 	mov rcx, 0
 	mov rdx, [rbx]
 	cmp rcx, rdx
-	je getNext.endParsing			; No next
+	je endParsing			; No next
 
 	
 	sub rsp, 8*8
-	mov rcx, [getNext.matchList]
+	mov rcx, [matchList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [getNext.matchIndex], rax
+	mov [matchIndex], rax
 
 
 	sub rsp, 8*8
-	mov r8, [getNext.matchIndex]
+	mov r8, [matchIndex]
 	sub r8, 1b					; Do not include delimiter
-	mov rbx, [getNext.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov rdx, [rbx]
 	add r8, rdx
-	mov rbx, [getNext.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov rdx, [rbx]
-	mov rcx, [getNext.letters]
+	mov rcx, [lettersAddr]
 	call [lettersBetweenIndices]	
 	add rsp, 8*8
-	mov [getNext.parsedLetters], rax
+	mov [parsedLetters], rax
 
 
 	
 	
-	.endParsing:
+	endParsing:
 
 	sub rsp, 8*8
-	mov rbx, [getNext.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.delimiter
 	mov rcx, [rbx]
 	call [letterLength]
 	add rsp, 8*8
-	mov r8, [getNext.matchIndex]
-	mov rbx, [getNext.parsing]
+	mov r8, [matchIndex]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov rdx, [rbx]
-	mov rcx, [getNext.matchIndex]
+	mov rcx, [matchIndex]
 	add rdx, rcx
 	add rdx, rax				; Delimiter length
 	mov [rbx], rdx
 
 
-	.end:
+	completed:
 
 	sub rsp, 8*8
-	mov r8, [getNext.matches]
+	mov r8, [matches]
 	mov rdx, 0
-	mov rcx, [getNext.heapAddress]
+	mov rcx, [heapAddress]
 	call [HeapFree]
 	add rsp, 8*8
 
 
-	mov rax, [getNext.parsedLetters]
+	mov rax, [parsedLetters]
 
 
 
@@ -393,32 +397,34 @@ parsing.getNext:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.getNextMatchOrDelimiter:
+getNextMatchOrDelimiter:
+namespace getNextMatchOrDelimiter
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*11);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label getNextMatchOrDelimiter.heapAddress qword at rbp-8  
-	label getNextMatchOrDelimiter.handleAllocatedMemory qword at rbp-16
-	label getNextMatchOrDelimiter.parsing qword at rbp-24 
-	label getNextMatchOrDelimiter.matchIndex qword at rbp-32
-	label getNextMatchOrDelimiter.matches qword at rbp-40
-	label getNextMatchOrDelimiter.letters qword at rbp-48
-	label getNextMatchOrDelimiter.matchList qword at rbp-56
-	label getNextMatchOrDelimiter.parsedLetters qword at rbp-64
-	label getNextMatchOrDelimiter.parsePassFlag qword at rbp-72
-	label getNextMatchOrDelimiter.nextNewlineIndex qword at rbp-80
-	label getNextMatchOrDelimiter.nextDelimiterIndex qword at rbp-88
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label matches qword at rbp-40
+	label letters qword at rbp-48
+	label matchList qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label parsePassFlag qword at rbp-72
+	label nextNewlineIndex qword at rbp-80
+	label nextDelimiterIndex qword at rbp-88
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [getNextMatchOrDelimiter.parsing], rcx
-	mov [getNextMatchOrDelimiter.letters], rdx	
+	mov [parsing], rcx
+	mov [letters], rdx	
 
 	and rsp, -32
 	push rbx 
@@ -436,47 +442,47 @@ parsing.getNextMatchOrDelimiter:
 
 	sub rsp, 8*4
 	call [GetProcessHeap]
-	mov [getNextMatchOrDelimiter.heapAddress], rax
+	mov [heapAddress], rax
 	add rsp, 8*4
 
 
 
 
 	mov rcx, 0
-	mov [getNextMatchOrDelimiter.parsedLetters], rcx		; Begin as 0
-	mov [getNextMatchOrDelimiter.matchIndex], rcx			; Begin as 0
-	mov [getNextMatchOrDelimiter.parsePassFlag], rcx			; 0 delimiter, then newline if no next delimiter
+	mov [parsedLetters], rcx		; Begin as 0
+	mov [matchIndex], rcx			; Begin as 0
+	mov [parsePassFlag], rcx			; 0 delimiter, then newline if no next delimiter
 
-	.nextMatchAttempt:
+	nextMatchAttempt:
 
 	sub rsp, 8*8
 	call [newMatches]
 	add rsp, 8*8
-	mov [getNextMatchOrDelimiter.matches], rax
+	mov [matches], rax
 
-	mov rbx, [getNextMatchOrDelimiter.matches]
+	mov rbx, [matches]
 	add rbx, Matches.flags
 	mov rcx, 10101b
 	mov [rbx], rcx
-	mov rbx, [getNextMatchOrDelimiter.matches]
+	mov rbx, [matches]
 	add rbx, Matches.transformFlags
 	mov rcx, 100b
 	mov [rbx], rcx
 
-	mov r8, [getNextMatchOrDelimiter.parsePassFlag]
+	mov r8, [parsePassFlag]
 	cmp r8, 0
-	je getNextMatchOrDelimiter.useDelimiter
+	je useDelimiter
 	mov rdx, [newlineLetters]							;	newlineUnixLetters
 
-	jmp getNextMatchOrDelimiter.newContainsRangeItem
-	.useDelimiter:
+	jmp newContainsRangeItem
+	useDelimiter:
 
-	mov rbx, [getNextMatchOrDelimiter.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.delimiter
 	mov rdx, [rbx]
-	.newContainsRangeItem:
+	newContainsRangeItem:
 	sub rsp, 8*8
-	mov rbx, [getNextMatchOrDelimiter.matches]
+	mov rbx, [matches]
 	add rbx, Matches.containsRangeList
 	mov rcx, [rbx]
 	call [newLastItem]
@@ -484,47 +490,47 @@ parsing.getNextMatchOrDelimiter:
 
 
 	sub rsp, 8*8
-	mov rbx, [getNextMatchOrDelimiter.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov r8, [rbx]
-	mov rdx, [getNextMatchOrDelimiter.letters]
+	mov rdx, [letters]
 	add rdx, r8
-	mov rcx, [getNextMatchOrDelimiter.matches]
+	mov rcx, [matches]
 	call [getMatches]
 	add rsp, 8*8
-	mov [getNextMatchOrDelimiter.matchList], rax
+	mov [matchList], rax
 
 
-	mov rbx,[getNextMatchOrDelimiter.matchList]
+	mov rbx,[matchList]
 	add rbx, List.itemsCount
 	mov rcx, 0
 	mov rdx, [rbx]
 	cmp rcx, rdx
-	jne getNextMatchOrDelimiter.hasNext			; No next
+	jne hasNext			; No next
 
-	mov rcx, [getNextMatchOrDelimiter.parsePassFlag]
+	mov rcx, [parsePassFlag]
 	cmp rcx, 0
-	jne getNextMatchOrDelimiter.endParsing			; No next, already tried delimiter and newline in match
+	jne endParsing			; No next, already tried delimiter and newline in match
 
 	mov rdx, 1b						; Newline instead of tab this time
-	mov [getNextMatchOrDelimiter.parsePassFlag], rdx
+	mov [parsePassFlag], rdx
 
 	sub rsp, 8*8
-	mov r8, [getNextMatchOrDelimiter.matches]
+	mov r8, [matches]
 	mov rdx, 0
-	mov rcx, [getNextMatchOrDelimiter.heapAddress]
+	mov rcx, [heapAddress]
 	call [HeapFree]
 	add rsp, 8*8
 
-	jmp getNextMatchOrDelimiter.nextMatchAttempt		; Now try newline
+	jmp nextMatchAttempt		; Now try newline
 
-	.hasNext:						; TO-DO: Simplify this section (delimiter versus newline nearest determination)
+	hasNext:						; TO-DO: Simplify this section (delimiter versus newline nearest determination)
 
 
 	sub rsp, 8*8
 	mov rdx, [newlineLetters]							;	newlineUnixLetters	newlineUnixLetters;newlineWinLetters
-	mov rcx, [getNextMatchOrDelimiter.letters]
-	mov rbx, [getNextMatchOrDelimiter.parsing]
+	mov rcx, [letters]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov r8, [rbx]
 	add rcx, r8
@@ -533,26 +539,26 @@ parsing.getNextMatchOrDelimiter:
 	mov rcx, 0
 	mov rdx, rax
 	cmp rdx, rcx	
-	je getNextMatchOrDelimiter.noNextNewline			; No newline
+	je noNextNewline			; No newline
 
 
 
 	sub rsp, 8*8
 	mov rdx, [newlineLetters]							;	newlineUnixLetters;newlineWinLetters
-	mov rcx, [getNextMatchOrDelimiter.letters]
-	mov rbx, [getNextMatchOrDelimiter.parsing]
+	mov rcx, [letters]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov r8, [rbx]
 	add rcx, r8
 	call [getNextMatchIndex]
 	add rsp, 8*8
-	mov [getNextMatchOrDelimiter.nextNewlineIndex], rax
+	mov [nextNewlineIndex], rax
 
 	sub rsp, 8*8
-	mov rcx, [getNextMatchOrDelimiter.matchList]
+	mov rcx, [matchList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [getNextMatchOrDelimiter.matchIndex], rax
+	mov [matchIndex], rax
 
 
 	sub rsp, 8*8
@@ -562,77 +568,77 @@ parsing.getNextMatchOrDelimiter:
 
 
 	sub rsp, 8*8
-	mov rcx, [getNextMatchOrDelimiter.matchIndex]
+	mov rcx, [matchIndex]
 	;call [debugNumMsg]
 	add rsp, 8*8
 
 
 	sub rsp, 8*8
-	mov rcx, [getNextMatchOrDelimiter.nextNewlineIndex]
+	mov rcx, [nextNewlineIndex]
 	;call [debugNumMsg]
 	add rsp, 8*8
 
-	mov rcx, [getNextMatchOrDelimiter.matchIndex]
-	mov rdx, [getNextMatchOrDelimiter.nextNewlineIndex]
+	mov rcx, [matchIndex]
+	mov rdx, [nextNewlineIndex]
 	cmp rcx, rdx
-	jle getNextMatchOrDelimiter.matchIndexDetermined
+	jle matchIndexDetermined
 
-	mov [getNextMatchOrDelimiter.matchIndex], rdx
-	jmp getNextMatchOrDelimiter.matchIndexDetermined		; When newline comes before delimiter, use it instead
+	mov [matchIndex], rdx
+	jmp matchIndexDetermined		; When newline comes before delimiter, use it instead
 
-	.noNextNewline:
+	noNextNewline:
 
 	
 	sub rsp, 8*8
-	mov rcx, [getNextMatchOrDelimiter.matchList]
+	mov rcx, [matchList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [getNextMatchOrDelimiter.matchIndex], rax
+	mov [matchIndex], rax
 
-	.matchIndexDetermined:
+	matchIndexDetermined:
 
 
 	sub rsp, 8*8
-	mov r8, [getNextMatchOrDelimiter.matchIndex]
+	mov r8, [matchIndex]
 	sub r8, 1b					; Do not include delimiter
-	mov rbx, [getNextMatchOrDelimiter.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov rdx, [rbx]
 	add r8, rdx
-	mov rbx, [getNextMatchOrDelimiter.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov rdx, [rbx]
-	mov rcx, [getNextMatchOrDelimiter.letters]
+	mov rcx, [letters]
 	call [lettersBetweenIndices]	
 	add rsp, 8*8
-	mov [getNextMatchOrDelimiter.parsedLetters], rax
+	mov [parsedLetters], rax
 
 
 	
 	
-	.endParsing:
+	endParsing:
 
 
-	mov r8, [getNextMatchOrDelimiter.matchIndex]
-	mov rbx, [getNextMatchOrDelimiter.parsing]
+	mov r8, [matchIndex]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov rdx, [rbx]
-	mov rcx, [getNextMatchOrDelimiter.matchIndex]
+	mov rcx, [matchIndex]
 	add rdx, rcx						; Do not skip delimiter
 	mov [rbx], rdx
 
 
-	.end:
+	completed:
 
 	sub rsp, 8*8
-	mov r8, [getNextMatchOrDelimiter.matches]
+	mov r8, [matches]
 	mov rdx, 0
-	mov rcx, [getNextMatchOrDelimiter.heapAddress]
+	mov rcx, [heapAddress]
 	call [HeapFree]
 	add rsp, 8*8
 
 
-	mov rax, [getNextMatchOrDelimiter.parsedLetters]
+	mov rax, [parsedLetters]
 
 
 
@@ -651,37 +657,39 @@ parsing.getNextMatchOrDelimiter:
 	pop rbp
 
 	retn 0
+end namespace
 
 ; parseRep can call parseNext as many times as it needs in order to traverse the Rep
 ; It also can call buildRep when there is a new Ref required
-parsing.parseRep:
+parseRep:
+namespace parseRep
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*13);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label parseRep.heapAddress qword at rbp-8  
-	label parseRep.handleAllocatedMemory qword at rbp-16
-	label parseRep.parsing qword at rbp-24 
-	label parseRep.matchIndex qword at rbp-32
-	label parseRep.newRef qword at rbp-40
-	label parseRep.letters qword at rbp-48
-	label parseRep.nextNewlineIndex qword at rbp-56
-	label parseRep.parsedLetters qword at rbp-64
-	label parseRep.lettersIndex qword at rbp-72
-	label parseRep.refRegistry qword at rbp-80
-	label parseRep.newLineLetterLength qword at rbp-88
-	label parseRep.matchingStartIndex qword at rbp-96
-	label parseRep.nextRef qword at rbp-104
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRef qword at rbp-40
+	label letters qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistry qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label nextRef qword at rbp-104
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [parseRep.parsing], rcx
-	mov [parseRep.letters], rdx	
-	mov [parseRep.refRegistry], r8
+	mov [parsing], rcx
+	mov [letters], rdx	
+	mov [refRegistry], r8
 
 	and rsp, -32
 	push rbx 
@@ -699,49 +707,49 @@ parsing.parseRep:
 	
 	
 	sub rsp, 8*8
-	mov rbx, [parseRep.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov rcx, [rbx]
 	;call [debugNumMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [parseRep.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.endIndex
 	mov rcx, [rbx]
 	;call [debugNumMsg]
 	add rsp, 8*8
 
 
-	mov rbx, [parseRep.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.endIndex
 	mov rcx, [rbx]
 	mov rdx, 0
 	cmp rcx, rdx
-	jne parseRep.endIndexExists			; Define Parsing endIndex
+	jne endIndexExists			; Define Parsing endIndex
 
 
 
 
 	sub rsp, 8*8
-	mov rcx, [parseRep.letters]
+	mov rcx, [letters]
 	call [letterLength]
 	add rsp, 8*8
-	mov rbx, [parseRep.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.endIndex
 	mov [rbx], rax
 
-	.endIndexExists:				; Parsing endIndex already defined
+	endIndexExists:				; Parsing endIndex already defined
 
-	.nextVal:
-	mov rbx, [parseRep.parsing]
+	nextVal:
+	mov rbx, [parsing]
 	mov rdx, rbx
 	add rdx, Parsing.index
 	mov rcx, [rdx]
 	add rbx, Parsing.endIndex
 	mov r8, [rbx]
 	cmp rcx, r8
-	jnle parseRep.end				; Don't go past end
+	jnle completed				; Don't go past end
 
 	sub rsp, 8*8
 	mov rcx, indexMsg
@@ -750,7 +758,7 @@ parsing.parseRep:
 
 
 	sub rsp, 8*8
-	mov rbx, [parseRep.parsing]
+	mov rbx, [parsing]
 	mov rdx, rbx
 	add rdx, Parsing.index
 	mov rcx, [rdx]
@@ -770,19 +778,19 @@ parsing.parseRep:
 
 
 	sub rsp, 8*8
-	mov r8, [parseRep.refRegistry]
-	mov rdx, [parseRep.letters]
-	mov rcx, [parseRep.parsing]
+	mov r8, [refRegistry]
+	mov rdx, [letters]
+	mov rcx, [parsing]
 	call next
 	add rsp, 8*8
-	mov [parseRep.nextRef], rax
+	mov [nextRef], rax
 
 
 
 	sub rsp, 8*8
-	mov r8, [parseRep.refRegistry]
-	mov rdx, [parseRep.nextRef]
-	mov rcx, [parseRep.parsing]
+	mov r8, [refRegistry]
+	mov rdx, [nextRef]
+	mov rcx, [parsing]
 	call buildRep
 	add rsp, 8*8
 	
@@ -796,11 +804,11 @@ parsing.parseRep:
 	
 
 
-	.end:
+	completed:
 
 	
 
-	;dbgmov rax,0;[parseRep.parsedLetters]
+	;dbgmov rax,0;[parsedLetters]
 
 
 
@@ -819,37 +827,39 @@ parsing.parseRep:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.next:
+next:
+namespace next
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*14);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label next.heapAddress qword at rbp-8  
-	label next.handleAllocatedMemory qword at rbp-16
-	label next.parsing qword at rbp-24 
-	label next.matchIndex qword at rbp-32
-	label next.newRef qword at rbp-40
-	label next.letters qword at rbp-48
-	label next.nextNewlineIndex qword at rbp-56
-	label next.parsedLetters qword at rbp-64
-	label next.lettersIndex qword at rbp-72
-	label next.refRegistry qword at rbp-80
-	label next.newLineLetterLength qword at rbp-88
-	label next.parsedLettersLength qword at rbp-96
-	label next.nextRef qword at rbp-104
-	label next.beforeMatchIndex qword at rbp-112
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRef qword at rbp-40
+	label letters qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistry qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label parsedLettersLength qword at rbp-96
+	label nextRef qword at rbp-104
+	label beforeMatchIndex qword at rbp-112
 
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [next.parsing], rcx
-	mov [next.letters], rdx	
-	mov [next.refRegistry], r8
+	mov [parsing], rcx
+	mov [letters], rdx	
+	mov [refRegistry], r8
 
 	and rsp, -32
 	push rbx 
@@ -870,10 +880,10 @@ parsing.next:
 
 
 	mov rcx, 0
-	mov [next.nextRef], rcx			; Begin as 0
+	mov [nextRef], rcx			; Begin as 0
 
 
-	mov rbx, [next.parsing]
+	mov rbx, [parsing]
 	mov rdx, rbx
 	add rbx, Parsing.index
 	add rdx, Parsing.unParsedIndex
@@ -883,8 +893,8 @@ parsing.next:
 	
 	sub rsp, 8*8
 	mov rdx, [newlineLetters]							;	newlineUnixLetters;newlineWinLetters
-	mov rcx, [next.letters]
-	mov rbx, [next.parsing]
+	mov rcx, [letters]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov r8, [rbx]
 	add rcx, r8
@@ -893,29 +903,29 @@ parsing.next:
 	mov rcx, 0
 	mov rdx, rax
 	cmp rdx, rcx	
-	je next.notAtNewLine			; No newline
+	je notAtNewLine			; No newline
 
 
 
 	sub rsp, 8*8
 	mov rdx, [newlineLetters]							;	newlineUnixLetters;newlineWinLetters
-	mov rcx, [next.letters]
-	mov rbx, [next.parsing]
+	mov rcx, [letters]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov r8, [rbx]
 	add rcx, r8
 	call [getNextMatchIndex]
 	add rsp, 8*8
-	mov [next.nextNewlineIndex], rax
+	mov [nextNewlineIndex], rax
 
 
 
 	mov rcx, 0
-	mov rdx, [next.nextNewlineIndex]
+	mov rdx, [nextNewlineIndex]
 	cmp rdx, rcx				; At newline
-	je next.atNewLine
+	je atNewLine
 
-	.notAtNewLine:
+	notAtNewLine:
 
 	sub rsp, 8*8
 	mov rcx, notAtNewLineMsg
@@ -924,11 +934,11 @@ parsing.next:
 
 
 	sub rsp, 8*8
-	mov r8, [next.parsing]
+	mov r8, [parsing]
 	add r8, Parsing.delimiter
 	mov rdx, [r8]
-	mov rcx, [next.letters]
-	mov rbx, [next.parsing]
+	mov rcx, [letters]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov r8, [rbx]
 	add rcx, r8
@@ -937,7 +947,7 @@ parsing.next:
 	mov rcx, 0
 	mov rdx, rax
 	cmp rdx, rcx	
-	je next.notAtDelimiter			; No delimiter
+	je notAtDelimiter			; No delimiter
 
 	sub rsp, 8*8
 	mov rcx, atDelimiterOrLettersMsg
@@ -945,11 +955,11 @@ parsing.next:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov r8, [next.parsing]
+	mov r8, [parsing]
 	add r8, Parsing.delimiter
 	mov rdx, [r8]
-	mov rcx, [next.letters]
-	mov rbx, [next.parsing]
+	mov rcx, [letters]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov r8, [rbx]
 	add rcx, r8
@@ -959,9 +969,9 @@ parsing.next:
 	mov rcx, 0
 	mov rdx, rax
 	cmp rdx, rcx				; At tab or non-default delimiter
-	je next.atDelimiter
+	je atDelimiter
 
-	.notAtDelimiter:
+	notAtDelimiter:
 
 
 	sub rsp, 8*8
@@ -972,12 +982,12 @@ parsing.next:
 
 
 	sub rsp, 8*8
-	mov r8, [next.refRegistry]
-	mov rdx, [next.letters]
-	mov rcx, [next.parsing]
+	mov r8, [refRegistry]
+	mov rdx, [letters]
+	mov rcx, [parsing]
 	call parseRef
 	add rsp, 8*8
-	mov [next.nextRef], rax
+	mov [nextRef], rax
 
 	sub rsp, 8*8
 	mov rcx, 99653
@@ -985,9 +995,9 @@ parsing.next:
 	add rsp, 8*8
 
 
-	jmp next.atLetters
+	jmp atLetters
 
-	.atNewLine:
+	atNewLine:
 
 	sub rsp, 8*8
 	mov rcx, atNewLineMsg
@@ -998,17 +1008,17 @@ parsing.next:
 	mov rcx, [newlineLetters]							;	newlineUnixLetters;newlineWinLetters
 	call [letterLength]
 	add rsp, 8*8
-	mov [next.parsedLettersLength], rax	; Cache length
+	mov [parsedLettersLength], rax	; Cache length
 
 
-	mov rbx, [next.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.flags
 	mov rcx, 1b				; PARSING_AT_NEWLINE
 	mov [rbx], rcx
 
-	jmp next.increaseIndex
+	jmp increaseIndex
 
-	.atDelimiter:
+	atDelimiter:
 
 	sub rsp, 8*8
 	mov rcx, atDelimiterMsg
@@ -1016,22 +1026,22 @@ parsing.next:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov r8, [next.parsing]
+	mov r8, [parsing]
 	add r8, Parsing.delimiter
 	mov rcx, [r8]
 	call [letterLength]
 	add rsp, 8*8
-	mov [next.parsedLettersLength], rax	; Cache length
+	mov [parsedLettersLength], rax	; Cache length
 
 
-	mov rbx, [next.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.flags
 	mov rcx, 10b				; PARSING_AT_DELIMITER
 	mov [rbx], rcx
 
-	jmp next.increaseIndex
+	jmp increaseIndex
 	
-	.atLetters:
+	atLetters:
 
 	sub rsp, 8*8
 	mov rcx, atLettersMsg
@@ -1039,34 +1049,34 @@ parsing.next:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rcx, [next.parsedLetters]
+	mov rcx, [parsedLetters]
 	call [letterLength]
 	add rsp, 8*8
-	mov [next.parsedLettersLength], rax	
+	mov [parsedLettersLength], rax	
 
-	mov rbx, [next.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.flags
 	mov rcx, 100b				; PARSING_AT_LETTERS
 	mov [rbx], rcx
 
 
 
-	jmp next.end				; parseRef increases Parsing index
+	jmp completed				; parseRef increases Parsing index
 
 
-	.increaseIndex:
+	increaseIndex:
 
 
-	mov rbx, [next.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov rcx, [rbx]
-	mov rdx, [next.parsedLettersLength]
+	mov rdx, [parsedLettersLength]
 	add rcx, rdx
 	mov [rbx], rcx				; Increment Parsing index
 
 
 
-	jmp next.end
+	jmp completed
 
 
 	
@@ -1089,54 +1099,54 @@ parsing.next:
 
 
 
-	mov rcx, [next.lettersIndex]
-	mov r8, [next.parsedLettersLength]
+	mov rcx, [lettersIndex]
+	mov r8, [parsedLettersLength]
 	add rcx, r8
-	mov [next.lettersIndex], rcx		; Increment letters index
+	mov [lettersIndex], rcx		; Increment letters index
 
 
 
-	jmp next.endParsedValue
+	jmp endParsedValue
 
 
 
 
 
-	mov rdx, [next.parsing]
+	mov rdx, [parsing]
 	;add rdx, Parsing.parsingRef
 	mov rbx, [rdx]
 	add rbx, Ref.flags
 	mov rcx, [rbx]
 	cmp rcx, 0				; 0, must be list 
-	jne next.refNotList
+	jne refNotList
 
 	mov rdx, 10b
 	mov [rbx], rdx				; REF_LIST
 
 
-	.refNotList:
+	refNotList:
 
-	mov rcx, [next.lettersIndex]
-	mov r8, [next.newLineLetterLength]
+	mov rcx, [lettersIndex]
+	mov r8, [newLineLetterLength]
 	add rcx, r8
-	mov [next.lettersIndex], rcx		; Increment letters index
-	mov rdx, [next.parsing]
+	mov [lettersIndex], rcx		; Increment letters index
+	mov rdx, [parsing]
 	add rdx, Parsing.index
 	mov rcx, [rdx]
 	add rcx, r8
 	mov [rdx], rcx				; Increment Parsing index
 
 
-	jmp next.endParsedValue
+	jmp endParsedValue
 
 
 
-	.endParsedValue:
+	endParsedValue:
 
 
-	.end:
+	completed:
 
-	mov rax, [next.nextRef]
+	mov rax, [nextRef]
 
 
 
@@ -1155,35 +1165,37 @@ parsing.next:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.buildRep:
+buildRep:
+namespace buildRep
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*13);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label buildRep.heapAddress qword at rbp-8  
-	label buildRep.handleAllocatedMemory qword at rbp-16
-	label buildRep.parsing qword at rbp-24 
-	label buildRep.matchIndex qword at rbp-32
-	label buildRep.newRef qword at rbp-40
-	label buildRep.letters qword at rbp-48
-	label buildRep.nextNewlineIndex qword at rbp-56
-	label buildRep.parsedLetters qword at rbp-64
-	label buildRep.lettersIndex qword at rbp-72
-	label buildRep.refRegistry qword at rbp-80
-	label buildRep.newLineLetterLength qword at rbp-88
-	label buildRep.matchingStartIndex qword at rbp-96
-	label buildRep.nextRef qword at rbp-104
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label nextRef qword at rbp-104
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [buildRep.parsing], rcx
-	mov [buildRep.nextRef], rdx	
-	mov [buildRep.refRegistry], r8
+	mov [parsing], rcx
+	mov [nextRef], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -1205,25 +1217,25 @@ parsing.buildRep:
 
 
 	sub rsp, 8*8
-	mov r8, [buildRep.refRegistry]
-	mov rdx, [buildRep.nextRef]
-	mov rcx, [buildRep.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [nextRef]
+	mov rcx, [parsing]
 	call buildBaseRepOffset
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov r8, [buildRep.refRegistry]
-	mov rdx, [buildRep.nextRef]
-	mov rcx, [buildRep.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [nextRef]
+	mov rcx, [parsing]
 	call buildNestedRepList
 	add rsp, 8*8
 
 
 
 	sub rsp, 8*8
-	mov r8, [buildRep.refRegistry]
-	mov rdx, [buildRep.nextRef]
-	mov rcx, [buildRep.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [nextRef]
+	mov rcx, [parsing]
 	call parseLists
 	add rsp, 8*8
 
@@ -1234,9 +1246,9 @@ parsing.buildRep:
 	
 
 
-	.end:
+	completed:
 
-	;dbgmov rax,0;[buildRep.parsedLetters]
+	;dbgmov rax,0;[parsedLetters]
 
 
 
@@ -1255,35 +1267,37 @@ parsing.buildRep:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.buildBaseRepOffset:
+buildBaseRepOffset:
+namespace buildBaseRepOffset
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*13);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label buildBaseRepOffset.heapAddress qword at rbp-8  
-	label buildBaseRepOffset.handleAllocatedMemory qword at rbp-16
-	label buildBaseRepOffset.parsing qword at rbp-24 
-	label buildBaseRepOffset.matchIndex qword at rbp-32
-	label buildBaseRepOffset.newRef qword at rbp-40
-	label buildBaseRepOffset.letters qword at rbp-48
-	label buildBaseRepOffset.nextNewlineIndex qword at rbp-56
-	label buildBaseRepOffset.parsedLetters qword at rbp-64
-	label buildBaseRepOffset.lettersIndex qword at rbp-72
-	label buildBaseRepOffset.refRegistry qword at rbp-80
-	label buildBaseRepOffset.newLineLetterLength qword at rbp-88
-	label buildBaseRepOffset.matchingStartIndex qword at rbp-96
-	label buildBaseRepOffset.nextRef qword at rbp-104
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label nextRef qword at rbp-104
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [buildBaseRepOffset.parsing], rcx
-	mov [buildBaseRepOffset.nextRef], rdx	
-	mov [buildBaseRepOffset.refRegistry], r8
+	mov [parsing], rcx
+	mov [nextRef], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -1302,65 +1316,65 @@ parsing.buildBaseRepOffset:
 	; Flags
 	; PARSING_AT_LETTERS	PARSING_AT_DELIMITER	PARSING_AT_NEWLINE
 	
-	mov rbx, [buildBaseRepOffset.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.flags
 	mov rcx, [rbx]
 	mov r8, 1b
 	cmp rcx, r8
-	je buildBaseRepOffset.atNewline
+	je atNewline
 
 
 	mov r8, 10b
 	cmp rcx, r8
-	je buildBaseRepOffset.atDelimiter
+	je atDelimiter
 
 
 	mov r8, 100b
 	cmp rcx, r8
-	je buildBaseRepOffset.atLetters
+	je atLetters
 
 
-	jmp buildBaseRepOffset.end
-	.atNewline:
+	jmp completed
+	atNewline:
 
 	sub rsp, 8*8
-	mov r8, [buildBaseRepOffset.refRegistry]
-	mov rdx, [buildBaseRepOffset.nextRef]
-	mov rcx, [buildBaseRepOffset.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [nextRef]
+	mov rcx, [parsing]
 	call resetNesting
 	add rsp, 8*8
 
-	jmp buildBaseRepOffset.end
-	.atDelimiter:
+	jmp completed
+	atDelimiter:
 
-	mov rbx, [buildBaseRepOffset.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.repOffset
 	mov rcx, [rbx]
-	mov rbx, [buildBaseRepOffset.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.baseRepOffset
 	mov rdx, [rbx]
 	cmp rcx, rdx
-	jle buildBaseRepOffset.increaseRepOffset
+	jle increaseRepOffset
 
 
-	jmp buildBaseRepOffset.end
-	.increaseRepOffset:				; Increase only when it does not coiincide with base
+	jmp completed
+	increaseRepOffset:				; Increase only when it does not coiincide with base
 
-	mov rbx, [buildBaseRepOffset.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.repOffset
 	mov rcx, [rbx]
 	add rcx, 1b
 	mov [rbx], rcx
 
-	jmp buildBaseRepOffset.end
-	.atLetters:
+	jmp completed
+	atLetters:
 
 	sub rsp, 8*8
 	mov rcx, baseRepOffsetAtLettersMsg
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
-	mov rbx, [buildBaseRepOffset.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.lineRefCount
 	mov rcx, [rbx]
 	add rcx, 1b
@@ -1372,7 +1386,7 @@ parsing.buildBaseRepOffset:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [buildBaseRepOffset.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.lineRefCount
 	mov rcx, [rbx]
 	;call [debugNumMsg]
@@ -1381,9 +1395,9 @@ parsing.buildBaseRepOffset:
 	; TO-DO: Multiline
 
 
-	jmp buildBaseRepOffset.end
+	jmp completed
 
-	.end:
+	completed:
 
 
 	add rsp, 8	
@@ -1401,35 +1415,37 @@ parsing.buildBaseRepOffset:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.resetNesting:
+resetNesting:
+namespace resetNesting
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*13);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label resetNesting.heapAddress qword at rbp-8  
-	label resetNesting.handleAllocatedMemory qword at rbp-16
-	label resetNesting.parsing qword at rbp-24 
-	label resetNesting.matchIndex qword at rbp-32
-	label resetNesting.newRef qword at rbp-40
-	label resetNesting.letters qword at rbp-48
-	label resetNesting.nextNewlineIndex qword at rbp-56
-	label resetNesting.parsedLetters qword at rbp-64
-	label resetNesting.lettersIndex qword at rbp-72
-	label resetNesting.refRegistry qword at rbp-80
-	label resetNesting.newLineLetterLength qword at rbp-88
-	label resetNesting.matchingStartIndex qword at rbp-96
-	label resetNesting.nextRef qword at rbp-104
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label nextRef qword at rbp-104
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [resetNesting.parsing], rcx
-	mov [resetNesting.nextRef], rdx	
-	mov [resetNesting.refRegistry], r8
+	mov [parsing], rcx
+	mov [nextRef], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -1444,17 +1460,17 @@ parsing.resetNesting:
 	sub rsp, 8
 
 
-	mov rbx, [resetNesting.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.repOffset
 	mov rcx, 0
 	mov [rbx], rcx
 
-	mov rbx, [resetNesting.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.lineRefCount
 	mov rcx, 0
 	mov [rbx], rcx
 
-	.end:
+	completed:
 
 	add rsp, 8	
 	pop r15 
@@ -1471,35 +1487,37 @@ parsing.resetNesting:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.buildNestedRepList:
+buildNestedRepList:
+namespace buildNestedRepList
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*13);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label buildNestedRepList.heapAddress qword at rbp-8  
-	label buildNestedRepList.handleAllocatedMemory qword at rbp-16
-	label buildNestedRepList.parsing qword at rbp-24 
-	label buildNestedRepList.matchIndex qword at rbp-32
-	label buildNestedRepList.newRef qword at rbp-40
-	label buildNestedRepList.lastRef qword at rbp-48
-	label buildNestedRepList.nextNewlineIndex qword at rbp-56
-	label buildNestedRepList.parsedLetters qword at rbp-64
-	label buildNestedRepList.lettersIndex qword at rbp-72
-	label buildNestedRepList.refRegistry qword at rbp-80
-	label buildNestedRepList.newLineLetterLength qword at rbp-88
-	label buildNestedRepList.matchingStartIndex qword at rbp-96
-	label buildNestedRepList.nextRef qword at rbp-104
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lastRef qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label nextRef qword at rbp-104
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [buildNestedRepList.parsing], rcx
-	mov [buildNestedRepList.nextRef], rdx	
-	mov [buildNestedRepList.refRegistry], r8
+	mov [parsing], rcx
+	mov [nextRef], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -1521,46 +1539,46 @@ parsing.buildNestedRepList:
 
 
 
-	mov rdx, [buildNestedRepList.nextRef]
+	mov rdx, [nextRef]
 	cmp rdx, 0
-	je buildNestedRepList.end			; Not at a new Ref
+	je completed			; Not at a new Ref
 
 
 	sub rsp, 8*8
-	mov rbx, [buildNestedRepList.nextRef]
+	mov rbx, [nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [buildBaseRepOffset.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.lineRefCount
 	mov rcx, [rbx]
 	;call [debugNumMsg]
 	add rsp, 8*8
 
 
-	mov rbx, [buildBaseRepOffset.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.lineRefCount
 	mov rcx, [rbx]
 	mov rdx, 1b
 	cmp rcx, rdx
-	jg buildNestedRepList.refAsParam
+	jg refAsParam
 
-	mov rbx, [buildNestedRepList.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rdx, [rbx]
 	add rdx, List.itemsCount
 	mov rcx, [rdx]
 	cmp rcx, 0
-	jne buildNestedRepList.notFirstRef
+	jne notFirstRef
 
 
-	mov rbx, [buildNestedRepList.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.repOffset
 	mov rcx, [rbx]
-	mov rbx, [buildNestedRepList.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.baseRepOffset
 	mov [rbx], rcx					; Also increase baseRepOffset if needed when first
 	
@@ -1571,7 +1589,7 @@ parsing.buildNestedRepList:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [buildNestedRepList.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.repOffset
 	mov rcx, [rbx]
 	;call [debugNumMsg]
@@ -1583,36 +1601,36 @@ parsing.buildNestedRepList:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [buildNestedRepList.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.baseRepOffset
 	mov rcx, [rbx]					; Also increase baseRepOffset if needed when first
 	;call [debugNumMsg]
 	add rsp, 8*8
 
-	.notFirstRef:
+	notFirstRef:
 
 
 
 	sub rsp, 8*8
-	mov rbx, [buildNestedRepList.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rcx, [rbx]
 	call [resetIndex]				; TO-DO: Remove this
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rdx, [buildNestedRepList.nextRef]
-	mov rbx, [buildNestedRepList.parsing]
+	mov rdx, [nextRef]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rcx, [rbx]
 	call [newLastItem]
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [buildNestedRepList.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.repOffset
 	mov rdx, [rbx]
-	mov rbx, [buildNestedRepList.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rcx, [rbx]
 	call [lastItemNesting]
@@ -1620,8 +1638,8 @@ parsing.buildNestedRepList:
 
 
 
-	jmp buildNestedRepList.end
-	.refAsParam:
+	jmp completed
+	refAsParam:
 
 	sub rsp, 8*8
 	mov rcx, refAsParamMsg
@@ -1629,12 +1647,12 @@ parsing.buildNestedRepList:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov r8, [buildNestedRepList.refRegistry]
-	mov rdx, [buildNestedRepList.nextRef]
-	mov rcx, [buildNestedRepList.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [nextRef]
+	mov rcx, [parsing]
 	call getLastRef
 	add rsp, 8*8
-	mov [buildNestedRepList.lastRef], rax
+	mov [lastRef], rax
 
 	sub rsp, 8*8
 	mov rcx, lastRefMsg
@@ -1642,38 +1660,38 @@ parsing.buildNestedRepList:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rcx, [buildNestedRepList.lastRef]
+	mov rcx, [lastRef]
 	;call [debugNumMsg]
 	add rsp, 8*8
 
 
-	;mov rbx, [buildNestedRepList.lastRef]
+	;mov rbx, [lastRef]
 	;add rbx, Ref.flags
 	;mov rdx, [rbx]
 	;cmp rdx, 10b					
-	;jne buildNestedRepList.lastRefNotList		
+	;jne lastRefNotList		
 
-	;mov rbx, [buildNestedRepList.nextRef]
+	;mov rbx, [nextRef]
 	;add rbx, Ref.flags
 	;mov rdx, [rbx]
 	;cmp rdx, 100b					; REF_DEFINED TO-DO: Handle this elsewhere? letters should not be a list param
-	;je buildNestedRepList.end			; Skip
+	;je end			; Skip
 
 	;.lastRefNotList:
 
 	sub rsp, 8*8
-	mov rdx, [buildNestedRepList.nextRef]
-	mov rbx, [buildNestedRepList.lastRef]
+	mov rdx, [nextRef]
+	mov rbx, [lastRef]
 	add rbx, Ref.list
 	mov rcx, [rbx]
 	call [newLastItem]
 	add rsp, 8*8
 
 
-	jmp buildNestedRepList.end
+	jmp completed
 
-	.end:
-	mov rax, [buildNestedRepList.nextRef]
+	completed:
+	mov rax, [nextRef]
 
 
 	add rsp, 8	
@@ -1691,36 +1709,38 @@ parsing.buildNestedRepList:
 	pop rbp
 
 	retn 0
+end namespace
 
 ; Returns 0 when none
-parsing.getLastRef:
+getLastRef:
+namespace getLastRef
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*13);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label getLastRef.heapAddress qword at rbp-8  
-	label getLastRef.handleAllocatedMemory qword at rbp-16
-	label getLastRef.parsing qword at rbp-24 
-	label getLastRef.matchIndex qword at rbp-32
-	label getLastRef.newRef qword at rbp-40
-	label getLastRef.letters qword at rbp-48
-	label getLastRef.nextNewlineIndex qword at rbp-56
-	label getLastRef.parsedLetters qword at rbp-64
-	label getLastRef.lettersIndex qword at rbp-72
-	label getLastRef.refRegistry qword at rbp-80
-	label getLastRef.newLineLetterLength qword at rbp-88
-	label getLastRef.matchingStartIndex qword at rbp-96
-	label getLastRef.nextRef qword at rbp-104
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label nextRef qword at rbp-104
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [getLastRef.parsing], rcx
-	mov [getLastRef.nextRef], rdx	
-	mov [getLastRef.refRegistry], r8
+	mov [parsing], rcx
+	mov [nextRef], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -1735,20 +1755,20 @@ parsing.getLastRef:
 	sub rsp, 8
 
 	
-	mov rbx, [getLastRef.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rdx, [rbx]
 	add rdx, List.itemsCount
 	mov rcx, [rdx]
 	cmp rcx, 0
-	je getLastRef.firstRef
+	je firstRef
 
-	mov rbx, [getLastRef.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rdx, [rbx]
 	add rdx, List.itemsCount
 	mov r8, [rdx]
-	mov rbx, [getLastRef.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov r9, [rbx]
 	add r9, List.index
@@ -1756,20 +1776,20 @@ parsing.getLastRef:
 	mov [r9], r8					; Set index - 1
 
 	sub rsp, 8*8
-	mov rbx, [getLastRef.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rcx, [rbx]
 	call [getNextItem]
 	add rsp, 8*8
 	
-	jmp getLastRef.end
-	.firstRef:
+	jmp completed
+	firstRef:
 
 
 	mov rax, 0
-	jmp getLastRef.end
+	jmp completed
 
-	.end:
+	completed:
 
 	add rsp, 8	
 	pop r15 
@@ -1786,36 +1806,38 @@ parsing.getLastRef:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.parseLists:
+parseLists:
+namespace parseLists
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*14);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label parseLists.heapAddress qword at rbp-8  
-	label parseLists.handleAllocatedMemory qword at rbp-16
-	label parseLists.parsing qword at rbp-24 
-	label parseLists.matchIndex qword at rbp-32
-	label parseLists.newRef qword at rbp-40
-	label parseLists.letters qword at rbp-48
-	label parseLists.nextNewlineIndex qword at rbp-56
-	label parseLists.parsingRefsList qword at rbp-64
-	label parseLists.lettersIndex qword at rbp-72
-	label parseLists.refRegistry qword at rbp-80
-	label parseLists.newLineLetterLength qword at rbp-88
-	label parseLists.matchingStartIndex qword at rbp-96
-	label parseLists.nextRef qword at rbp-104
-	label parseLists.nesting qword at rbp-112
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsingRefsList qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label nextRef qword at rbp-104
+	label nesting qword at rbp-112
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [parseLists.parsing], rcx
-	mov [parseLists.nextRef], rdx	
-	mov [parseLists.refRegistry], r8
+	mov [parsing], rcx
+	mov [nextRef], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -1837,23 +1859,23 @@ parsing.parseLists:
 
 
 	sub rsp, 8*8
-	mov r8, [parseLists.refRegistry]
-	mov rdx, [parseLists.nextRef]
-	mov rcx, [parseLists.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [nextRef]
+	mov rcx, [parsing]
 	call defineLists
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov r8, [parseLists.refRegistry]
-	mov rdx, [parseLists.nextRef]
-	mov rcx, [parseLists.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [nextRef]
+	mov rcx, [parsing]
 	call defineNonLists
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov r8, [parseLists.refRegistry]
-	mov rdx, [parseLists.nextRef]
-	mov rcx, [parseLists.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [nextRef]
+	mov rcx, [parsing]
 	call defineListParams
 	add rsp, 8*8
 
@@ -1867,8 +1889,8 @@ parsing.parseLists:
 
 
 
-	mov rax, [parseLists.nextRef]
-	.end:
+	mov rax, [nextRef]
+	completed:
 
 	add rsp, 8	
 	pop r15 
@@ -1885,36 +1907,38 @@ parsing.parseLists:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.defineLists:
+defineLists:
+namespace defineLists
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*14);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label defineLists.heapAddress qword at rbp-8  
-	label defineLists.handleAllocatedMemory qword at rbp-16
-	label defineLists.parsing qword at rbp-24 
-	label defineLists.matchIndex qword at rbp-32
-	label defineLists.newRef qword at rbp-40
-	label defineLists.letters qword at rbp-48
-	label defineLists.nextNewlineIndex qword at rbp-56
-	label defineLists.parsingRefsList qword at rbp-64
-	label defineLists.prevItem qword at rbp-72
-	label defineLists.refRegistry qword at rbp-80
-	label defineLists.item qword at rbp-88
-	label defineLists.prevItemNesting qword at rbp-96
-	label defineLists.nextRef qword at rbp-104
-	label defineLists.nesting qword at rbp-112
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsingRefsList qword at rbp-64
+	label prevItem qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label item qword at rbp-88
+	label prevItemNesting qword at rbp-96
+	label nextRef qword at rbp-104
+	label nesting qword at rbp-112
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [defineLists.parsing], rcx
-	mov [defineLists.nextRef], rdx	
-	mov [defineLists.refRegistry], r8
+	mov [parsing], rcx
+	mov [nextRef], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -1931,10 +1955,10 @@ parsing.defineLists:
 	
 
 	mov rcx, 0
-	mov [defineLists.prevItem], rcx			; Begin as 0
-	mov [defineLists.item], rcx			; Begin as 0
-	mov [defineLists.prevItemNesting], rcx
-	mov [defineLists.nesting], rcx
+	mov [prevItem], rcx			; Begin as 0
+	mov [item], rcx			; Begin as 0
+	mov [prevItemNesting], rcx
+	mov [nesting], rcx
 
 
 	sub rsp, 8*8
@@ -1942,13 +1966,13 @@ parsing.defineLists:
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
-	mov rbx, [defineLists.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rcx, [rbx]
-	mov [defineLists.parsingRefsList], rcx		; Cache
+	mov [parsingRefsList], rcx		; Cache
 
 	sub rsp, 8*8
-	mov rcx, [defineLists.parsingRefsList]
+	mov rcx, [parsingRefsList]
 	call [resetIndex]
 	add rsp, 8*8
 
@@ -1959,61 +1983,61 @@ parsing.defineLists:
 	;defineLists
 
 
-	.nextRefItem:
-	mov rbx, [defineLists.parsingRefsList]
+	nextRefItem:
+	mov rbx, [parsingRefsList]
 	mov r8, rbx
 	add rbx, List.index
 	add r8, List.itemsCount
 	mov rcx, [rbx]
 	mov rdx, [r8]
 	cmp rcx, rdx
-	jnl defineLists.endParsingRefsList
+	jnl endParsingRefsList
 
 	
 
 
 	sub rsp, 8*8
-	mov rcx, [defineLists.parsingRefsList]
+	mov rcx, [parsingRefsList]
 	call [getNextItemNesting]
 	add rsp, 8*8
-	mov [defineLists.nesting], rax
+	mov [nesting], rax
 
 	sub rsp, 8*8
-	mov rcx, [defineLists.nesting]
+	mov rcx, [nesting]
 	;call [debugNumMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rcx, [defineLists.parsingRefsList]
+	mov rcx, [parsingRefsList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [defineLists.item], rax
+	mov [item], rax
 
 	sub rsp, 8*8
-	mov rbx, [defineLists.item]
+	mov rbx, [item]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
-	mov rcx, [defineLists.nesting]
-	mov rdx, [defineLists.prevItemNesting]
+	mov rcx, [nesting]
+	mov rdx, [prevItemNesting]
 	sub rcx, rdx
 	mov r8, 1b
 	cmp rcx, r8
-	jne defineLists.listRefNotFound
+	jne listRefNotFound
 
-	mov rbx, [defineLists.prevItem]
+	mov rbx, [prevItem]
 	add rbx, Ref.flags
 	mov rdx, 10b
 	mov [rbx], rdx						; Found a List REF_LIST
 
 
 	sub rsp, 8*8
-	mov r8, [defineLists.refRegistry]
-	mov rdx, [defineLists.prevItem]
-	mov rcx, [defineLists.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [prevItem]
+	mov rcx, [parsing]
 	call propagateRefFlags					; Ensure every occurence is a List, and Ref Registry Ref also
 	add rsp, 8*8
 	
@@ -2024,7 +2048,7 @@ parsing.defineLists:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [defineLists.prevItem]
+	mov rbx, [prevItem]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
@@ -2037,20 +2061,20 @@ parsing.defineLists:
 
 
 
-	.listRefNotFound:
-	mov rbx, [defineLists.item]
-	mov [defineLists.prevItem], rbx
-	mov rbx, [defineLists.nesting]
-	mov [defineLists.prevItemNesting], rbx
+	listRefNotFound:
+	mov rbx, [item]
+	mov [prevItem], rbx
+	mov rbx, [nesting]
+	mov [prevItemNesting], rbx
 	
 
 
-	jmp defineLists.nextRefItem
-	.endParsingRefsList:
+	jmp nextRefItem
+	endParsingRefsList:
 
 
-	.end:
-	mov rax, [defineLists.nextRef]
+	completed:
+	mov rax, [nextRef]
 
 
 	add rsp, 8	
@@ -2068,36 +2092,38 @@ parsing.defineLists:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.defineNonLists:
+defineNonLists:
+namespace defineNonLists
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*14);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label defineNonLists.heapAddress qword at rbp-8  
-	label defineNonLists.handleAllocatedMemory qword at rbp-16
-	label defineNonLists.parsing qword at rbp-24 
-	label defineNonLists.matchIndex qword at rbp-32
-	label defineNonLists.newRef qword at rbp-40
-	label defineNonLists.letters qword at rbp-48
-	label defineNonLists.nextNewlineIndex qword at rbp-56
-	label defineNonLists.parsingRefsList qword at rbp-64
-	label defineNonLists.lettersIndex qword at rbp-72
-	label defineNonLists.refRegistry qword at rbp-80
-	label defineNonLists.newLineLetterLength qword at rbp-88
-	label defineNonLists.matchingStartIndex qword at rbp-96
-	label defineNonLists.nextRef qword at rbp-104
-	label defineNonLists.nesting qword at rbp-112
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsingRefsList qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label nextRef qword at rbp-104
+	label nesting qword at rbp-112
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [defineNonLists.parsing], rcx
-	mov [defineNonLists.nextRef], rdx	
-	mov [defineNonLists.refRegistry], r8
+	mov [parsing], rcx
+	mov [nextRef], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -2119,13 +2145,13 @@ parsing.defineNonLists:
 	
 
 
-	mov rbx, [defineNonLists.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rcx, [rbx]
-	mov [defineNonLists.parsingRefsList], rcx		; Cache
+	mov [parsingRefsList], rcx		; Cache
 
 	sub rsp, 8*8
-	mov rcx, [defineNonLists.parsingRefsList]
+	mov rcx, [parsingRefsList]
 	call [resetIndex]
 	add rsp, 8*8
 
@@ -2136,55 +2162,55 @@ parsing.defineNonLists:
 	;defineNonLists
 
 
-	.nextRefItem:
-	mov rbx, [defineNonLists.parsingRefsList]
+	nextRefItem:
+	mov rbx, [parsingRefsList]
 	mov r8, rbx
 	add rbx, List.index
 	add r8, List.itemsCount
 	mov rcx, [rbx]
 	mov rdx, [r8]
 	cmp rcx, rdx
-	jnl defineNonLists.endParsingRefsList
+	jnl endParsingRefsList
 
 
 	
 	sub rsp, 8*8
-	mov rcx, [defineNonLists.parsingRefsList]
+	mov rcx, [parsingRefsList]
 	call [getNextItem]
 	add rsp, 8*8
 	add rax, Ref.flags
 	mov r8, [rax]
 	mov rdx, 10b
 	cmp r8, rdx
-	jne defineNonLists.notList
+	jne notList
 
-	jmp defineNonLists.nextRefItem
-	.notList:
+	jmp nextRefItem
+	notList:
 
 	mov rdx, 100b
 	cmp r8, rdx
-	jne defineNonLists.notDefinedRef
+	jne notDefinedRef
 
-	jmp defineNonLists.nextRefItem
-	.notDefinedRef:
+	jmp nextRefItem
+	notDefinedRef:
 
 	mov rdx, 1000b
 	cmp r8, rdx
-	jne defineNonLists.notRefFilter
+	jne notRefFilter
 
-	jmp defineNonLists.nextRefItem
-	.notRefFilter:
+	jmp nextRefItem
+	notRefFilter:
 
 	mov rdx, 1b
 	mov [rax], rdx					; Found a val ref
 
 
-	jmp defineNonLists.nextRefItem
-	.endParsingRefsList:
+	jmp nextRefItem
+	endParsingRefsList:
 
 
-	.end:
-	mov rax, [defineNonLists.nextRef]
+	completed:
+	mov rax, [nextRef]
 	
 
 	add rsp, 8	
@@ -2202,38 +2228,40 @@ parsing.defineNonLists:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.defineListParams:
+defineListParams:
+namespace defineListParams
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*16);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label defineListParams.heapAddress qword at rbp-8  
-	label defineListParams.handleAllocatedMemory qword at rbp-16
-	label defineListParams.parsing qword at rbp-24 
-	label defineListParams.matchIndex qword at rbp-32
-	label defineListParams.newRef qword at rbp-40
-	label defineListParams.letters qword at rbp-48
-	label defineListParams.nextNewlineIndex qword at rbp-56
-	label defineListParams.parsingRefsList qword at rbp-64
-	label defineListParams.parsingListIndex qword at rbp-72
-	label defineListParams.refRegistry qword at rbp-80
-	label defineListParams.newLineLetterLength qword at rbp-88
-	label defineListParams.matchingStartIndex qword at rbp-96
-	label defineListParams.nextListRef qword at rbp-104
-	label defineListParams.nesting qword at rbp-112
-	label defineListParams.convergedCount qword at rbp-120
-	label defineListParams.nextRef qword at rbp-128
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsingRefsList qword at rbp-64
+	label parsingListIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label nextListRef qword at rbp-104
+	label nesting qword at rbp-112
+	label convergedCount qword at rbp-120
+	label nextRef qword at rbp-128
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [defineListParams.parsing], rcx
-	mov [defineListParams.nextRef], rdx	
-	mov [defineListParams.refRegistry], r8
+	mov [parsing], rcx
+	mov [nextRef], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -2249,17 +2277,17 @@ parsing.defineListParams:
 
 
 	mov rcx, 0
-	mov [defineListParams.parsingListIndex], rcx		; Begin as 0
+	mov [parsingListIndex], rcx		; Begin as 0
 
-	mov rcx, [defineListParams.nextRef]
+	mov rcx, [nextRef]
 	cmp rcx, 0
-	je defineListParams.end					; No ref
+	je completed					; No ref
 	
-	;mov rbx, [defineListParams.nextRef]		; Instead of this, make sure convergedcount does not show these
+	;mov rbx, [nextRef]		; Instead of this, make sure convergedcount does not show these
 	;add rbx, Ref.flags
 	;mov rdx, [rbx]
 	;cmp rdx, 100b					; REF_DEFINED TO-DO: Handle this elsewhere? letters should not be a list param
-	;je defineListParams.end				; Skip
+	;je end				; Skip
 
 
 	sub rsp, 8*8
@@ -2268,13 +2296,13 @@ parsing.defineListParams:
 	add rsp, 8*8
 
 
-	mov rbx, [defineListParams.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rcx, [rbx]
-	mov [defineListParams.parsingRefsList], rcx		; Cache
+	mov [parsingRefsList], rcx		; Cache
 
 	sub rsp, 8*8
-	mov rcx, [defineListParams.parsingRefsList]
+	mov rcx, [parsingRefsList]
 	call [resetIndex]
 	add rsp, 8*8
 
@@ -2285,39 +2313,39 @@ parsing.defineListParams:
 	;definelistparams
 
 
-	.nextRefItem:
-	mov rbx, [defineListParams.parsingRefsList]
+	nextRefItem:
+	mov rbx, [parsingRefsList]
 	mov r8, rbx
 	add rbx, List.index
 	add r8, List.itemsCount
 	mov rcx, [rbx]
 	mov rdx, [r8]
 	cmp rcx, rdx
-	jnl defineListParams.endParsingRefsList
+	jnl endParsingRefsList
 
 
 	sub rsp, 8*8
-	mov rcx, [defineListParams.parsingRefsList]
+	mov rcx, [parsingRefsList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [defineListParams.nextListRef], rax
+	mov [nextListRef], rax
 
 
 
 
 	sub rsp, 8*8
-	mov rbx, [defineListParams.nextListRef]
+	mov rbx, [nextListRef]
 	add rbx, Ref.flags
 	mov rcx, [rbx]
 	;call [debugNumMsg]
 	add rsp, 8*8
 
-	mov rbx, [defineListParams.nextListRef]
+	mov rbx, [nextListRef]
 	add rbx, Ref.flags
 	mov rcx, [rbx]
 	mov r8, 10b
 	cmp rcx, r8
-	jne defineListParams.nextRefItem		; List Ref not reached
+	jne nextRefItem		; List Ref not reached
 
 	sub rsp, 8*8
 	mov rcx, 839898
@@ -2325,18 +2353,18 @@ parsing.defineListParams:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [defineListParams.nextListRef]
+	mov rbx, [nextListRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
-	mov rbx, [defineListParams.parsingRefsList]
+	mov rbx, [parsingRefsList]
 	add rbx, List.index
 	mov rcx, [rbx]
-	mov [defineListParams.parsingListIndex], rcx			; cache
+	mov [parsingListIndex], rcx			; cache
 
-	mov rbx, [defineListParams.parsingRefsList]
+	mov rbx, [parsingRefsList]
 	add rbx, List.index
 	mov rcx, [rbx]
 	sub rcx, 1b
@@ -2344,7 +2372,7 @@ parsing.defineListParams:
 	
 
 	sub rsp, 8*8
-	mov rbx, [defineListParams.parsingRefsList]
+	mov rbx, [parsingRefsList]
 	add rbx, List.index
 	mov rcx, [rbx]
 	;call [debugNumMsg]
@@ -2357,18 +2385,18 @@ parsing.defineListParams:
 
 
 	sub rsp, 8*8
-	mov rcx, [defineListParams.parsingRefsList]
+	mov rcx, [parsingRefsList]
 	call [getConvergedItemCount]
 	add rsp, 8*8
-	mov [defineListParams.convergedCount], rax
+	mov [convergedCount], rax
 
-	mov rbx, [defineListParams.parsingRefsList]
+	mov rbx, [parsingRefsList]
 	add rbx, List.index
-	mov rcx, [defineListParams.parsingListIndex]			; Restore
+	mov rcx, [parsingListIndex]			; Restore
 	mov [rbx], rcx
 
 	sub rsp, 8*8
-	mov rbx, [defineListParams.parsingRefsList]
+	mov rbx, [parsingRefsList]
 	add rbx, List.index
 	mov rcx, [rbx]
 	;call [debugNumMsg]
@@ -2380,41 +2408,41 @@ parsing.defineListParams:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rcx, [defineListParams.convergedCount]
+	mov rcx, [convergedCount]
 	;call [debugNumMsg]
 	add rsp, 8*8
 
-	mov r9, [defineListParams.convergedCount]
+	mov r9, [convergedCount]
 	cmp r9, 0
-	je defineListParams.nextRefItem			; Can this ever happen?
+	je nextRefItem			; Can this ever happen?
 
-	mov rbx, [defineListParams.nextListRef]
+	mov rbx, [nextListRef]
 	add rbx, Ref.list
 	mov rdx, [rbx]
 	add rdx, List.itemsCount
 	mov r8, [rdx]
-	mov r9, [defineListParams.convergedCount]
+	mov r9, [convergedCount]
 	cmp r8, r9
-	jnl defineListParams.nextRefItem		; ListRef's item count is not less than or equal to converged count
+	jnl nextRefItem		; ListRef's item count is not less than or equal to converged count
 
 
 	sub rsp, 8*8
-	mov rdx, [defineListParams.nextRef]
-	mov rbx, [defineListParams.nextListRef]
+	mov rdx, [nextRef]
+	mov rbx, [nextListRef]
 	add rbx, Ref.list
 	mov rcx, [rbx]
 	call [newLastItem]				; NextRef must be missing at this point
 	add rsp, 8*8
 
 
-	jmp defineListParams.end
-	.endParsingRefsList:
+	jmp completed
+	endParsingRefsList:
 
 
 
 	
-	.end:
-	mov rax, [defineListParams.nextRef]
+	completed:
+	mov rax, [nextRef]
 
 	add rsp, 8	
 	pop r15 
@@ -2431,36 +2459,36 @@ parsing.defineListParams:
 	pop rbp
 
 	retn 0
+end namespace
 
-
-
-parsing.parseRef:
+parseRef:
+namespace parseRef
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*12);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label parseRef.heapAddress qword at rbp-8  
-	label parseRef.handleAllocatedMemory qword at rbp-16
-	label parseRef.parsing qword at rbp-24 
-	label parseRef.matchIndex qword at rbp-32
-	label parseRef.newRef qword at rbp-40
-	label parseRef.letters qword at rbp-48
-	label parseRef.nextNewlineIndex qword at rbp-56
-	label parseRef.parsedLetters qword at rbp-64
-	label parseRef.lettersIndex qword at rbp-72
-	label parseRef.refRegistry qword at rbp-80
-	label parseRef.newLineLetterLength qword at rbp-88
-	label parseRef.matchingStartIndex qword at rbp-96
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [parseRef.parsing], rcx
-	mov [parseRef.letters], rdx	
-	mov [parseRef.refRegistry], r8
+	mov [parsing], rcx
+	mov [lettersAddr], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -2482,11 +2510,11 @@ parsing.parseRef:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rdx, [parseRef.letters]
-	mov rcx, [parseRef.parsing]
+	mov rdx, [lettersAddr]
+	mov rcx, [parsing]
 	call getNextMatchOrDelimiter
 	add rsp, 8*8
-	mov [parseRef.parsedLetters], rax
+	mov [parsedLetters], rax
 
 	
 	sub rsp, 8*8
@@ -2495,18 +2523,18 @@ parsing.parseRef:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rcx, [parseRef.parsedLetters]
+	mov rcx, [parsedLetters]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
 	sub rsp, 8*8
-	mov r8, [parseRef.refRegistry]
-	mov rdx, [parseRef.parsedLetters]
-	mov rcx, [parseRef.parsing]
+	mov r8, [refRegistryAddr]
+	mov rdx, [parsedLetters]
+	mov rcx, [parsing]
 	call getRegisteredValue
 	add rsp, 8*8
-	mov [parseRef.newRef], rax
+	mov [newRefAddr], rax
 
 	sub rsp, 8*8
 	mov rcx, 33
@@ -2514,7 +2542,7 @@ parsing.parseRef:
 	add rsp, 8*8
 
 
-	jmp parseRef.end
+	jmp completed
 
 
 
@@ -2537,146 +2565,146 @@ parsing.parseRef:
 
 
 
-	mov rbx, [parseRef.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.index
 	mov rcx, [rbx]
-	mov [parseRef.matchingStartIndex], rcx	; Cache use later
+	mov [matchingStartIndex], rcx	; Cache use later
 
 
 
 	sub rsp, 8*8
-	mov r8, [parseRef.matchingStartIndex]	; Used with defined Refs only
-	mov rdx, [parseRef.parsedLetters]
-	mov rcx, [parseRef.refRegistry]
+	mov r8, [matchingStartIndex]	; Used with defined Refs only
+	mov rdx, [parsedLetters]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.getRegisteredRef
 	add rsp, 8*8
 	cmp rax, 0				; Already exists
-	je parseRef.newLastRegisteredRef
+	je newLastRegisteredRef
 	cmp rax, 1b
-	jne parseRef.parsingRefBlankOrStillParsing	; Already defined
+	jne parsingRefBlankOrStillParsing	; Already defined
 	
 
-	.newLastDefinedRef:
+	newLastDefinedRef:
 
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [parseRef.newRef], rax
+	mov [newRefAddr], rax
 
-	mov rbx, [parseRef.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.ref
-	mov r8, [parseRef.parsedLetters]
+	mov r8, [parsedLetters]
 	mov [rbx], r8
-	mov rbx, [parseRef.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.repIndex
-	mov rcx, [parseRef.matchingStartIndex]	; Index
+	mov rcx, [matchingStartIndex]	; Index
 	mov [rbx], rcx
 
-	mov rbx, [parseRef.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.flags
 	mov r8, 10b				; REF_DEFINED
 	mov [rbx], r8
 
 
 	sub rsp, 8*8
-	mov rdx, [parseRef.parsedLetters]
-	mov rcx, [parseRef.refRegistry]
+	mov rdx, [parsedLetters]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.getRegisteredDefinedRef
 	add rsp, 8*8
 	add rax, Ref.definedRefFlags
 	mov r8, [rax]
-	mov rbx, [parseRef.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.definedRefFlags
 	mov [rbx], r8					; Copy flags
 
 	sub rsp, 8*8
-	mov rbx, [parseRef.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.unParsedIndex
 	mov r8, [rbx]
-	mov rdx, [parseRef.newRef]
-	mov rcx, [parseRef.refRegistry]
+	mov rdx, [newRefAddr]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredRef	; Uses same list as non-defined
 	add rsp, 8*8
 
 
-	jmp parseRef.newRefRegistered
-	.newLastRegisteredRef:
+	jmp newRefRegistered
+	newLastRegisteredRef:
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [parseRef.newRef], rax
+	mov [newRefAddr], rax
 
-	mov rbx, [parseRef.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.ref
-	mov r8, [parseRef.parsedLetters]
+	mov r8, [parsedLetters]
 	mov [rbx], r8
 
 	sub rsp, 8*8
-	mov rbx, [parseRef.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.unParsedIndex
 	mov r8, [rbx]
-	mov rdx, [parseRef.newRef]
-	mov rcx, [parseRef.refRegistry]
+	mov rdx, [newRefAddr]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredRef
 	add rsp, 8*8
 
 	
-	.newRefRegistered:
+	newRefRegistered:
 
 
 
-	.parsingRefBlankOrStillParsing:		; Need to put Ref in Parsing also when not there
-	mov rdx, [parseRef.parsing]
+	parsingRefBlankOrStillParsing:		; Need to put Ref in Parsing also when not there
+	mov rdx, [parsing]
 	;add rdx, Parsing.parsingRef
 	mov r8, [rdx]
 	mov rcx, 0
 	cmp r8, rcx
-	je parseRef.parsingRefBlank
+	je parsingRefBlank
 	
 
-	.parsingRefNotBlank:
+	parsingRefNotBlank:
 
 
-	.parsingRefBlank:
+	parsingRefBlank:
 
 	
-	mov rbx, [parseRef.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.flags
 	mov r8, [rbx]
 	cmp r8, rcx
 	mov rcx, 100b				; REF_DEFINED
-	je parseRef.newDefinedRef
+	je newDefinedRef
 
 
-	mov rdx, [parseRef.parsing]
+	mov rdx, [parsing]
 	;add rdx, Parsing.parsingRef
-	mov r8, [parseRef.newRef]
+	mov r8, [newRefAddr]
 	mov [rdx], r8
 
 
-	jmp parseRef.end
-	.newDefinedRef:
+	jmp completed
+	newDefinedRef:
 
 
-	mov rdx, [parseRef.parsing]
+	mov rdx, [parsing]
 	add rdx, Parsing.parsingDefinedRef
-	mov r8, [parseRef.newRef]
+	mov r8, [newRefAddr]
 	mov [rdx], r8
 
-	jmp parseRef.end
+	jmp completed
 
-	.existingRef:
+	existingRef:
 
 	;compare parsedLetters, parsingRef
 	;compare parsingRef list
 	; new last list item
 
 
-	.end:
+	completed:
 
-	mov rax, [parseRef.newRef]
+	mov rax, [newRefAddr]
 
 
 	add rsp, 8	
@@ -2694,36 +2722,38 @@ parsing.parseRef:
 	pop rbp
 
 	retn 0
+end namespace
 
-parsing.getRegisteredValue:
+getRegisteredValue:
+namespace getRegisteredValue
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*14);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label getRegisteredValue.heapAddress qword at rbp-8  
-	label getRegisteredValue.handleAllocatedMemory qword at rbp-16
-	label getRegisteredValue.parsing qword at rbp-24 
-	label getRegisteredValue.matchIndex qword at rbp-32
-	label getRegisteredValue.newRef qword at rbp-40
-	label getRegisteredValue.letters qword at rbp-48
-	label getRegisteredValue.nextNewlineIndex qword at rbp-56
-	label getRegisteredValue.parsedLetters qword at rbp-64
-	label getRegisteredValue.lettersIndex qword at rbp-72
-	label getRegisteredValue.refRegistry qword at rbp-80
-	label getRegisteredValue.newLineLetterLength qword at rbp-88
-	label getRegisteredValue.matchingStartIndex qword at rbp-96
-	label getRegisteredValue.refFlags qword at rbp-104
-	label getRegisteredValue.definedRefFlags qword at rbp-112
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label lettersAddr qword at rbp-48
+	label nextNewlineIndex qword at rbp-56
+	label parsedLetters qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label refFlags qword at rbp-104
+	label definedRefFlags qword at rbp-112
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [getRegisteredValue.parsing], rcx
-	mov [getRegisteredValue.parsedLetters], rdx	
-	mov [getRegisteredValue.refRegistry], r8
+	mov [parsing], rcx
+	mov [parsedLetters], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -2738,9 +2768,9 @@ parsing.getRegisteredValue:
 	sub rsp, 8
 
 	mov rcx, 1b
-	mov [getRegisteredValue.refFlags], rcx			; Begin as REF_VALUE
+	mov [refFlags], rcx			; Begin as REF_VALUE
 	mov rcx, 0
-	mov [getRegisteredValue.definedRefFlags], rcx		; Begin as 0
+	mov [definedRefFlags], rcx		; Begin as 0
 
 
 	sub rsp, 8*8
@@ -2749,21 +2779,21 @@ parsing.getRegisteredValue:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [getRegisteredValue.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.unParsedIndex
 	mov r8, [rbx]						; Used with defined Refs only
-	mov rdx, [getRegisteredValue.parsedLetters]
-	mov rcx, [getRegisteredValue.refRegistry]
+	mov rdx, [parsedLetters]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.getRegisteredRef
 	add rsp, 8*8
 	cmp rax, 0						
-	je getRegisteredValue.newLastRegisteredRef		; Non-existent Ref
+	je newLastRegisteredRef		; Non-existent Ref
 	cmp rax, 1b
-	je getRegisteredValue.newLastRegisteredDefinedRef	; Non-existent DefinedRef
+	je newLastRegisteredDefinedRef	; Non-existent DefinedRef
 
-	.alreadyDefined:
+	alreadyDefined:
 
-	mov [getRegisteredValue.newRef], rax
+	mov [newRefAddr], rax
 
 	sub rsp, 8*8
 	mov rcx, alreadyRegisteredMsg
@@ -2771,9 +2801,9 @@ parsing.getRegisteredValue:
 	add rsp, 8*8
 	
 
-	jmp getRegisteredValue.end
+	jmp completed
 
-	.newLastRegisteredDefinedRef:
+	newLastRegisteredDefinedRef:
 
 	sub rsp, 8*8
 	mov rcx, newRegisteredDefinedRefMsg
@@ -2781,26 +2811,26 @@ parsing.getRegisteredValue:
 	add rsp, 8*8
 
 	mov r8, 100b						; REF_DEFINED
-	mov [getRegisteredValue.refFlags], r8
+	mov [refFlags], r8
 
 	sub rsp, 8*8
-	mov rdx, [getRegisteredValue.parsedLetters]
-	mov rcx, [getRegisteredValue.refRegistry]
+	mov rdx, [parsedLetters]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.getRegisteredDefinedRef
 	add rsp, 8*8
 	add rax, Ref.definedRefFlags
 	mov r8, [rax]
-	mov [getRegisteredValue.definedRefFlags], r8
+	mov [definedRefFlags], r8
 	
 
-	jmp getRegisteredValue.newLastRegisteredVal
-	.newLastRegisteredRef:					; refFlags is 1 REF_VALUE (may become REF_LIST later)
+	jmp newLastRegisteredVal
+	newLastRegisteredRef:					; refFlags is 1 REF_VALUE (may become REF_LIST later)
 
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [getRegisteredValue.newRef], rax
+	mov [newRefAddr], rax
 
 	sub rsp, 8*8
 	mov rcx, newRegisteredValueMsg
@@ -2808,43 +2838,43 @@ parsing.getRegisteredValue:
 	add rsp, 8*8
 	
 	
-	jmp getRegisteredValue.placeRefInRefRegistry
+	jmp placeRefInRefRegistry
 
-	.newLastRegisteredVal:
+	newLastRegisteredVal:
 
 	sub rsp, 8*8
 	call ref.new
 	add rsp, 8*8
-	mov [getRegisteredValue.newRef], rax
+	mov [newRefAddr], rax
 
 
 
 
-	.placeRefInRefRegistry:
+	placeRefInRefRegistry:
 
-	mov rbx, [getRegisteredValue.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.flags
-	mov r8, [getRegisteredValue.refFlags]			; REF_DEFINED or undefined at this point
+	mov r8, [refFlags]			; REF_DEFINED or undefined at this point
 	mov [rbx], r8
 
-	mov rbx, [getRegisteredValue.newRef]
-	mov r8, [getRegisteredValue.definedRefFlags]
+	mov rbx, [newRefAddr]
+	mov r8, [definedRefFlags]
 	add rbx, Ref.definedRefFlags
 	mov [rbx], r8					; Copy defined refflags or 0
 
 
 
-	mov rbx, [getRegisteredValue.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.ref
-	mov r8, [getRegisteredValue.parsedLetters]
+	mov r8, [parsedLetters]
 	mov [rbx], r8
 
 	sub rsp, 8*8
-	mov rbx, [getRegisteredValue.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.unParsedIndex
 	mov r8, [rbx]						; Used with defined Refs only
-	mov rdx, [getRegisteredValue.newRef]
-	mov rcx, [getRegisteredValue.refRegistry]
+	mov rdx, [newRefAddr]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.newLastRegisteredRef
 	add rsp, 8*8
 
@@ -2855,10 +2885,10 @@ parsing.getRegisteredValue:
 
 
 
-	.end:
+	completed:
 
 	
-	mov rax, [getRegisteredValue.newRef]
+	mov rax, [newRefAddr]
 
 
 	add rsp, 8	
@@ -2876,39 +2906,41 @@ parsing.getRegisteredValue:
 	pop rbp
 
 	retn 0
+end namespace
 
 
 ; Copy Ref flags into every occurence in the Parsing Refs and Ref Registry Lists
 ; Preserves Parsing List index
-parsing.propagateRefFlags:
+propagateRefFlags:
+namespace propagateRefFlags
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*14);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label propagateRefFlags.heapAddress qword at rbp-8  
-	label propagateRefFlags.handleAllocatedMemory qword at rbp-16
-	label propagateRefFlags.parsing qword at rbp-24 
-	label propagateRefFlags.ref qword at rbp-32
-	label propagateRefFlags.newRef qword at rbp-40
-	label propagateRefFlags.parsingList qword at rbp-48
-	label propagateRefFlags.parsingListIndex qword at rbp-56
-	label propagateRefFlags.refRegistryList qword at rbp-64
-	label propagateRefFlags.lettersIndex qword at rbp-72
-	label propagateRefFlags.refRegistry qword at rbp-80
-	label propagateRefFlags.newLineLetterLength qword at rbp-88
-	label propagateRefFlags.matchingStartIndex qword at rbp-96
-	label propagateRefFlags.refFlags qword at rbp-104
-	label propagateRefFlags.definedRefFlags qword at rbp-112
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label ref qword at rbp-32
+	label newRefAddr qword at rbp-40
+	label parsingList qword at rbp-48
+	label parsingListIndex qword at rbp-56
+	label refRegistryList qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label refRegistryAddr qword at rbp-80
+	label newLineLetterLength qword at rbp-88
+	label matchingStartIndex qword at rbp-96
+	label refFlags qword at rbp-104
+	label definedRefFlags qword at rbp-112
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [propagateRefFlags.parsing], rcx
-	mov [propagateRefFlags.ref], rdx	
-	mov [propagateRefFlags.refRegistry], r8
+	mov [parsing], rcx
+	mov [ref], rdx	
+	mov [refRegistryAddr], r8
 
 	and rsp, -32
 	push rbx 
@@ -2926,32 +2958,32 @@ parsing.propagateRefFlags:
 
 	
 
-	mov rbx, [propagateRefFlags.parsing]
+	mov rbx, [parsing]
 	add rbx, Parsing.parsingRefs
 	mov rdx, [rbx]
-	mov [propagateRefFlags.parsingList], rdx		; Cache
+	mov [parsingList], rdx		; Cache
 	add rdx, List.index
 	mov rcx, [rdx]
-	mov [propagateRefFlags.parsingListIndex], rcx		; Restore later
+	mov [parsingListIndex], rcx		; Restore later
 
 
 
 	sub rsp, 8*8
 	mov r8, 0						; Used with defined Refs only
-	mov rbx, [propagateRefFlags.ref]
+	mov rbx, [ref]
 	add rbx, Ref.ref
 	mov rdx, [rbx]
-	mov rcx, [propagateRefFlags.refRegistry]
+	mov rcx, [refRegistryAddr]
 	call refRegistry.getRegisteredRef
 	add rsp, 8*8
 	cmp rax, 0						
-	je propagateRefFlags.noRegisteredRefValue		; Non-existent Ref
+	je noRegisteredRefValue		; Non-existent Ref
 	cmp rax, 1b
-	je propagateRefFlags.noRegisteredRefValue		; Non-existent DefinedRef
+	je noRegisteredRefValue		; Non-existent DefinedRef
 
-	.alreadyDefined:
+	alreadyDefined:
 
-	mov [propagateRefFlags.newRef], rax
+	mov [newRefAddr], rax
 
 	sub rsp, 8*8
 	mov rcx, 55218989
@@ -2959,15 +2991,15 @@ parsing.propagateRefFlags:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [propagateRefFlags.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
-	mov rbx, [propagateRefFlags.ref]
+	mov rbx, [ref]
 	add rbx, Ref.flags
-	mov r8, [propagateRefFlags.newRef]
+	mov r8, [newRefAddr]
 	add r8, Ref.flags
 	mov r9, [rbx]
 	mov [r8], r9						; Propagate into RefRegistry
@@ -2975,32 +3007,32 @@ parsing.propagateRefFlags:
 
 	
 
-	.noRegisteredRefValue:
+	noRegisteredRefValue:
 
 	sub rsp, 8*8
-	mov rcx, [propagateRefFlags.parsingList]
+	mov rcx, [parsingList]
 	call [resetIndex]
 	add rsp, 8*8
 	
-	.nextParsingRef:
-	mov rbx, [propagateRefFlags.parsingList]
+	nextParsingRef:
+	mov rbx, [parsingList]
 	mov rdx, rbx
 	add rbx, List.index
 	add rdx, List.itemsCount
 	mov rcx, [rbx]
 	mov r8, [rdx]
 	cmp rcx, r8
-	jnl propagateRefFlags.endParsingRefs
+	jnl endParsingRefs
 
 	sub rsp, 8*8
-	mov rcx, [propagateRefFlags.parsingList]
+	mov rcx, [parsingList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [propagateRefFlags.newRef], rax
+	mov [newRefAddr], rax
 
-	mov rbx, [propagateRefFlags.ref]
+	mov rbx, [ref]
 	add rbx, Ref.ref
-	mov r8, [propagateRefFlags.newRef]
+	mov r8, [newRefAddr]
 	add r8, Ref.ref
 	mov r9, [rbx]
 	mov r10, [r8]
@@ -3013,23 +3045,23 @@ parsing.propagateRefFlags:
 
 
 	sub rsp, 8*8
-	mov rbx, [propagateRefFlags.ref]
+	mov rbx, [ref]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [propagateRefFlags.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
-	mov rbx, [propagateRefFlags.ref]
+	mov rbx, [ref]
 	add rbx, Ref.ref
-	mov r8, [propagateRefFlags.newRef]
+	mov r8, [newRefAddr]
 	add r8, Ref.ref
 	mov r9, [rbx]
 	mov r10, [r8]
@@ -3041,12 +3073,12 @@ parsing.propagateRefFlags:
 	call [lettersSameExact]
 	add rsp, 8*8	
 	cmp rax, 0
-	je propagateRefFlags.nextParsingRef
+	je nextParsingRef
 	
 
-	mov rbx, [propagateRefFlags.ref]
+	mov rbx, [ref]
 	add rbx, Ref.flags
-	mov r8, [propagateRefFlags.newRef]
+	mov r8, [newRefAddr]
 	add r8, Ref.flags
 	mov r9, [rbx]
 	mov [r8], r9						; Propagate into Parsing Refs List Ref
@@ -3059,37 +3091,37 @@ parsing.propagateRefFlags:
 
 
 	sub rsp, 8*8
-	mov rbx, [propagateRefFlags.ref]
+	mov rbx, [ref]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rbx, [propagateRefFlags.newRef]
+	mov rbx, [newRefAddr]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
 
-	jmp propagateRefFlags.nextParsingRef
+	jmp nextParsingRef
 
-	.endParsingRefs:
+	endParsingRefs:
 	
-	mov rbx, [propagateRefFlags.parsingList]
+	mov rbx, [parsingList]
 	add rbx, List.index
-	mov rcx, [propagateRefFlags.parsingListIndex]
+	mov rcx, [parsingListIndex]
 	mov [rbx], rcx						; Restore Index
 
 
 
-	.end:
+	completed:
 
 
 
 	
-	mov rax, [propagateRefFlags.ref]
+	mov rax, [ref]
 
 
 	add rsp, 8	
@@ -3107,6 +3139,7 @@ parsing.propagateRefFlags:
 	pop rbp
 
 	retn 0
+end namespace
 
 ;parseRefWithFlags calls below three parse calls
 ;getParsedLettersRefFlag?

@@ -12,23 +12,27 @@ end match
 _ equ }
 
 
-	format	PE large console 4.0
+	format	PE large NX console 4.0
 	entry	start
 
 include '../version.inc'
 
-section '.text' code readable executable
+section '.text' code executable
 
   start:
 
 	call	system_init
 
+	call	get_arguments
+	mov	bl,al
+	cmp	[no_logo],0
+	jne	logo_ok
 	mov	esi,_logo
 	xor	ecx,ecx
 	call	display_string
-
-	call	get_arguments
-	jc	display_usage_information
+      logo_ok:
+	test	bl,bl
+	jnz	display_usage_information
 
 	xor	al,al
 	mov	ecx,[verbosity_level]
@@ -55,8 +59,17 @@ section '.text' code readable executable
 
 	call	show_display_data
 
-	mov	ebx,_code_cannot_be_generated
-	jmp	fatal_error
+	mov	esi,_error_prefix
+	xor	ecx,ecx
+	call	display_error_string
+	mov	esi,_code_cannot_be_generated
+	xor	ecx,ecx
+	call	display_error_string
+	mov	esi,_message_suffix
+	xor	ecx,ecx
+	call	display_error_string
+
+	jmp	assembly_failed
 
   assembly_done:
 
@@ -65,8 +78,10 @@ section '.text' code readable executable
 	cmp	[first_error],0
 	jne	assembly_failed
 
+	cmp	[no_logo],0
+	jne	summary_done
 	mov	eax,[current_pass]
-	mov	edi,string_buffer
+	xor	edx,edx
 	call	itoa
 	call	display_string
 	mov	esi,_passes
@@ -91,14 +106,14 @@ section '.text' code readable executable
 	xchg	eax,ebx
 	or	ebx,eax
 	jz	display_output_length
-	mov	edi,string_buffer
+	xor	edx,edx
 	call	itoa
 	call	display_string
 	mov	esi,_message_suffix
 	mov	ecx,1
 	call	display_string
 	mov	eax,[timer]
-	mov	edi,string_buffer
+	xor	edx,edx
 	call	itoa
 	call	display_string
 	mov	esi,_seconds
@@ -106,14 +121,15 @@ section '.text' code readable executable
 	call	display_string
       display_output_length:
 	call	get_output_length
-	push	eax
-	mov	edi,string_buffer
+	push	eax edx
 	call	itoa
 	call	display_string
-	pop	eax
+	pop	edx eax
 	mov	esi,_bytes
 	cmp	eax,1
 	jne	display_bytes_suffix
+	test	edx,edx
+	jnz	display_bytes_suffix
 	mov	esi,_byte
       display_bytes_suffix:
 	xor	ecx,ecx
@@ -121,6 +137,7 @@ section '.text' code readable executable
 	mov	esi,_new_line
 	xor	ecx,ecx
 	call	display_string
+      summary_done:
 
 	mov	ebx,[source_path]
 	mov	edi,[output_path]
@@ -180,6 +197,7 @@ section '.text' code readable executable
 	xor	eax,eax
 	mov	[initial_commands],eax
 	mov	[output_path],eax
+	mov	[no_logo],al
 	mov	[maximum_number_of_passes],100
 	mov	[maximum_number_of_errors],1
 	mov	[maximum_depth_of_stack],10000
@@ -230,7 +248,7 @@ section '.text' code readable executable
 	cmp	[output_path],0
 	je	get_output_path
     error_in_arguments:
-	stc
+	or	al,-1
 	retn
     get_source_path:
 	mov	[source_path],edi
@@ -243,7 +261,6 @@ section '.text' code readable executable
 	je	error_in_arguments
 	xor	al,al
 	stosb
-	clc
 	retn
     get_option:
 	inc	esi
@@ -267,7 +284,19 @@ section '.text' code readable executable
 	cmp	al,'v'
 	je	set_verbose_mode
 	cmp	al,'V'
+	je	set_verbose_mode
+	cmp	al,'n'
+	je	set_no_logo
+	cmp	al,'N'
 	jne	error_in_arguments
+    set_no_logo:
+	or	[no_logo],-1
+	mov	al,[esi]
+	cmp	al,20h
+	je	find_next_argument
+	test	al,al
+	jnz	error_in_arguments
+	jmp	find_next_argument
     set_verbose_mode:
 	call	get_option_value
 	jc	error_in_arguments
@@ -387,7 +416,6 @@ section '.text' code readable executable
 	push	ecx
 	mov	ecx,eax
 	call	malloc
-	jc	out_of_memory
 	mov	[initial_commands],eax
 	mov	[initial_commands_maximum_length],ecx
 	mov	edi,eax
@@ -398,7 +426,6 @@ section '.text' code readable executable
 	mov	ecx,eax
 	mov	eax,[initial_commands]
 	call	realloc
-	jc	out_of_memory
 	mov	[initial_commands],eax
 	mov	[initial_commands_maximum_length],ecx
 	mov	edi,eax
@@ -414,13 +441,14 @@ section '.text' code readable executable
   include '../conditions.inc'
   include '../floats.inc'
   include '../directives.inc'
+  include '../calm.inc'
   include '../errors.inc'
   include '../map.inc'
   include '../reader.inc'
   include '../output.inc'
   include '../console.inc'
 
-section '.data' data readable writeable
+section '.rdata' data readable
 
   _logo db 'flat assembler  version g.',VERSION,13,10,0
 
@@ -431,6 +459,7 @@ section '.data' data readable writeable
 	 db '    -r limit    Set the maximum depth of the stack (default 10000)',13,10
 	 db '    -v flag     Enable or disable showing all lines from the stack (default 0)',13,10
 	 db '    -i command  Insert instruction at the beginning of source',13,10
+	 db '    -n          Do not show logo nor summary',13,10
 	 db 0
 
   _pass db ' pass, ',0
@@ -470,9 +499,9 @@ section '.bss' readable writeable
 
   timer dd ?
   verbosity_level dd ?
-  string_buffer rb 100h
+  no_logo db ?
 
-section '.idata' import data readable writeable
+section '.idata' import data readable
 
   library kernel32,'KERNEL32.DLL'
 

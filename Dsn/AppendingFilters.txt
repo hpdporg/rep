@@ -1,0 +1,39 @@
+
+Appending should work on filters
+valuesBlock->queryBlocks.valuesBlock
+qB.vB	listA.val1	comma
+
+etc, so it cascades
+
+
+Put numeric expressions, etc in datap. Parsing/evaluating these
+
+queryBlocks
+
+	tableName
+
+	valuesBlock
+
+	index
+
+	condition
+
+	conditionVal
+
+
+
+
+
+valuesBlock	val1	comma	val2	comma	val3	comma	val4
+
+
+
+retrieveFile	sqlFileName	sql
+
+
+
+generatedSQL	replaceLettersList	sql	queryBlocks	REPLACE_BLOCK
+
+
+
+restoreFile	generatedSQLFile	generatedSQL

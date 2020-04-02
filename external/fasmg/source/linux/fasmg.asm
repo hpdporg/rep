@@ -1,9 +1,8 @@
 
 match ,{
 
-	include 'import32.inc'
 	include 'macro/struct.inc'
-	include 'macro/proc32.inc'
+	include 'import32.inc'
 
 } match -,{
 else
@@ -43,12 +42,16 @@ segment readable executable
 
 	call	system_init
 
+	call	get_arguments
+	mov	bl,al
+	cmp	[no_logo],0
+	jne	logo_ok
 	mov	esi,_logo
 	xor	ecx,ecx
 	call	display_string
-
-	call	get_arguments
-	jc	display_usage_information
+      logo_ok:
+	test	bl,bl
+	jnz	display_usage_information
 
 	xor	al,al
 	mov	ecx,[verbosity_level]
@@ -60,7 +63,7 @@ segment readable executable
   init:
 	call	assembly_init
 
-	mov	eax,78
+	mov	eax,78			; sys_gettimeofday
 	mov	ebx,start_time
 	xor	ecx,ecx
 	int	0x80
@@ -77,8 +80,17 @@ segment readable executable
 
 	call	show_display_data
 
-	mov	ebx,_code_cannot_be_generated
-	jmp	fatal_error
+	mov	esi,_error_prefix
+	xor	ecx,ecx
+	call	display_error_string
+	mov	esi,_code_cannot_be_generated
+	xor	ecx,ecx
+	call	display_error_string
+	mov	esi,_message_suffix
+	xor	ecx,ecx
+	call	display_error_string
+
+	jmp	assembly_failed
 
   assembly_done:
 
@@ -87,8 +99,10 @@ segment readable executable
 	cmp	[first_error],0
 	jne	assembly_failed
 
+	cmp	[no_logo],0
+	jne	summary_done
 	mov	eax,[current_pass]
-	mov	edi,string_buffer
+	xor	edx,edx
 	call	itoa
 	call	display_string
 	mov	esi,_passes
@@ -98,7 +112,7 @@ segment readable executable
       display_passes_suffix:
 	xor	ecx,ecx
 	call	display_string
-	mov	eax,78
+	mov	eax,78			; sys_gettimeofday
 	mov	ebx,end_time
 	xor	ecx,ecx
 	int	0x80
@@ -122,14 +136,14 @@ segment readable executable
 	xchg	eax,ebx
 	or	ebx,eax
 	jz	display_output_length
-	mov	edi,string_buffer
+	xor	edx,edx
 	call	itoa
 	call	display_string
 	mov	esi,_message_suffix
 	mov	ecx,1
 	call	display_string
 	mov	eax,[tenths_of_second]
-	mov	edi,string_buffer
+	xor	edx,edx
 	call	itoa
 	call	display_string
 	mov	esi,_seconds
@@ -137,14 +151,15 @@ segment readable executable
 	call	display_string
       display_output_length:
 	call	get_output_length
-	push	eax
-	mov	edi,string_buffer
+	push	eax edx
 	call	itoa
 	call	display_string
-	pop	eax
+	pop	edx eax
 	mov	esi,_bytes
 	cmp	eax,1
 	jne	display_bytes_suffix
+	test	edx,edx
+	jnz	display_bytes_suffix
 	mov	esi,_byte
       display_bytes_suffix:
 	xor	ecx,ecx
@@ -152,6 +167,7 @@ segment readable executable
 	mov	esi,_new_line
 	xor	ecx,ecx
 	call	display_string
+      summary_done:
 
 	mov	ebx,[source_path]
 	mov	edi,[output_path]
@@ -162,7 +178,7 @@ segment readable executable
 	call	system_shutdown
 
 	xor	ebx,ebx
-	mov	eax,1
+	mov	eax,1			; sys_exit
 	int	0x80
 
   assembly_failed:
@@ -173,7 +189,7 @@ segment readable executable
 	call	system_shutdown
 
 	mov	ebx,2
-	mov	eax,1
+	mov	eax,1			; sys_exit
 	int	0x80
 
   write_failed:
@@ -200,7 +216,7 @@ segment readable executable
 	call	system_shutdown
 
 	mov	ebx,3
-	mov	eax,1
+	mov	eax,1			; sys_exit
 	int	0x80
 
   display_usage_information:
@@ -212,7 +228,7 @@ segment readable executable
 	call	system_shutdown
 
 	mov	ebx,1
-	mov	eax,1
+	mov	eax,1			; sys_exit
 	int	0x80
 
   get_arguments:
@@ -220,6 +236,7 @@ segment readable executable
 	mov	[initial_commands],eax
 	mov	[source_path],eax
 	mov	[output_path],eax
+	mov	[no_logo],al
 	mov	[maximum_number_of_passes],100
 	mov	[maximum_number_of_errors],1
 	mov	[maximum_depth_of_stack],10000
@@ -265,8 +282,16 @@ segment readable executable
 	je	set_verbose_mode
 	cmp	al,'V'
 	je	set_verbose_mode
+	cmp	al,'n'
+	je	set_no_logo
+	cmp	al,'N'
+	jne	error_in_arguments
+    set_no_logo:
+	or	[no_logo],-1
+	cmp	byte [esi],0
+	je	next_argument
     error_in_arguments:
-	stc
+	or	al,-1
 	ret
     set_verbose_mode:
 	cmp	byte [esi],0
@@ -325,7 +350,7 @@ segment readable executable
 	jnz	get_argument
 	cmp	[source_path],0
 	je	error_in_arguments
-	clc
+	xor	al,al
 	ret
     get_option_value:
 	xor	eax,eax
@@ -392,7 +417,6 @@ segment readable executable
 	push	ecx
 	mov	ecx,eax
 	call	malloc
-	jc	out_of_memory
 	mov	[initial_commands],eax
 	mov	[initial_commands_maximum_length],ecx
 	mov	edi,eax
@@ -403,7 +427,6 @@ segment readable executable
 	mov	ecx,eax
 	mov	eax,[initial_commands]
 	call	realloc
-	jc	out_of_memory
 	mov	[initial_commands],eax
 	mov	[initial_commands_maximum_length],ecx
 	mov	edi,eax
@@ -419,6 +442,7 @@ segment readable executable
   include '../conditions.inc'
   include '../floats.inc'
   include '../directives.inc'
+  include '../calm.inc'
   include '../errors.inc'
   include '../map.inc'
   include '../reader.inc'
@@ -436,6 +460,7 @@ segment readable
 	 db '    -r limit    Set the maximum depth of stack (default 10000)',10
 	 db '    -v flag     Enable or disable showing all lines from the stack (default 0)',10
 	 db '    -i command  Insert instruction at the beginning of source',13,10
+	 db '    -n          Do not show logo nor summary',13,10
 	 db 0
 
   _pass db ' pass, ',0
@@ -480,7 +505,7 @@ segment readable writeable
   tenths_of_second dd ?
 
   verbosity_level dd ?
-  string_buffer rb 100h
+  no_logo db ?
 
   path_buffer rb 1000h
 

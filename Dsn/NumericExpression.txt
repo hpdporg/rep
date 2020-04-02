@@ -1,0 +1,8 @@
+
+value4	 	the next val
+value3		the third val
+
+sum1	= val1 * val3 - 4
+
+
+

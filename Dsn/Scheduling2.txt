@@ -1,0 +1,100 @@
+
+
+
+DailyLogRows where timestamp between 3/9/2020 and 3/14/2020
+
+
+
+WBS_IDs Rows as Plane
+
+ScheduleRows where timestamp between 3/9/2020 and 3/14/2020
+
+Rows where Rows.WBS same wbs_IDs.ID same WBS_IDs Rows.2 same WorkPackage
+
+RowCount per day
+
+
+
+
+
+conds
+	Rows.timestamp > 3/9/2020
+	Rows.timestamp < 3/14/2020
+	Rows.WBS same WBS_IDs.ID
+		WBS_IDs.2 same WorkPackage
+
+
+filtered	filteredFlowRef	conds
+
+
+acSum	= rows.AC
+
+taskEntryCount	= rows
+
+
+percentComplete	= rows.PercentComplete * 100
+
+sameDayCond
+	rows.timestamp.DAY_OF_WEEK same	rows.timestamp.DAY_OF_WEEK
+
+filtered	countByDay	sameDayCond	= +1
+
+taskCountCond
+	rows.task notSame rows.task
+
+filtered	taskCount	taskCountCond	= +1
+
+highlightCountConds
+	Rows.Highlight/Issue/Task contains H
+
+
+acPerTaskCond
+	rows.task same rows.task
+
+filtered	acPerTask	acPerTaskCond	= rows.AC
+
+perfReport
+	timestamp
+	responseTime
+	queryName
+	DataSize
+	DB
+
+responseQueryNameCond
+	perfReport.queryName same perfReport.queryName
+
+
+responseTimeByQueryName
+	timestamp
+	responseTime
+	queryName
+
+
+filtered	responseTimeByQueryName	responseQueryNameCond	= first perfReport.timestamp	= average perfReport.responseTime	= last perfReport.queryName
+
+
+
+
+NumericFlagLessThanCond
+	Rows.timestamp > 3/9/2020
+	Rows.timestamp < 3/14/2020
+	Rows.AC < 1.0
+	Rows.WBS same WBS_IDs.ID
+		WBS_IDs.2 same WorkPackage
+
+
+
+processesOnlyCond
+	WBS_IDs.2 same Process
+		WBS_IDs.1 within WBS.0
+
+filtered	processes	processesOnlyCond
+
+dailyLogWithinProcessesConds
+	Rows.timestamp > 3/9/2020
+	Rows.timestamp < 3/14/2020
+	Rows.WBS same processes.ID
+
+
+
+

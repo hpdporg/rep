@@ -24,7 +24,6 @@ create_string_map:
 	shl	ebx,2
 	lea	ecx,[sizeof.Map+ebx*4]
 	call	malloc_fixed
-	jc	out_of_memory
 	xchg	ebx,eax
 	mov	ecx,eax
 	dec	eax
@@ -34,7 +33,6 @@ create_string_map:
 	rep	stosd
 	mov	ecx,1000h
 	call	malloc_fixed
-	jc	out_of_memory
 	mov	[ebx+Map.linked_blocks],eax
 	xor	edx,edx
 	mov	[eax],edx
@@ -114,7 +112,10 @@ put_into_map:
 ;  ecx = string length, zero for ASCIIZ string
 ;  eax = value
 ; preserves: ebx, [esi], edi
-; note: esi is replaced with pointer to the same string in persistent storage
+; note:
+;  esi is replaced with pointer to the same string in persistent storage,
+;  an ASCIIZ string is a key with length including the terminating zero
+;  and when it is put into persistent storage, final zero is copied as well
 	push	eax
 	call	get_bucket
 	test	eax,eax
@@ -153,17 +154,16 @@ put_into_map:
 	jc	map_out_of_free_space
 	retn
     map_out_of_free_space:
-	push	edx
+	push	ecx edx
 	mov	ecx,1000h
 	call	malloc_fixed
-	jc	out_of_memory
 	mov	edx,eax
 	xchg	[ebx+Map.linked_blocks],edx
 	mov	[eax],edx
 	add	eax,10h
 	mov	[ebx+Map.free_space],eax
 	mov	[ebx+Map.free_space_length],1000h-10h
-	pop	edx
+	pop	edx ecx
 	jmp	allocate_map_entry
 
 remove_from_map:

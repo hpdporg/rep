@@ -1,4 +1,10 @@
 
+; general note:
+;  with the ability to run in various environments in mind, the entire assembler core
+;  does not use ebp register and never directly touches esp; the stack is managed
+;  with push and pop instructions, occasionally [esp] may be used to access the top value,
+;  but no other assumptions about the stack layout are made
+
 struct Workspace
 	memory_start dd ?
 	memory_end dd ?
@@ -10,9 +16,10 @@ struct SourceContext
 ends
 
 struct SourceEntry
-	type db ?			 ; SOURCE_#
-	flags db ?
-	reserved dw ?
+	type db ?			; SOURCE_#
+	flags db ?			; SRCF_#
+	saved_result db ?
+	reserved db ?
 	name dd ?
 	name_length dd ?
 	text dd ?
@@ -46,10 +53,18 @@ ends
 SOURCE_FILE = 0
 SOURCE_MEMORY = 1
 SOURCE_MACRO = 2
+SOURCE_CALM = 3
+
+SRCF_PREPROCESSED = 1
+SRCF_ALM_STATEMENT = 2
+
+PMODE_RETAIN_COMMENTS = 1
+PMODE_ISOLATE_LINES = 2
 
 AMODE_SKIP = 1
 AMODE_DEFINITION = 2
 AMODE_POSTPONED = 4
+AMODE_CALM_DEFINITION = 8
 
 TRACE_ERROR_STACK = 1
 TRACE_DISPLAY = 2
@@ -83,6 +98,10 @@ assembly_init:
 	mov	[value_workspace.memory_start],eax
 	mov	[expression_workspace.memory_start],eax
 	mov	[calculation_workspace.memory_start],eax
+	mov	[auxiliary_workspace.memory_start],eax
+	mov	[calm_code_buffer.memory_start],eax
+	mov	[calm_literals_buffer.memory_start],eax
+	mov	[calm_auxiliary_buffer.memory_start],eax
 
 	mov	[display_buffer],eax
 	mov	[macro_buffer],eax
@@ -119,7 +138,6 @@ assembly_init:
 	call	get_environment_variable
 	mov	ecx,eax
 	call	malloc_fixed
-	jc	out_of_memory
 	mov	[include_paths],eax
 	mov	edi,eax
 	call	get_environment_variable
@@ -152,6 +170,11 @@ assembly_init:
 	call	create_tree_element
 	mov	[root_namespace],eax
 
+	mov	ecx,sizeof.SymbolTree_Root + sizeof.SymbolTree_Node
+	call	create_tree_element
+	or	[eax+SymbolTree_Root.flags],NAMESPACE_UNATTACHED
+	mov	[alm_namespace],eax
+
 	call	create_parameter_namespace
 	mov	[root_parameter_namespace],eax
 
@@ -168,62 +191,58 @@ assembly_init:
 
 	mov	ecx,100h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[tree_stack_base],eax
 	add	eax,ecx
 	mov	[tree_stack_end],eax
 
 	mov	ecx,1000h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[source_context],eax
 	mov	[source_context_maximum_length],ecx
 
 	mov	ecx,1000h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[line_embeddings],eax
 	mov	[line_embeddings_maximum_length],ecx
 
+	mov	ecx,140h
+	call	malloc_growable
+	mov	[output_areas_list],eax
+	mov	edi,eax
+	add	eax,ecx
+	mov	[output_areas_list_end],eax
 	xor	eax,eax
+	shr	ecx,2
+	rep	stosd
 	mov	[number_of_line_embeddings],eax
-	mov	[first_output_area_entry],eax
-
-	mov	ecx,sizeof.AreaEntry
-	call	create_tree_element
-	mov	[virtual_area_entry],eax
+	mov	[virtual_area],eax
 
 	mov	ecx,1000h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[directives_stack_base],eax
 	add	eax,ecx
 	mov	[directives_stack_end],eax
 
 	mov	ecx,1000h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[counters_stack_base],eax
 	add	eax,ecx
 	mov	[counters_stack_end],eax
 
 	mov	ecx,100h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[operator_stack_base],eax
 	add	eax,ecx
 	mov	[operator_stack_end],eax
 
 	mov	ecx,10h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[condition_stack_base],eax
 	add	eax,ecx
 	mov	[condition_stack_end],eax
 
 	mov	ecx,100h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[assembly_stack_base],eax
 	add	eax,ecx
 	mov	[assembly_stack_end],eax
@@ -240,6 +259,10 @@ assembly_init:
 	mov	ecx,100h
 	call	allocate_workspace
 
+	mov	edx,auxiliary_workspace
+	mov	ecx,100h
+	call	allocate_workspace
+
 	mov	edx,value_workspace
 	mov	ecx,1000h
 	call	allocate_workspace
@@ -252,32 +275,39 @@ assembly_init:
 	mov	ecx,1000h
 	call	allocate_workspace
 
+	mov	edx,calm_code_buffer
+	mov	ecx,1000h
+	call	allocate_workspace
+
+	mov	edx,calm_literals_buffer
+	mov	ecx,1000h
+	call	allocate_workspace
+
+	mov	edx,calm_auxiliary_buffer
+	mov	ecx,1000h
+	call	allocate_workspace
+
 	mov	ecx,100h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[display_buffer],eax
 	mov	[display_buffer_length],ecx
 
 	mov	ecx,100h
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[macro_buffer],eax
 	mov	[macro_buffer_length],ecx
 
 	mov	ecx,32*6*sizeof.ExpressionTerm
 	call	malloc_fixed
-	jc	out_of_memory
 	mov	[temporary_terms],eax
 	mov	[free_temporary_terms],eax
 
 	mov	ecx,4*sizeof.FloatData
 	call	malloc_fixed
-	jc	out_of_memory
 	mov	[temporary_floats],eax
 
 	mov	ecx,256*4
 	call	malloc_fixed
-	jc	out_of_memory
 	mov	[operator_table],eax
 	mov	edi,eax
 	mov	ecx,256
@@ -442,6 +472,8 @@ assembly_shutdown:
 	call	mfree
 	mov	eax,[line_embeddings]
 	call	mfree
+	mov	eax,[output_areas_list]
+	call	mfree
 	mov	eax,[directives_stack_base]
 	call	mfree
 	mov	eax,[counters_stack_base]
@@ -464,6 +496,14 @@ assembly_shutdown:
 	mov	eax,[expression_workspace.memory_start]
 	call	mfree
 	mov	eax,[calculation_workspace.memory_start]
+	call	mfree
+	mov	eax,[auxiliary_workspace.memory_start]
+	call	mfree
+	mov	eax,[calm_code_buffer.memory_start]
+	call	mfree
+	mov	eax,[calm_literals_buffer.memory_start]
+	call	mfree
+	mov	eax,[calm_auxiliary_buffer.memory_start]
 	call	mfree
 
 	mov	eax,[display_buffer]
@@ -538,14 +578,16 @@ assembly_pass:
 	mov	[current_counter],edx
 	xor	eax,eax
 	mov	[edx],al
+	mov	[preprocessing_mode],al
 	mov	[next_pass_needed],al
 	mov	[assembly_mode],al
+	mov	[use_raw_values],al
 	mov	[shift_tracking],al
 	mov	[current_area],eax
 	mov	[current_output_area_entry],eax
+	mov	[initial_output_area_entry],eax
 	mov	[predicted_shift],eax
 	mov	[display_data_length],eax
-	mov	[macro_position],eax
 	mov	[macro_end_position],eax
 	mov	[proxy_number],eax
 	mov	[output_extension],eax
@@ -556,8 +598,9 @@ assembly_pass:
 	mov	edi,ebx
 	mov	ecx,sizeof.SourceEntry shr 2
 	assert	sizeof.SourceEntry and 11b = 0
-	xor	eax,eax
 	rep	stosd
+	mov	[line_start],eax
+	mov	[line_end],eax
 	test	esi,esi
 	jz	read_main_source_file
 	cmp	byte [esi],0
@@ -595,36 +638,348 @@ assembly_pass:
 	mov	ebx,[auxiliary_output_areas]
 	mov	edi,release_auxiliary_output
 	call	iterate_through_map
-    assembly_line:
+assembly_line:
 	xor	eax,eax
 	mov	[value_position],eax
 	mov	[current_constituent],al
 	call	clear_line_embeddings
-	call	get_line
-	jc	pass_done
-    assemble_instruction:
+    get_line:
+	xor	eax,eax
+	mov	[symbol_class],SYMCLASS_PARAMETER
+	mov	[symbol_expected],al
+	mov	[symbol_required],al
+	mov	[name_volatile],al
+	mov	[preprocessed_context],eax
+	mov	[alm_statement],al
+	mov	ebx,[source_context]
+	mov	ecx,[ebx+SourceContext.number_of_entries]
+	dec	ecx
+	imul	ecx,sizeof.SourceEntry
+	lea	ebx,[ebx+sizeof.SourceContext+ecx]
+	xchg	eax,[ebx+SourceEntry.number_of_attached_lines]
+	inc	eax
+	add	[ebx+SourceEntry.line_number],eax
+	cmp	[ebx+SourceEntry.type],SOURCE_CALM
+	je	calm_virtual_machine
+	mov	eax,[ebx+SourceEntry.local_namespace]
+	mov	[parameter_namespace],eax
+	test	[eax+SymbolTree_Root.flags],NAMESPACE_UNATTACHED
+	jz	local_namespace_ok
+	xor	eax,eax
+    local_namespace_ok:
+	mov	[local_namespace],eax
+	cmp	[ebx+SourceEntry.type],SOURCE_MACRO
+	je	get_line_from_macro
+	and	[name_token],0
+	mov	esi,[ebx+SourceEntry.text]
+	mov	eax,[ebx+SourceEntry.offset]
+	add	esi,eax
+	mov	[ebx+SourceEntry.line_offset],eax
+	cmp	byte [esi],0
+	je	source_ended
+	mov	edi,[preprocessing_workspace.memory_start]
+    preprocess_line_from_file:
+	mov	ecx,14
+	mov	edx,preprocessing_workspace
+	call	reserve_workspace
+	lodsb
+	cmp	al,1Ah
+	je	convert_name_symbol
+	cmp	al,22h
+	je	convert_quoted_string
+	cmp	al,27h
+	je	convert_quoted_string
+	test	al,al
+	jz	file_ended
+	cmp	al,0Ah
+	je	line_ended
+	cmp	al,';'
+	jne	preprocess_syntactical_character
+	xor	edx,edx
+	test	[preprocessing_mode],PMODE_RETAIN_COMMENTS
+	jz	skip_comment
+    preprocess_syntactical_character:
+	stosb
+	cmp	al,'`'
+	je	convert_parameter
+	cmp	al,'\'
+	jne	preprocess_line_from_file
+	test	[preprocessing_mode],PMODE_ISOLATE_LINES
+	jnz	preprocess_line_from_file
+	mov	edx,esi
+    detect_line_concatenation:
+	mov	al,[edx]
+	inc	edx
+	cmp	al,0Ah
+	je	concatenate_line
+	cmp	al,';'
+	je	concatenation_comment
+	cmp	al,20h
+	jne	preprocess_line_from_file
+	jmp	detect_line_concatenation
+    concatenate_line:
+	mov	byte [edi-1],20h
+	inc	esi
+	inc	[ebx+SourceEntry.number_of_attached_lines]
+	jmp	preprocess_line_from_file
+    concatenation_comment:
+	test	[preprocessing_mode],PMODE_RETAIN_COMMENTS
+	jnz	preprocess_line_from_file
+	mov	byte [edi-1],20h
+	mov	esi,edx
+	inc	[ebx+SourceEntry.number_of_attached_lines]
+    skip_comment:
+	lodsb
+	test	al,al
+	jz	file_ended
+	cmp	al,0Ah
+	je	comment_ended
+	cmp	al,22h
+	je	skip_quoted_string
+	cmp	al,27h
+	je	skip_quoted_string
+	cmp	al,1Ah
+	jne	skip_comment
+	lodsd
+	lea	esi,[esi+eax+12]
+	jmp	skip_comment
+    comment_ended:
+	test	edx,edx
+	jnz	preprocess_line_from_file
+	jmp	line_ended
+    skip_quoted_string:
+	lodsd
+	add	esi,eax
+	jmp	skip_comment
+    convert_quoted_string:
+	stosb
+	mov	eax,esi
+	stosd
+	lodsd
+	add	esi,eax
+	jmp	preprocess_line_from_file
+    convert_name_symbol:
+	mov	ecx,[esi]
+	lea	eax,[esi+4+ecx+12]
+	push	eax ebx
+	mov	eax,[eax-4]
+	test	eax,eax
+	jz	name_symbol_not_cached
+	mov	esi,eax
+      name_symbol_not_cached:
+	call	preprocess_symbol
+    name_symbol_converted:
+	pop	ebx esi
+	jmp	preprocess_line_from_file
+    convert_parameter:
+	cmp	byte [esi],1Ah
+	jne	preprocess_line_from_file
+	lodsb
+	mov	ecx,[esi]
+	lea	eax,[esi+4+ecx+12]
+	push	eax ebx
+	mov	eax,[eax-4]
+	test	eax,eax
+	jz	parameter_to_convert_not_cached
+	mov	esi,eax
+      parameter_to_convert_not_cached:
+	call	preprocess_symbol
+	jc	name_symbol_converted
+	call	convert_parameter_to_string
+	jmp	name_symbol_converted
+    file_ended:
+	dec	esi
+    line_ended:
+	sub	esi,[ebx+SourceEntry.text]
+	mov	[ebx+SourceEntry.offset],esi
+	jmp	line_preprocessed
+    source_ended:
+	mov	ebx,[source_context]
+	dec	[ebx+SourceContext.number_of_entries]
+	jnz	get_line
+	cmp	[ebx+sizeof.SourceContext+SourceEntry.type],SOURCE_MEMORY
+	jne	no_more_lines
+	mov	esi,[source_file]
+	test	esi,esi
+	jz	no_more_lines
+	cmp	byte [esi],0
+	je	no_more_lines
+	lea	edi,[ebx+sizeof.SourceContext]
+	mov	ecx,sizeof.SourceEntry shr 2
+	assert	sizeof.SourceEntry and 11b = 0
+	xor	eax,eax
+	rep	stosd
+	call	read_source
+	test	eax,eax
+	jz	main_source_file_not_found
+	mov	ebx,[source_context]
+	inc	[ebx+SourceContext.number_of_entries]
+	add	ebx,sizeof.SourceContext
+	mov	[ebx+SourceEntry.type],SOURCE_FILE
+	mov	[ebx+SourceEntry.name],esi
+	mov	[ebx+SourceEntry.text],eax
+	mov	eax,[parameter_namespace]
+	mov	[ebx+SourceEntry.local_namespace],eax
+	jmp	get_line
+    no_more_lines:
+	jmp	pass_done
+    get_line_from_macro:
+	mov	edx,[ebx+SourceEntry.text]
+	mov	esi,[edx+ValueDefinition.value]
+	mov	ecx,[edx+ValueDefinition.value_length]
+	mov	eax,[ebx+SourceEntry.offset]
+	test	[ebx+SourceEntry.flags],SRCF_PREPROCESSED
+	jnz	use_preprocessed_line
+	add	ecx,esi
+	mov	[source_end],ecx
+	add	esi,eax
+	cmp	esi,[source_end]
+	je	macro_ended
+	mov	[ebx+SourceEntry.line_offset],eax
+	mov	edi,[preprocessing_workspace.memory_start]
+    preprocess_line_from_macro:
+	cmp	esi,[source_end]
+	je	macro_line_ended
+	mov	ecx,14
+	mov	edx,preprocessing_workspace
+	call	reserve_workspace
+	lodsb
+	cmp	al,1Ah
+	je	reproduce_name_symbol
+	test	al,al
+	jz	macro_line_ended
+	stosb
+	cmp	al,22h
+	je	reproduce_quoted_string
+	cmp	al,27h
+	je	reproduce_quoted_string
+	cmp	al,30h
+	je	reproduce_internal_token
+	cmp	al,40h
+	je	reproduce_context_token
+	cmp	al,'`'
+	je	conversion_operator_in_macro
+	jmp	preprocess_line_from_macro
+    reproduce_quoted_string:
+	movsd
+	jmp	preprocess_line_from_macro
+    reproduce_internal_token:
+	mov	ecx,[esi]
+	add	ecx,4
+	mov	edx,preprocessing_workspace
+	call	reserve_workspace
+	lodsd
+	stosd
+	mov	ecx,eax
+	shr	ecx,2
+	rep	movsd
+	mov	cl,al
+	and	cl,11b
+	rep	movsb
+	jmp	preprocess_line_from_macro
+    reproduce_context_token:
+	mov	[preprocessed_context],esi
+	assert	sizeof.RecognitionContext and 11b = 0
+	mov	ecx,sizeof.RecognitionContext shr 2
+	rep	movsd
+	cmp	esi,[source_end]
+	je	macro_line_ended
+	cmp	byte [esi],40h
+	jne	preprocess_line_from_macro
+	inc	esi
+	sub	edi,sizeof.RecognitionContext
+	jmp	reproduce_context_token
+    reproduce_name_symbol:
+	mov	[name_token],esi
+	lodsd
+	push	esi ebx
+	mov	esi,eax
+	call	preprocess_symbol
+    name_symbol_reproduced:
+	pop	ebx esi
+	jmp	preprocess_line_from_macro
+    conversion_operator_in_macro:
+	cmp	esi,[source_end]
+	je	macro_ended
+	cmp	byte [esi],1Ah
+	jne	preprocess_line_from_macro
+	inc	esi
+	mov	[name_token],esi
+	lodsd
+	push	esi ebx
+	mov	esi,eax
+	call	preprocess_symbol
+	jc	name_symbol_reproduced
+	call	convert_parameter_to_string
+	jmp	name_symbol_reproduced
+    convert_parameter_to_string:
+	call	convert_symbolic_value_to_string
+	mov	ebx,[memory_source_cache]
+	xor	eax,eax
+	call	put_into_map
+	mov	edi,[symbol_value_start]
+	dec	edi
+	mov	al,22h
+	stosb
+	mov	eax,esi
+	stosd
+	retn
+    macro_ended:
+	mov	edx,[ebx+SourceEntry.text]
+	and	[edx+ValueDefinition.flags],not VAL_IN_USE
+	dec	[edx+ValueDefinition.reference_count]
+	mov	ebx,[source_context]
+	dec	[ebx+SourceContext.number_of_entries]
+	jnz	get_line
+	jmp	pass_done
+    use_preprocessed_line:
+	jecxz	macro_ended
+	test	eax,eax
+	jnz	macro_ended
+	mov	[ebx+SourceEntry.offset],ecx
+	add	ecx,esi
+	mov	[line_start],esi
+	mov	[line_end],ecx
+	jmp	got_line
+    macro_line_ended:
+	mov	edx,[ebx+SourceEntry.text]
+	sub	esi,[edx+ValueDefinition.value]
+	mov	[ebx+SourceEntry.offset],esi
+    line_preprocessed:
+	mov	[line_end],edi
+	mov	esi,[preprocessing_workspace.memory_start]
+	mov	[line_start],esi
+    got_line:
+	xor	eax,eax
+	mov	[line_context],eax
+	mov	[embedded_context],eax
+assemble_instruction:
 	mov	ebx,[interceptor_symbol]
 	call	get_available_value
 	jc	no_interceptor
 	test	[edx+ValueDefinition.flags],VAL_UNCONDITIONAL
 	jz	weak_interceptor
-	jmp	use_macro
+	jmp	execute_instruction
       no_interceptor:
 	xor	edx,edx
       weak_interceptor:
 	mov	[interceptor],edx
-	and	[label_interceptor],0
-	and	[symbol_definition],0
+	xor	eax,eax
+	mov	[label_interceptor],eax
+	test	[assembly_mode],AMODE_CALM_DEFINITION
+	jnz	assemble_alm_instruction
+	mov	[symbol_definition],al
+	mov	[instruction_branch],eax
 	mov	dl,SYMCLASS_INSTRUCTION
 	call	identify_symbol
 	jc	empty_line
+	mov	[label_branch],edx
+	mov	al,[symbol_solid]
+	mov	[label_solid],al
 	test	ebx,ebx
 	jz	unrecognized_instruction
-	mov	al,[ebx+SymbolTree_Leaf.class]
-	cmp	al,SYMCLASS_EXPRESSION
-	je	labeled_instruction
-	cmp	al,SYMCLASS_INSTRUCTION
-	jne	unrecognized_instruction
+	cmp	[ebx+SymbolTree_Leaf.class],SYMCLASS_INSTRUCTION
+	jne	labeled_instruction
 	call	get_available_value
 	jc	unrecognized_instruction
 	test	[edx+ValueDefinition.flags],VAL_UNCONDITIONAL
@@ -632,25 +987,57 @@ assembly_pass:
 	cmp	[interceptor],0
 	jne	unrecognized_instruction
 	test	[assembly_mode],AMODE_SKIP or AMODE_DEFINITION
-	jnz	ignored_instruction
+	jnz	unrecognized_instruction
     execute_instruction:
 	mov	al,[edx+ValueDefinition.type]
+	cmp	al,VALTYPE_CALM
+	je	launch_calm
+	cmp	al,VALTYPE_NATIVE_COMMAND
+	je	execute_native_instruction
 	cmp	al,VALTYPE_SYMBOLIC
 	je	use_macro
-	cmp	al,VALTYPE_NATIVE_COMMAND
-	jne	ignored_instruction
-	jmp	[edx+ValueDefinition.value]
-    labeled_instruction:
-	cmp	[interceptor],0
+	cmp	al,VALTYPE_RESERVED
 	jne	unrecognized_instruction
+	mov	edx,_symbolic_self_reference
+	call	register_error
+    unrecognized_instruction:
+	test	[assembly_mode],AMODE_SKIP
+	jnz	assembly_line
+	test	[assembly_mode],AMODE_DEFINITION
+	jnz	add_line_to_macro
+	cmp	[interceptor],0
+	jne	execute_interceptor
+	cmp	[label_interceptor],0
+	jne	execute_label_interceptor
+	mov	edx,_illegal_instruction
+	call	register_error
+	mov	ebx,[label_branch]
+	test	ebx,ebx
+	jz	assembly_line
+	mov	[symbol_class],SYMCLASS_INSTRUCTION
+	or	[symbol_required],1
+	or	[symbol_expected],1
+	call	scan_symbol_branch
+	xor	edx,edx
+	call	mark_symbol_as_used
+	mov	ebx,[instruction_branch]
+	test	ebx,ebx
+	jz	assembly_line
+	mov	[symbol_class],SYMCLASS_STRUCTURE
+	or	[symbol_required],1
+	or	[symbol_expected],1
+	call	scan_symbol_branch
+	xor	edx,edx
+	call	mark_symbol_as_used
+	jmp	assembly_line
+    labeled_instruction:
 	mov	[label_leaf],ebx
-	mov	[label_branch],edx
 	mov	[label_instruction_start],esi
 	mov	ebx,[label_interceptor_symbol]
 	call	get_available_value
 	jc	no_label_interceptor
 	test	[edx+ValueDefinition.flags],VAL_UNCONDITIONAL
-	jnz	use_struc
+	jnz	execute_labeled_instruction
 	mov	[label_interceptor],edx
 	mov	eax,[embedded_context]
 	mov	[label_instruction_context],eax
@@ -665,6 +1052,7 @@ assembly_pass:
     identify_structure_instruction:
 	mov	dl,SYMCLASS_STRUCTURE
 	call	identify_symbol
+	mov	[instruction_branch],edx
 	test	ebx,ebx
 	jz	unrecognized_instruction
 	cmp	[ebx+SymbolTree_Leaf.class],SYMCLASS_STRUCTURE
@@ -675,40 +1063,27 @@ assembly_pass:
 	jnz	execute_labeled_instruction
 	test	[assembly_mode],AMODE_SKIP or AMODE_DEFINITION
 	jnz	unrecognized_instruction
-	cmp	[label_interceptor],0
-	jne	unrecognized_instruction
-    execute_labeled_instruction:
-	mov	al,[edx+ValueDefinition.type]
-	cmp	al,VALTYPE_SYMBOLIC
-	je	use_struc
-	cmp	al,VALTYPE_NATIVE_COMMAND
-	jne	unrecognized_instruction
-	jmp	[edx+ValueDefinition.value]
-    ignored_instruction:
-	test	[assembly_mode],AMODE_SKIP
-	jnz	assembly_line
-	test	[assembly_mode],AMODE_DEFINITION
-	jz	illegal_instruction
-	jmp	add_line_to_macro
-    unrecognized_instruction:
-	test	[assembly_mode],AMODE_SKIP
-	jnz	assembly_line
-	test	[assembly_mode],AMODE_DEFINITION
-	jnz	add_line_to_macro
-    illegal_instruction:
 	cmp	[interceptor],0
 	jne	execute_interceptor
 	cmp	[label_interceptor],0
 	jne	execute_label_interceptor
-	mov	edx,_illegal_instruction
-	call	register_error
-	jmp	assembly_line
+    execute_labeled_instruction:
+	mov	al,[edx+ValueDefinition.type]
+	cmp	al,VALTYPE_CALM
+	je	launch_calm
+	cmp	al,VALTYPE_SYMBOLIC
+	je	use_struc
+	cmp	al,VALTYPE_NATIVE_COMMAND
+	jne	unrecognized_instruction
+    execute_native_instruction:
+	mov	eax,[current_pass]
+	mov	[ebx+SymbolTree_Leaf.last_use_pass],eax
+	jmp	[edx+ValueDefinition.value]
     empty_line:
 	mov	al,[assembly_mode]
-	test	al,AMODE_SKIP
-	jnz	assembly_line
-	test	al,AMODE_DEFINITION
-	jnz	add_line_to_macro
+	and	al,AMODE_SKIP or AMODE_DEFINITION
+	cmp	al,AMODE_DEFINITION
+	je	add_line_to_macro
 	jmp	assembly_line
     execute_interceptor:
 	mov	ebx,[interceptor_symbol]
@@ -716,15 +1091,17 @@ assembly_pass:
 	xor	eax,eax
 	mov	[embedded_context],eax
 	mov	esi,[line_start]
-	jmp	use_macro
+	jmp	execute_instruction
     execute_label_interceptor:
 	mov	ebx,[label_interceptor_symbol]
 	mov	edx,[label_interceptor]
 	mov	eax,[label_instruction_context]
 	mov	[embedded_context],eax
 	mov	esi,[label_instruction_start]
+	cmp	[edx+ValueDefinition.type],VALTYPE_CALM
+	je	launch_calm
 	jmp	use_struc
-    instruction_assembled:
+instruction_assembled:
 	cmp	[current_constituent],0
 	jne	extra_characters_on_line
 	call	warp_to_next_symbol
@@ -799,6 +1176,11 @@ assembly_pass:
 	mov	edx,_source_file_not_found
 	call	register_error
     no_source_to_assemble:
+	mov	esi,zero_value
+	mov	ecx,4+4
+	call	create_output_area
+	mov	[current_area],edx
+	inc	[edx+ValueDefinition.reference_count]
 	stc
 	retn
 
@@ -810,7 +1192,6 @@ allocate_workspace:
 	push	edx
 	call	malloc_growable
 	pop	edx
-	jc	out_of_memory
 	mov	[edx+Workspace.memory_start],eax
 	add	eax,ecx
 	mov	[edx+Workspace.memory_end],eax
@@ -834,8 +1215,9 @@ reserve_workspace:
 	retn
     not_enough_workspace:
 	add	ecx,edi
-	jc	out_of_memory
+	jc	allocation_overflow
 	sub	ecx,[edx+Workspace.memory_start]
+	push	ecx
 	bsr	eax,ecx
 	xchg	ecx,eax
 	dec	cl
@@ -843,6 +1225,9 @@ reserve_workspace:
 	inc	eax
 	shl	eax,cl
 	mov	ecx,eax
+	pop	eax
+	cmp	ecx,eax
+	jbe	allocation_overflow
 	cmp	edi,[edx+Workspace.memory_start]
 	je	reestablish_workspace
     expand_workspace:
@@ -851,7 +1236,7 @@ reserve_workspace:
 	push	edx
 	call	realloc
 	pop	edx
-	jc	out_of_memory
+    update_workspace:
 	mov	[edx+Workspace.memory_start],eax
 	add	edi,eax
 	add	eax,ecx
@@ -866,13 +1251,10 @@ reserve_workspace:
 	pop	ecx
 	call	malloc_growable
 	pop	edx
-	jc	out_of_memory
-	mov	[edx+Workspace.memory_start],eax
-	mov	edi,eax
-	add	eax,ecx
-	mov	[edx+Workspace.memory_end],eax
-	stc
-	retn
+	xor	edi,edi
+	jmp	update_workspace
+    allocation_overflow:
+	jmp	out_of_memory
 
 grow_stack:
 ; in:
@@ -882,6 +1264,7 @@ grow_stack:
 ;  eax = new base address of memory block containing stack data
 ;  ecx = new size of memory block
 ; preserves: ebx, esi, edi
+	push	ecx
 	bsr	edx,ecx
 	xchg	ecx,edx
 	sub	cl,2
@@ -889,8 +1272,10 @@ grow_stack:
 	inc	edx
 	shl	edx,cl
 	mov	ecx,edx
+	pop	edx
+	cmp	ecx,edx
+	jbe	allocation_overflow
 	call	realloc
-	jc	out_of_memory
 	retn
 
 create_source_entry:
@@ -914,7 +1299,6 @@ create_source_entry:
 	mov	eax,ebx
 	mov	ebx,edx
 	call	realloc
-	jc	out_of_memory
 	mov	[source_context],eax
 	mov	[source_context_maximum_length],ecx
 	mov	edx,ebx
@@ -926,6 +1310,10 @@ create_source_entry:
 	assert	sizeof.SourceEntry and 11b = 0
 	xor	eax,eax
 	rep	stosd
+	cmp	[alm_statement],0
+	je	source_entry_created
+	mov	[edi-sizeof.SourceEntry+SourceEntry.flags],SRCF_ALM_STATEMENT
+    source_entry_created:
 	clc
 	retn
     source_context_full:
@@ -1016,238 +1404,16 @@ get_file_source_entry:
 	loopne	find_file_source_entry
 	retn
 
-get_line:
+preprocess_symbol:
+; in:
+;  esi - contents of the name token (32-bit length and name followed by two hashes)
+;  edi - pointer into preprocessing_workspace where the preprocessed text should be stored
 ; out:
-;  cf set if there are no more lines to assemble
-;  esi = pointer into preprocessed line
-	mov	[symbol_class],SYMCLASS_PARAMETER
-	and	[symbol_expected],0
-	and	[symbol_required],0
-	and	[name_volatile],0
-	mov	ebx,[source_context]
-	mov	eax,[ebx+SourceContext.number_of_entries]
-	dec	eax
-	imul	eax,sizeof.SourceEntry
-	lea	ebx,[ebx+sizeof.SourceContext+eax]
-	xor	eax,eax
-	mov	[preprocessed_context],eax
-	xchg	eax,[ebx+SourceEntry.number_of_attached_lines]
-	inc	eax
-	add	[ebx+SourceEntry.line_number],eax
-	mov	eax,[ebx+SourceEntry.local_namespace]
-	mov	[parameter_namespace],eax
-	test	[eax+SymbolTree_Root.flags],NAMESPACE_UNATTACHED
-	jz	local_namespace_ok
-	xor	eax,eax
-    local_namespace_ok:
-	mov	[local_namespace],eax
-	cmp	[ebx+SourceEntry.type],SOURCE_MACRO
-	je	get_line_from_macro
-	and	[name_token],0
-	mov	esi,[ebx+SourceEntry.text]
-	mov	eax,[ebx+SourceEntry.offset]
-	add	esi,eax
-	mov	[ebx+SourceEntry.line_offset],eax
-	cmp	byte [esi],0
-	je	source_ended
-	mov	edi,[preprocessing_workspace.memory_start]
-    preprocess_line_from_file:
-	mov	ecx,14
-	mov	edx,preprocessing_workspace
-	call	reserve_workspace
-	lodsb
-	test	al,al
-	jz	file_ended
-	cmp	al,0Ah
-	je	line_ended
-	cmp	al,1Ah
-	je	convert_name_symbol
-	cmp	al,22h
-	je	convert_quoted_string
-	cmp	al,27h
-	je	convert_quoted_string
-	stosb
-	cmp	al,'`'
-	je	convert_parameter
-	cmp	al,'\'
-	jne	preprocess_line_from_file
-	cmp	byte [esi],0Ah
-	jne	preprocess_line_from_file
-	inc	esi
-	dec	edi
-	inc	[ebx+SourceEntry.number_of_attached_lines]
-	jmp	preprocess_line_from_file
-    convert_quoted_string:
-	stosb
-	mov	eax,esi
-	stosd
-	lodsd
-	add	esi,eax
-	jmp	preprocess_line_from_file
-    convert_name_symbol:
-	mov	eax,[esi]
-	lea	eax,[esi+4+eax+8]
-	push	eax ebx
-	call	preprocess_symbol
-    name_symbol_converted:
-	pop	ebx esi
-	jmp	preprocess_line_from_file
-    convert_parameter:
-	cmp	byte [esi],1Ah
-	jne	preprocess_line_from_file
-	lodsb
-	mov	eax,[esi]
-	lea	eax,[esi+4+eax+8]
-	push	eax ebx
-	call	preprocess_symbol
-	jc	name_symbol_converted
-	call	convert_parameter_to_string
-	jmp	name_symbol_converted
-    file_ended:
-	dec	esi
-    line_ended:
-	sub	esi,[ebx+SourceEntry.text]
-	mov	[ebx+SourceEntry.offset],esi
-    got_line:
-	mov	[line_end],edi
-	mov	esi,[preprocessing_workspace.memory_start]
-	mov	[line_start],esi
-	xor	eax,eax
-	mov	[line_context],eax
-	mov	[embedded_context],eax
-      ; clc
-	retn
-    source_ended:
-	mov	ebx,[source_context]
-	dec	[ebx+SourceContext.number_of_entries]
-	jnz	get_line
-	cmp	[ebx+sizeof.SourceContext+SourceEntry.type],SOURCE_MEMORY
-	jne	no_more_lines
-	mov	esi,[source_file]
-	test	esi,esi
-	jz	no_more_lines
-	cmp	byte [esi],0
-	je	no_more_lines
-	lea	edi,[ebx+sizeof.SourceContext]
-	mov	ecx,sizeof.SourceEntry shr 2
-	assert	sizeof.SourceEntry and 11b = 0
-	xor	eax,eax
-	rep	stosd
-	call	read_source
-	test	eax,eax
-	jz	main_source_file_not_found
-	mov	ebx,[source_context]
-	inc	[ebx+SourceContext.number_of_entries]
-	add	ebx,sizeof.SourceContext
-	mov	[ebx+SourceEntry.type],SOURCE_FILE
-	mov	[ebx+SourceEntry.name],esi
-	mov	[ebx+SourceEntry.text],eax
-	mov	eax,[parameter_namespace]
-	mov	[ebx+SourceEntry.local_namespace],eax
-	jmp	get_line
-    no_more_lines:
-	stc
-	retn
-    get_line_from_macro:
-	mov	edx,[ebx+SourceEntry.text]
-	mov	esi,[edx+ValueDefinition.value]
-	mov	eax,[edx+ValueDefinition.value_length]
-	add	eax,esi
-	mov	[source_end],eax
-	mov	eax,[ebx+SourceEntry.offset]
-	add	esi,eax
-	mov	[ebx+SourceEntry.line_offset],eax
-	mov	edi,[preprocessing_workspace.memory_start]
-    preprocess_line_from_macro:
-	cmp	esi,[source_end]
-	je	macro_ended
-	mov	ecx,14
-	mov	edx,preprocessing_workspace
-	call	reserve_workspace
-	lodsb
-	test	al,al
-	jz	macro_line_ended
-	cmp	al,1Ah
-	je	reproduce_name_symbol
-	stosb
-	cmp	al,22h
-	je	reproduce_quoted_string
-	cmp	al,27h
-	je	reproduce_quoted_string
-	cmp	al,30h
-	je	reproduce_internal_token
-	cmp	al,40h
-	je	reproduce_context_token
-	cmp	al,'`'
-	je	conversion_operator_in_macro
-	jmp	preprocess_line_from_macro
-    reproduce_quoted_string:
-	movsd
-	jmp	preprocess_line_from_macro
-    reproduce_internal_token:
-	mov	ecx,[esi]
-	add	ecx,4
-	mov	edx,preprocessing_workspace
-	call	reserve_workspace
-	lodsd
-	stosd
-	mov	ecx,eax
-	shr	ecx,2
-	rep	movsd
-	mov	cl,al
-	and	cl,11b
-	rep	movsb
-	jmp	preprocess_line_from_macro
-    reproduce_context_token:
-	mov	[preprocessed_context],esi
-	assert	sizeof.RecognitionContext and 11b = 0
-	mov	ecx,sizeof.RecognitionContext shr 2
-	rep	movsd
-	cmp	esi,[source_end]
-	je	macro_ended
-	cmp	byte [esi],40h
-	jne	preprocess_line_from_macro
-	inc	esi
-	sub	edi,sizeof.RecognitionContext
-	jmp	reproduce_context_token
-    reproduce_name_symbol:
-	mov	[name_token],esi
-	lodsd
-	push	esi ebx
-	mov	esi,eax
-	call	preprocess_symbol
-    name_symbol_reproduced:
-	pop	ebx esi
-	jmp	preprocess_line_from_macro
-    conversion_operator_in_macro:
-	cmp	esi,[source_end]
-	je	macro_ended
-	cmp	byte [esi],1Ah
-	jne	preprocess_line_from_macro
-	inc	esi
-	mov	[name_token],esi
-	lodsd
-	push	esi ebx
-	mov	esi,eax
-	call	preprocess_symbol
-	jc	name_symbol_reproduced
-	call	convert_parameter_to_string
-	jmp	name_symbol_reproduced
-    macro_line_ended:
-	mov	edx,[ebx+SourceEntry.text]
-	sub	esi,[edx+ValueDefinition.value]
-	mov	[ebx+SourceEntry.offset],esi
-	jmp	got_line
-    macro_ended:
-	mov	edx,[ebx+SourceEntry.text]
-	and	[edx+ValueDefinition.flags],not VAL_IN_USE
-	dec	[edx+ValueDefinition.reference_count]
-	mov	ebx,[source_context]
-	dec	[ebx+SourceContext.number_of_entries]
-	jnz	get_line
-	stc
-	retn
-    preprocess_symbol:
+;  edi - just after the preprocessed text
+;  cf set when symbol was used as-is (was not recognized as a parameter)
+;  when cf = 0:
+;   [symbol_value_start] - start of the preprocessed text
+;   [symbol_value_end] - end of the preprocessed text (the same as edi)
 	mov	eax,edi
 	sub	eax,[preprocessing_workspace.memory_start]
 	mov	[symbol_value_start],eax
@@ -1519,6 +1685,9 @@ get_line:
 	xchg	ecx,eax
 	jmp	copy_with_preprocessed_context
     local_symbol_name:
+	mov	ecx,1+sizeof.RecognitionContext+1+4+1+sizeof.RecognitionContext
+	mov	edx,preprocessing_workspace
+	call	reserve_workspace
 	mov	al,40h
 	stosb
 	mov	eax,[local_namespace]
@@ -1551,7 +1720,14 @@ get_line:
 	add	[symbol_value_start],eax
 	clc
 	retn
-    convert_parameter_to_string:
+
+convert_symbolic_value_to_string:
+; in:
+;  [symbol_value_start] - start of the preprocessed text to convert
+;  [symbol_value_end] - end of the preprocessed text to convert
+; out:
+;  esi - 32-bit length followed by string data
+;  ecx = total length of string data (including the length prefix)
 	mov	esi,[symbol_value_start]
 	mov	edx,assembly_workspace
 	mov	edi,[edx+Workspace.memory_start]
@@ -1559,7 +1735,7 @@ get_line:
       convert_token_to_text:
 	mov	ecx,[symbol_value_end]
 	sub	ecx,esi
-	jbe	finish_parameter_to_string_conversion
+	jbe	finish_conversion
 	mov	edx,assembly_workspace
 	call	reserve_workspace
 	lodsb
@@ -1639,177 +1815,13 @@ get_line:
 	rep	movsb
 	pop	esi
 	jmp	convert_token_to_text
-      finish_parameter_to_string_conversion:
+      finish_conversion:
 	mov	esi,[assembly_workspace.memory_start]
 	mov	ecx,edi
 	sub	ecx,esi
 	lea	eax,[ecx-4]
 	mov	[esi],eax
-	mov	ebx,[memory_source_cache]
-	xor	eax,eax
-	call	put_into_map
-	mov	edi,[symbol_value_start]
-	dec	edi
-	mov	al,22h
-	stosb
-	mov	eax,esi
-	stosd
 	retn
-
-move_to_next_symbol:
-; in:
-;  esi = pointer into preprocessed line or current embedded value
-;  zeroed ecx is recommended for whitespace detection
-; out:
-;  esi = pointer advanced past the whitespace and context tokens
-;  cf set when reached end of line or embedded value
-;  ecx increased when there was whitespace on the way, preserved otherwise
-;  when cf = 0:
-;   esi - next symbol
-;   al = initial byte of the next symbol
-; preserves: ebx, edx, edi
-	cmp	esi,[line_end]
-	jb	next_token_available
-	stc
-	retn
-    next_token_available:
-	mov	al,[esi]
-	cmp	al,40h
-	je	set_embedded_context
-	cmp	al,20h
-	je	pass_whitespace
-	clc
-	retn
-    pass_whitespace:
-	inc	esi
-	inc	ecx
-	jmp	move_to_next_symbol
-    set_embedded_context:
-	inc	esi
-	cmp	[esi+RecognitionContext.base_namespace],0
-	je	restore_embedded_context
-	mov	[embedded_context],esi
-	add	esi,sizeof.RecognitionContext
-	jmp	move_to_next_symbol
-    restore_embedded_context:
-	add	esi,sizeof.RecognitionContext
-	mov	eax,[number_of_line_embeddings]
-	test	eax,eax
-	jz	clear_embedded_context
-	dec	eax
-	imul	eax,sizeof.LineEmbedding
-	add	eax,[line_embeddings]
-	mov	eax,[eax+LineEmbedding.recognition_context]
-	mov	[embedded_context],eax
-	jmp	move_to_next_symbol
-    clear_embedded_context:
-	and	[embedded_context],0
-	jmp	move_to_next_symbol
-
-warp_to_next_symbol:
-; in:
-;  esi = pointer into preprocessed line or current embedded value
-;  zeroed ecx is recommended for whitespace detection
-; out:
-;  esi - next symbol
-;  cf set when end of line reached
-;  ecx increased when there was whitespace on the way, preserved otherwise
-;  when cf = 0:
-;   al = initial byte of the next symbol
-; preserves: ebx, edx, edi
-	call	move_to_next_symbol
-	jc	warp_through_embedding_boundary
-	retn
-    warp_through_embedding_boundary:
-	mov	eax,[number_of_line_embeddings]
-	sub	eax,1
-	jc	reached_end_of_line
-	mov	[number_of_line_embeddings],eax
-	imul	eax,sizeof.LineEmbedding
-	add	eax,[line_embeddings]
-	mov	esi,eax
-	push	edx
-	add	ecx,[esi+LineEmbedding.whitespace]
-	mov	edx,[esi+LineEmbedding.recognition_context]
-	mov	[embedded_context],edx
-	mov	edx,[esi+LineEmbedding.definition]
-	dec	[edx+ValueDefinition.reference_count]
-	and	[edx+ValueDefinition.flags],not VAL_IN_USE
-	mov	edx,[esi+LineEmbedding.previous_end]
-	mov	[line_end],edx
-	mov	esi,[esi+LineEmbedding.previous_pointer]
-	pop	edx
-	jmp	warp_to_next_symbol
-    reached_end_of_line:
-       ; stc
-	retn
-
-cut_piece_of_line:
-; in:
-;  esi = pointer into preprocessed line or current embedded value
-;  edi - LineExcerpt to be filled with information about cut piece of line
-;  dl = initial byte of symbol that should end the cut value, zero to cut up to the end of line (or current embedded value)
-;  dh = initial byte of symbol that would open the nested piece, zero for no nesting
-;  [breakpoint_token] = initial byte of symbol that should uncoditionally end the cut value if it is met
-; out:
-;  esi = pointer advanced past the cut piece
-;  al = initial byte of symbol at pointer, zero when no more symbols there
-; preserves: ebx, edx, edi
-; note: when [breakpoint_token] has the same value as either dl or dh, it has no effect
-	mov	[number_of_enclosings],1
-	call	move_to_next_symbol
-	mov	[edi+LineExcerpt.data_start],esi
-	mov	[edi+LineExcerpt.data_end],esi
-	jc	last_piece_in_line
-	mov	ecx,[embedded_context]
-	mov	[edi+LineExcerpt.recognition_context],ecx
-    cut_piece:
-	cmp	al,dh
-	je	nested_piece
-	cmp	al,dl
-	je	close_nested_piece
-	cmp	al,[breakpoint_token]
-	jne	cut_token
-	retn
-    close_nested_piece:
-	dec	[number_of_enclosings]
-	jz	end_of_piece
-    cut_token:
-	cmp	al,1Ah
-	je	cut_token_with_data
-	cmp	al,22h
-	je	cut_token_with_data
-	cmp	al,27h
-	je	cut_token_with_data
-	cmp	al,30h
-	je	cut_internal_token
-	cmp	al,40h
-	je	cut_context_token
-	inc	esi
-    cut_next_token:
-	mov	[edi+LineExcerpt.data_end],esi
-	call	move_to_next_symbol
-	jnc	cut_piece
-    last_piece_in_line:
-	xor	al,al
-    end_of_piece:
-	mov	ecx,[embedded_context]
-	mov	[edi+LineExcerpt.leftover_context],ecx
-	retn
-    nested_piece:
-	inc	[number_of_enclosings]
-	jmp	cut_token
-    cut_token_with_data:
-	add	esi,1+4
-	jmp	cut_next_token
-    cut_internal_token:
-	inc	esi
-	lodsd
-	add	esi,eax
-	jmp	cut_next_token
-    cut_context_token:
-	add	esi,1+sizeof.RecognitionContext
-	jmp	cut_next_token
 
 compare_symbolic_values:
 ; in:
@@ -1894,6 +1906,8 @@ compare_symbolic_values:
 	repe	cmpsb
 	je	internal_tokens_equal
 	inc	ecx
+	dec	esi
+	dec	edi
 	add	ecx,eax
 	retn
     internal_tokens_equal:
@@ -1915,6 +1929,338 @@ compare_symbolic_values:
 	dec	edx
 	jnz	compare_contexts
 	jmp	compare_symbolic_values
+
+move_to_next_symbol:
+; in:
+;  esi = pointer into preprocessed line or current embedded value
+;  zeroed ecx is recommended for whitespace detection
+; out:
+;  esi = pointer advanced past the whitespace and context tokens
+;  cf set when reached end of line or embedded value
+;  ecx increased when there was whitespace on the way, preserved otherwise
+;  when cf = 0:
+;   esi - next symbol
+;   al = initial byte of the next symbol
+; preserves: ebx, edx, edi
+; note:
+;  [embedded_context] is updated to point to a RecognitionContext that should be in force at the new position (null means current namespace context);
+	cmp	esi,[line_end]
+	jb	next_token_available
+	stc
+	retn
+    next_token_available:
+	mov	al,[esi]
+	cmp	al,40h
+	je	set_embedded_context
+	cmp	al,20h
+	je	pass_whitespace
+	clc
+	retn
+    pass_whitespace:
+	inc	esi
+	inc	ecx
+	jmp	move_to_next_symbol
+    set_embedded_context:
+	inc	esi
+	cmp	[esi+RecognitionContext.base_namespace],0
+	je	restore_embedded_context
+	mov	[embedded_context],esi
+	add	esi,sizeof.RecognitionContext
+	jmp	move_to_next_symbol
+    restore_embedded_context:
+	add	esi,sizeof.RecognitionContext
+	mov	eax,[number_of_line_embeddings]
+	test	eax,eax
+	jz	clear_embedded_context
+	dec	eax
+	imul	eax,sizeof.LineEmbedding
+	add	eax,[line_embeddings]
+	mov	eax,[eax+LineEmbedding.recognition_context]
+	mov	[embedded_context],eax
+	jmp	move_to_next_symbol
+    clear_embedded_context:
+	and	[embedded_context],0
+	jmp	move_to_next_symbol
+
+warp_to_next_symbol:
+; in:
+;  esi = pointer into preprocessed line or current embedded value
+;  zeroed ecx is recommended for whitespace detection
+; out:
+;  esi - next symbol
+;  cf set when end of line reached
+;  ecx increased when there was whitespace on the way, preserved otherwise
+;  when cf = 0:
+;   al = initial byte of the next symbol
+; preserves: ebx, edx, edi
+; note:
+;  [embedded_context] is updated to point to a RecognitionContext that should be in force at the new position (null means current namespace context);
+	call	move_to_next_symbol
+	jc	warp_through_embedding_boundary
+	retn
+    warp_through_embedding_boundary:
+	mov	eax,[number_of_line_embeddings]
+	sub	eax,1
+	jc	reached_end_of_line
+	mov	[number_of_line_embeddings],eax
+	imul	eax,sizeof.LineEmbedding
+	add	eax,[line_embeddings]
+	mov	esi,eax
+	push	edx
+	add	ecx,[esi+LineEmbedding.whitespace]
+	mov	edx,[esi+LineEmbedding.recognition_context]
+	mov	[embedded_context],edx
+	mov	edx,[esi+LineEmbedding.definition]
+	dec	[edx+ValueDefinition.reference_count]
+	and	[edx+ValueDefinition.flags],not VAL_IN_USE
+	mov	edx,[esi+LineEmbedding.previous_end]
+	mov	[line_end],edx
+	mov	esi,[esi+LineEmbedding.previous_pointer]
+	pop	edx
+	jmp	warp_to_next_symbol
+    reached_end_of_line:
+       ; stc
+	retn
+
+cut_piece_of_line:
+; in:
+;  esi = pointer into preprocessed line or current embedded value
+;  edi - LineExcerpt to be filled with information about cut piece of line
+;  dl = initial byte of symbol that should end the cut value, zero to cut up to the end of line (or current embedded value)
+;  dh = initial byte of symbol that would open the nested piece, zero for no nesting
+;  [breakpoint_token] = initial byte of symbol that should unconditionally end the cut value if it is met
+; out:
+;  esi = pointer advanced past the cut piece
+;  al = initial byte of symbol at pointer, zero when no more symbols there
+; preserves: ebx, edx, edi
+; note: when [breakpoint_token] has the same value as either dl or dh, it has no effect
+	mov	[number_of_enclosings],1
+	call	move_to_next_symbol
+	mov	[edi+LineExcerpt.data_start],esi
+	mov	[edi+LineExcerpt.data_end],esi
+	jc	last_piece_in_line
+	mov	ecx,[embedded_context]
+	mov	[edi+LineExcerpt.recognition_context],ecx
+    cut_piece:
+	cmp	al,dh
+	je	nested_piece
+	cmp	al,dl
+	je	close_nested_piece
+	cmp	al,[breakpoint_token]
+	jne	cut_token
+	retn
+    nested_piece:
+	inc	[number_of_enclosings]
+	jmp	cut_token
+    close_nested_piece:
+	dec	[number_of_enclosings]
+	jz	end_of_piece
+    cut_token:
+	cmp	al,1Ah
+	je	cut_token_with_data
+	cmp	al,22h
+	je	cut_token_with_data
+	cmp	al,27h
+	je	cut_token_with_data
+	cmp	al,30h
+	je	cut_internal_token
+	inc	esi
+    cut_next_token:
+	mov	[edi+LineExcerpt.data_end],esi
+	call	move_to_next_symbol
+	jnc	cut_piece
+    last_piece_in_line:
+	xor	al,al
+    end_of_piece:
+	mov	ecx,[embedded_context]
+	mov	[edi+LineExcerpt.leftover_context],ecx
+	retn
+    cut_token_with_data:
+	add	esi,1+4
+	jmp	cut_next_token
+    cut_internal_token:
+	inc	esi
+	lodsd
+	add	esi,eax
+	jmp	cut_next_token
+
+extract_piece_of_line:
+; in:
+;  esi = pointer into preprocessed line (not an embedded value)
+;  edi - buffer for token sequence, must be large enough to hold all the remaining tokens in line and an additional context token
+;  dl = initial byte of symbol that should end the cut value, zero to cut up to the end of line
+;  dh = initial byte of symbol that would open the nested piece, zero for no nesting
+;  [breakpoint_token] = initial byte of symbol that should unconditionally end the cut value if it is met
+; out:
+;  esi = pointer advanced past the processed piece
+;  edi - end of the extracted sequence of tokens in provided buffer
+;  al = initial byte of symbol at pointer, zero when no more symbols there
+;  [context_boundary] = equal to edi if the extracted sequence ends with a context token
+; preserves: ebx, edx
+; note:
+;  when [breakpoint_token] has the same value as either dl or dh, it has no effect
+;  when AMODE_DEFINITION is active, current context is not added to the extracted value
+	and	[context_boundary],0
+	call	move_to_next_symbol
+	jc	no_piece_to_extract
+	mov	[number_of_enclosings],1
+	mov	[whitespace_boundary],edi
+	mov	al,40h
+	stosb
+	mov	eax,[embedded_context]
+	test	eax,eax
+	jz	extract_current_context
+	xchg	esi,eax
+	assert	sizeof.RecognitionContext and 11b = 0
+	mov	ecx,sizeof.RecognitionContext shr 2
+	rep	movsd
+	mov	esi,eax
+	mov	[context_boundary],edi
+	jmp	extract_piece
+    extract_contextless:
+	dec	edi
+	jmp	extract_piece
+    extract_current_context:
+	test	[assembly_mode],AMODE_DEFINITION
+	jnz	extract_contextless
+	call	store_current_context
+    extract_piece:
+	lodsb
+	cmp	al,dh
+	je	nested_piece_to_extract
+	cmp	al,dl
+	je	close_extracted_nested_piece
+	cmp	al,[breakpoint_token]
+	je	extraction_breakpoint
+    extract_token:
+	cmp	al,40h
+	je	extract_context_token
+	cmp	al,20h
+	je	extract_whitespace
+	and	[whitespace_boundary],0
+	stosb
+	cmp	al,1Ah
+	je	extract_token_with_data
+	cmp	al,22h
+	je	extract_token_with_data
+	cmp	al,27h
+	je	extract_token_with_data
+	cmp	al,30h
+	je	extract_internal_token
+    extract_next_token:
+	cmp	esi,[line_end]
+	jne	extract_piece
+	xor	al,al
+	cmp	[whitespace_boundary],0
+	jne	drop_final_whitespace
+	retn
+    nested_piece_to_extract:
+	inc	[number_of_enclosings]
+	jmp	extract_token
+    close_extracted_nested_piece:
+	dec	[number_of_enclosings]
+	jnz	extract_token
+    extraction_breakpoint:
+	dec	esi
+	cmp	[whitespace_boundary],0
+	jne	drop_final_whitespace
+	retn
+    drop_final_whitespace:
+	mov	edi,[whitespace_boundary]
+	retn
+    no_piece_to_extract:
+	xor	al,al
+	retn
+    extract_whitespace:
+	cmp	[whitespace_boundary],0
+	jne	whitespace_boundary_ok
+	mov	[whitespace_boundary],edi
+    whitespace_boundary_ok:
+	stosb
+	jmp	extract_next_token
+    extract_token_with_data:
+	movsd
+	jmp	extract_next_token
+    extract_internal_token:
+	lodsd
+	stosd
+	mov	ecx,eax
+	rep	movsb
+	jmp	extract_next_token
+    extract_context_token:
+	cmp	[whitespace_boundary],0
+	jne	context_whitespace_boundary_ok
+	mov	[whitespace_boundary],edi
+    context_whitespace_boundary_ok:
+	mov	[embedded_context],esi
+	cmp	dword [esi],0
+	jne	embedded_context_for_extraction_ok
+	and	[embedded_context],0
+    embedded_context_for_extraction_ok:
+	call	make_recognition_context_token
+	jmp	extract_next_token
+
+make_recognition_context_token:
+; in:
+;  al = 40h
+;  esi - RecognitionContext (contents of the context token)
+;  edi - buffer for the context token
+;  [context_boundary] = equal to edi if it is at the end of another context token
+; out:
+;  esi - past the processed RecognitionContext
+;  edi - past the extracted context token
+;  [context_boundary] - past the extracted context token
+; preserves: ebx, edx
+	cmp	edi,[context_boundary]
+	je	reuse_recognition_context
+	stosb
+	jmp	store_recognition_context
+    reuse_recognition_context:
+	sub	edi,sizeof.RecognitionContext
+    store_recognition_context:
+    ; in:
+    ;  esi - RecognitionContext to read (may have base namespace zeroed to indicate current context)
+    ;  edi - RecognitionContext to fill
+    ; out:
+    ;  esi - past the processed RecognitionContext
+    ;  edi - past the filled RecognitionContext
+    ;  [context_boundary] - past the filled RecognitionContext
+    ; preserves: ebx, edx
+	test	[assembly_mode],AMODE_DEFINITION
+	jnz	copy_recognition_context
+	cmp	[esi+RecognitionContext.base_namespace],0
+	je	capture_context_reset
+      copy_recognition_context:
+	assert	sizeof.RecognitionContext and 11b = 0
+	mov	ecx,sizeof.RecognitionContext shr 2
+	rep	movsd
+	mov	[context_boundary],edi
+	retn
+      capture_context_reset:
+	add	esi,sizeof.RecognitionContext
+    store_current_context:
+    ; in:
+    ;  edi - RecognitionContext to fill
+    ; out:
+    ;  edi - past the filled RecognitionContext
+    ;  [context_boundary] - past the filled RecognitionContext
+    ; preserves: ebx, edx
+	mov	eax,[current_namespace]
+	mov	[edi+RecognitionContext.base_namespace],eax
+	mov	ecx,[local_namespace]
+	jecxz	context_with_no_structure_label
+	mov	ecx,[ecx+SymbolTree_Root.current_label]
+	jecxz	context_with_no_structure_label
+	mov	[edi+RecognitionContext.current_label],ecx
+	add	edi,sizeof.RecognitionContext
+	mov	[context_boundary],edi
+	retn
+      context_with_no_structure_label:
+	mov	eax,[eax+SymbolTree_Root.current_label]
+	mov	[edi+RecognitionContext.current_label],eax
+	add	edi,sizeof.RecognitionContext
+	mov	[context_boundary],edi
+	retn
 
 embed_symbolic_value:
 ; in:
@@ -1959,7 +2305,16 @@ embed_symbolic_value:
 
 clear_line_embeddings:
 ; preserves: ebx, ecx, edx, esi, edi
+; note:
+;  when esi is said to point into preprocessed line or current embedded value, it must be between [line_start] and [line_end];
+;  these two pointers change upon entering a symbolic value of evaluated identifier (with embed_symbolic_value)
+;  and are restored when warp_to_next_symbol goes past the end of that embedded value;
+;  if the assembly is finished before reaching the end of line, clear_line_embeddings needs to be called
+;  to discard the stack of stored [line_start] and [line_end] boundaries before setting up a new line for the assembly;
+;  it does not reset [embedded_context], but this can be done by simply zeroing the pointer
 	xor	eax,eax
+	mov	[line_start],eax
+	mov	[line_end],eax
 	cmp	eax,[number_of_line_embeddings]
 	je	embedded_values_ok
 	push	ecx
@@ -1993,6 +2348,7 @@ identify_symbol:
 ;   edx - SymbolTree_Foliage, may be null if either ebx or edi is null
 ;   edi - SymbolTree_Root, null when there was no identifier at all or when identified symbol is not in a namespace
 ;   [symbol_start] - first token of identified symbol (within current embedded value or preprocessed line)
+;   [symbol_solid] = non-zero when initial component of identifier was a name and not a dot
 ; note:
 ;  when ebx is null but edi is not, the identifier was malformed
 ;  when edi is null but ebx is not, a special symbol was identified; this is possible only for SYMCLASS_INSTRUCTION and SYMCLASS_STRUCTURE
@@ -2024,6 +2380,7 @@ identify_symbol:
     ;	edx - SymbolTree_Foliage, may be null if either ebx or edi is null
     ;	edi - SymbolTree_Root, null when there was no identifier at all or when identified symbol is not in a namespace
     ;	[symbol_start] - first token of identified symbol
+    ;	[symbol_solid] = non-zero when initial component of identifier was a name and not a dot
     ; note:
     ;  when ebx is null but edi is not, the identifier was malformed
     ;  when edi is null but ebx is not, a special symbol was identified; this is possible only for SYMCLASS_INSTRUCTION and SYMCLASS_STRUCTURE
@@ -2049,20 +2406,34 @@ identify_symbol:
 	mov	[recognition_context.current_label],eax
     namespaces_ok:
 	mov	[symbol_start],esi
-	and	[forced_definition],0
+	and	[symbol_solid],0
+	cmp	[symbol_definition],0
+	setnz	dh
+	shl	dh,bsf RECOGNIZE_DEFINITION
+	mov	[recognizer_setting],dh
+	xor	edx,edx
 	xor	edi,edi
 	mov	al,[esi]
+	cmp	al,1Ah
+	je	starting_with_name
 	cmp	al,'.'
 	je	starting_dot
 	cmp	al,'#'
 	je	starting_with_concatenation
 	cmp	al,'?'
 	je	starting_question_mark
-	cmp	al,1Ah
-	jne	return_no_identifier
+    return_no_identifier:
+	xor	ebx,ebx
+    return_no_namespace:
+	xor	edx,edx
+	xor	edi,edi
+	clc
+	retn
     starting_with_name:
 	call	detect_numeric_symbol
 	jc	return_no_identifier
+    valid_starting_name:
+	or	[symbol_solid],1
     valid_name:
 	inc	esi
 	mov	[name_token],esi
@@ -2071,10 +2442,7 @@ identify_symbol:
 	and	[name_volatile],0
 	xor	ecx,ecx
     identify_name:
-	mov	dh,[symbol_definition]
-	or	dh,[forced_definition]
-	setnz	dh
-	shl	dh,bsf RECOGNIZE_DEFINITION
+	mov	dh,[recognizer_setting]
 	call	move_to_next_symbol
 	jc	run_recognizer
 	cmp	al,'#'
@@ -2161,13 +2529,6 @@ identify_symbol:
 	jne	find_expected_class
 	clc
 	retn
-    return_no_identifier:
-	xor	ebx,ebx
-    return_no_namespace:
-	xor	edx,edx
-	xor	edi,edi
-	clc
-	retn
     starting_question_mark:
 	inc	esi
 	xor	ecx,ecx
@@ -2183,12 +2544,12 @@ identify_symbol:
 	cmp	[symbol_definition],0
 	jne	no_forced_definition
 	mov	[expected_class],SYMCLASS_EXPRESSION
-	or	[forced_definition],1
+	or	[recognizer_setting],RECOGNIZE_DEFINITION
     no_forced_definition:
 	cmp	al,'.'
 	je	starting_dot
 	cmp	al,1Ah
-	je	valid_name
+	je	valid_starting_name
 	cmp	al,30h
 	je	concatenation_with_internal_number
     alone_question_mark:
@@ -2418,10 +2779,7 @@ identify_symbol:
 	je	starting_question_mark
 	jmp	malformed_identifier
     identify_name_with_empty_concatenation:
-	mov	dh,[symbol_definition]
-	or	dh,[forced_definition]
-	setnz	dh
-	shl	dh,bsf RECOGNIZE_DEFINITION
+	mov	dh,[recognizer_setting]
 	call	move_to_next_symbol
 	jc	run_recognizer
 	jmp	name_complete
@@ -2648,6 +3006,7 @@ get_literal:
 	mov	[literal_exponent_sign],al
 	mov	[literal_fractional_part],al
 	mov	[waiting_for_digit],al
+	mov	[float_literal_status],al
 	push	esi ecx
 	mov	ebx,edx
 	call	start_decimal_converter
@@ -2660,10 +3019,12 @@ get_literal:
 	cmp	al,'_'
 	je	skip_float_digit
 	cmp	al,'9'
-	ja	invalid_float_digit
+	ja	float_nondigit
 	sub	al,'0'
 	jz	float_digit_zero
-	jc	invalid_float_digit
+	jc	float_nondigit
+	test	[float_literal_status],1
+	jnz	reject_float_digit
 	inc	[decimal_places]
 	push	esi ecx
 	xor	ecx,ecx
@@ -2675,6 +3036,8 @@ get_literal:
 	loop	get_float_digit
 	jmp	float_digits_ok
       float_digit_zero:
+	test	[float_literal_status],1
+	jnz	reject_float_digit
 	inc	[decimal_places]
 	inc	[zero_digits]
 	and	[waiting_for_digit],0
@@ -2695,7 +3058,9 @@ get_literal:
 	jnz	no_more_tokens_in_float
 	mov	al,[literal_fractional_part]
 	or	al,[literal_exponent_sign]
-	jnz	no_more_tokens_in_float
+	jz	decimal_point_allowed
+	or	[float_literal_status],-1
+    decimal_point_allowed:
 	or	[literal_fractional_part],1
 	or	[waiting_for_digit],1
 	and	[decimal_places],0
@@ -2712,6 +3077,8 @@ get_literal:
     no_more_tokens_in_float:
 	cmp	[waiting_for_digit],0
 	jne	invalid_float_value
+	cmp	[float_literal_status],-1
+	je	invalid_float_value
 	call	finish_decimal_conversion
 	push	esi ecx
 	mov	esi,edi
@@ -2766,12 +3133,12 @@ get_literal:
 	mov	al,1
 	xchg	al,[literal_exponent_sign]
 	test	al,al
-	jnz	invalid_literal_float
+	jnz	reject_exponent_digit
 	or	[waiting_for_digit],1
 	loop	get_exponent_digit
 	pop	ecx esi
 	call	move_to_adjacent_symbol
-	jc	invalid_literal_exponent
+	jc	invalid_float_value
 	cmp	al,1Ah
 	je	next_digits_section
 	cmp	al,30h
@@ -2779,7 +3146,7 @@ get_literal:
 	cmp	al,'+'
 	je	get_following_digits
 	cmp	al,'-'
-	jne	invalid_literal_exponent
+	jne	invalid_float_value
 	neg	[literal_exponent_sign]
 	jmp	get_following_digits
     get_exponent_digit:
@@ -2790,64 +3157,42 @@ get_literal:
 	cmp	al,'_'
 	je	skip_exponent_digit
 	sub	al,'0'
-	jc	invalid_float_digit
+	jc	reject_exponent_digit
 	cmp	al,10
-	jae	invalid_float_digit
+	jae	reject_exponent_digit
+	test	[float_literal_status],1
+	jnz	reject_exponent_digit
 	mov	edx,[literal_exponent]
 	imul	edx,10
-	jo	invalid_literal_float
+	jo	reject_exponent_digit
 	cmp	[literal_exponent_sign],0
 	jnl	exponent_digit_ok
 	neg	eax
       exponent_digit_ok:
 	add	edx,eax
-	jo	invalid_literal_float
+	jo	reject_exponent_digit
 	mov	[literal_exponent],edx
 	and	[waiting_for_digit],0
       skip_exponent_digit:
 	loop	get_exponent_digit
 	jmp	float_digits_ok
-    invalid_float_digit:
+      reject_exponent_digit:
+	or	[float_literal_status],-1
+	jmp	skip_exponent_digit
+    float_nondigit:
 	cmp	[waiting_for_digit],0
-	jne	invalid_literal_float
+	jne	reject_float_digit
 	movzx	eax,byte [esi-1]
 	mov	al,[characters+eax]
 	cmp	al,'e'
 	je	get_literal_exponent
 	cmp	al,'f'
-	jne	invalid_literal_float
-	dec	ecx
-	jnz	invalid_literal_float
-	pop	ecx esi
-	or	edx,-1
-	jmp	check_for_redundant_segments
-    invalid_literal_float:
-	pop	ecx esi
-    invalid_literal_exponent:
-	xor	edx,edx
-    check_for_redundant_segments:
-	call	move_to_next_symbol
-	jc	no_redundant_segments
-	cmp	al,'#'
-	jne	no_redundant_segments
-	call	check_concatenation
-	jc	no_redundant_segments
-	cmp	al,1Ah
-	je	skip_redundant_segment
-	cmp	al,30h
-	jne	no_redundant_segments
-	add	esi,[esi+1]
-      skip_redundant_segment:
-	add	esi,1+4
-	jmp	check_for_redundant_segments
-    no_redundant_segments:
-	test	edx,edx
-	jnz	no_more_tokens_in_float
-	mov	al,[literal_fractional_part]
-	or	al,[literal_exponent_sign]
-	jnz	invalid_float_value
-	mov	al,30h
-	retn
+	jne	reject_float_digit
+	or	[float_literal_status],1
+	jmp	skip_float_digit
+      reject_float_digit:
+	or	[float_literal_status],-1
+	jmp	skip_float_digit
     move_to_adjacent_symbol:
 	call	move_to_next_symbol
 	jc	adjacent_symbol_ok
@@ -2876,42 +3221,87 @@ skip_literal:
 	inc	esi
 	call	move_to_next_symbol
 	retn
-    skip_literal_number:
+    skip_literal_string:
 	add	esi,5
+	call	move_to_next_symbol
+	retn
+    skip_literal_number:
+	xor	dh,dh
+	inc	esi
+	lodsd
+	mov	dl,[eax+4]
+	cmp	dl,'0'
+	jb	skip_number_segments
+	cmp	dl,'9'
+	ja	skip_number_segments
+	or	dh,1
+    check_for_possible_exponent:
+	mov	ecx,[eax]
+	mov	dl,[eax+4+ecx-1]
+	cmp	dl,'e'
+	je	possible_exponent
+	cmp	dl,'E'
+	jne	skip_number_segments
+    possible_exponent:
+	or	dh,2
+	jmp	skip_number_segments
+    skip_internal_number:
+	inc	esi
+	lodsd
+	add	esi,eax
+	mov	dh,1
     skip_number_segments:
 	xor	ecx,ecx
 	call	move_to_next_symbol
 	jc	literal_symbol_skipped
 	cmp	al,'#'
-	jne	literal_symbol_skipped
-    check_literal_concatenation:
-	call	check_concatenation
+	je	check_literal_concatenation
+	test	ecx,ecx
+	jnz	literal_symbol_skipped
+	cmp	al,'.'
+	jne	check_for_exponent
+    skip_decimal_point:
+	inc	esi
+	xor	ecx,ecx
+	call	move_to_next_symbol
 	jc	literal_symbol_skipped
+	cmp	al,'#'
+	je	check_literal_concatenation
+	test	ecx,ecx
+	jnz	literal_symbol_skipped
+    skip_attached_segment:
+	cmp	al,'.'
+	je	skip_decimal_point
 	cmp	al,30h
 	je	skip_attached_internal_number
 	cmp	al,1Ah
-	jne	literal_symbol_skipped
+	jne	check_for_exponent
     skip_attached_number:
-	add	esi,5
+	inc	esi
+	lodsd
+	test	dh,1
+	jnz	check_for_possible_exponent
 	jmp	skip_number_segments
     skip_attached_internal_number:
 	inc	esi
 	lodsd
 	add	esi,eax
+	and	dh,not 2
 	jmp	skip_number_segments
-    skip_literal_string:
-	add	esi,5
-	call	move_to_next_symbol
+    check_for_exponent:
+	cmp	dh,1+2
+	jne	literal_symbol_skipped
+	cmp	al,'+'
+	je	skip_exponent
+	cmp	al,'-'
+	jne	literal_symbol_skipped
+    skip_exponent:
+	xor	dh,dh
+	jmp	skip_decimal_point
+    check_literal_concatenation:
+	call	check_concatenation
+	jnc	skip_attached_segment
     literal_symbol_skipped:
-	retn
-    skip_internal_number:
-	inc	esi
-	lodsd
-	add	esi,eax
-	call	move_to_next_symbol
-	jc	literal_symbol_skipped
-	cmp	al,'#'
-	je	check_literal_concatenation
 	retn
 
 get_processed_value:
@@ -2937,6 +3327,7 @@ get_processed_value:
 ; note:
 ;  to detect whitespace between two consecutive symbols, warp_to_next_symbol should be called after this function,
 ;  since it may further increase ecx when there is additional whitespace outside of current embedded value
+;  when [use_raw_values] flag is set, this function is identical to get_raw_value
 	call	get_raw_value
 	jc	no_more_values
 	cmp	al,1Ah
@@ -2949,6 +3340,8 @@ get_processed_value:
 	clc
 	retn
     symbolic_value:
+	cmp	[use_raw_values],0
+	jne	value_ok
 	mov	eax,[current_pass]
 	mov	[ebx+SymbolTree_Leaf.last_use_pass],eax
 	test	[ebx+SymbolTree_Leaf.flags],SYM_VARIABLE

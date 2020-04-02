@@ -31,15 +31,16 @@ section '.text' code readable writeable executable align 16
 
 refRegistry:
 namespace refRegistry
-refRegistry.new:
+new:
+namespace new
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*2);+(8*0)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label new.heapAddress qword at rbp-8  
-	label new.handleAllocatedMemory qword at rbp-16
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
@@ -62,7 +63,7 @@ refRegistry.new:
 
 	sub rsp, 8*4
 	call [GetProcessHeap]
-	mov [new.heapAddress], rax
+	mov [heapAddress], rax
 	add rsp, 8*4
 	
 
@@ -73,21 +74,21 @@ refRegistry.new:
 	sub rsp, 8*4
 	mov r8, rcx		
 	mov rdx, 000001000b
-	mov rcx, [new.heapAddress]
+	mov rcx, [heapAddress]
 	call [ HeapAlloc] 
-	mov [new.handleAllocatedMemory], rax
+	mov [handleAllocatedMemory], rax
 	add rsp, 8*4
 
 
 
 
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, RefRegistry.list
 	sub rsp, 8*8
 	call [newList]
 	add rsp, 8*8
 	mov [rbx], rax
-	mov rbx, [new.handleAllocatedMemory]
+	mov rbx, [handleAllocatedMemory]
 	add rbx, RefRegistry.definedList
 	sub rsp, 8*8
 	call [newList]
@@ -97,21 +98,21 @@ refRegistry.new:
 
 
 
-	;lea rax, [new.list]
-	;lea rcx, [new.list.indexedItemIndex]
+	;lea rax, [list]
+	;lea rcx, [list.indexedItemIndex]
 
 	;sub rcx, rax
 	;add rcx, 1000b
 
 	;cld
 
-	;lea rsi, [new.list]
-	;mov rdi, [storage.new.handleAllocatedMemory]
+	;lea rsi, [list]
+	;mov rdi, [storage.handleAllocatedMemory]
 
 	;rep movsb
 
 
-	mov rax, [new.handleAllocatedMemory]
+	mov rax, [handleAllocatedMemory]
 
 
 	add rsp, 8	
@@ -129,32 +130,33 @@ refRegistry.new:
 	pop rbp
 
 	retn 0
+end namespace
 
-
-refRegistry.newLastRegisteredRef:
+newLastRegisteredRef:
+namespace newLastRegisteredRef
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*9);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label newLastRegisteredRef.heapAddress qword at rbp-8  
-	label newLastRegisteredRef.handleAllocatedMemory qword at rbp-16
-	label newLastRegisteredRef.parsing qword at rbp-24 
-	label newLastRegisteredRef.matchIndex qword at rbp-32
-	label newLastRegisteredRef.matches qword at rbp-40
-	label newLastRegisteredRef.refRegistryAddr qword at rbp-48
-	label newLastRegisteredRef.newRef qword at rbp-56
-	label newLastRegisteredRef.ref qword at rbp-64
-	label newLastRegisteredRef.refIndex qword at rbp-72
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label matches qword at rbp-40
+	label refRegistryAddr qword at rbp-48
+	label newRef qword at rbp-56
+	label ref qword at rbp-64
+	label refIndex qword at rbp-72
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [newLastRegisteredRef.refRegistryAddr], rcx
-	mov [newLastRegisteredRef.ref], rdx	
-	mov [newLastRegisteredRef.refIndex], r8
+	mov [refRegistryAddr], rcx
+	mov [ref], rdx	
+	mov [refIndex], r8
 
 	and rsp, -32
 	push rbx 
@@ -170,16 +172,16 @@ refRegistry.newLastRegisteredRef:
 
 
 	mov rcx, 0
-	;mov [newLastRegisteredRef.lettersIndex], rcx		; Begin as 0
+	;mov [lettersIndex], rcx		; Begin as 0
 
-	mov rbx, [newLastRegisteredRef.ref]
+	mov rbx, [ref]
 	add rbx, Ref.repIndex
-	mov r8, [newLastRegisteredRef.refIndex]
+	mov r8, [refIndex]
 	mov [rbx], r8
 
 	
 	sub rsp, 8*8
-	mov rbx, [newLastRegisteredRef.refRegistryAddr]
+	mov rbx, [refRegistryAddr]
 	add rbx, RefRegistry.list
 	mov rcx, [rbx]
 	call [resetIndex]
@@ -187,8 +189,8 @@ refRegistry.newLastRegisteredRef:
 
 
 	sub rsp, 8*8
-	mov rdx, [newLastRegisteredRef.ref]
-	mov rbx, [newLastRegisteredRef.refRegistryAddr]
+	mov rdx, [ref]
+	mov rbx, [refRegistryAddr]
 	add rbx, RefRegistry.list
 	mov rcx, [rbx]
 	call [newLastItem]
@@ -198,7 +200,7 @@ refRegistry.newLastRegisteredRef:
 
 
 
-	mov rax, 0;[newLastRegisteredRef.parsedLetters]
+	mov rax, 0;[parsedLetters]
 
 
 
@@ -217,31 +219,33 @@ refRegistry.newLastRegisteredRef:
 	pop rbp
 
 	retn 0
+end namespace
 
 
-refRegistry.newLastRegisteredDefinedRef:
+newLastRegisteredDefinedRef:
+namespace newLastRegisteredDefinedRef
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*9);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label newLastRegisteredDefinedRef.heapAddress qword at rbp-8  
-	label newLastRegisteredDefinedRef.handleAllocatedMemory qword at rbp-16
-	label newLastRegisteredDefinedRef.parsing qword at rbp-24 
-	label newLastRegisteredDefinedRef.matchIndex qword at rbp-32
-	label newLastRegisteredDefinedRef.matches qword at rbp-40
-	label newLastRegisteredDefinedRef.refRegistryAddr qword at rbp-48
-	label newLastRegisteredDefinedRef.newRef qword at rbp-56
-	label newLastRegisteredDefinedRef.ref qword at rbp-64
-	label newLastRegisteredDefinedRef.lettersIndex qword at rbp-72
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label parsing qword at rbp-24 
+	label matchIndex qword at rbp-32
+	label matches qword at rbp-40
+	label refRegistryAddr qword at rbp-48
+	label newRef qword at rbp-56
+	label ref qword at rbp-64
+	label lettersIndex qword at rbp-72
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [newLastRegisteredDefinedRef.refRegistryAddr], rcx
-	mov [newLastRegisteredDefinedRef.ref], rdx	
+	mov [refRegistryAddr], rcx
+	mov [ref], rdx	
 	
 	and rsp, -32
 	push rbx 
@@ -257,14 +261,14 @@ refRegistry.newLastRegisteredDefinedRef:
 
 
 	mov rcx, 0
-	;mov [newLastRegisteredDefinedRef.lettersIndex], rcx		; Begin as 0
+	;mov [lettersIndex], rcx		; Begin as 0
 
 
 	
 
 	sub rsp, 8*8
-	mov rdx, [newLastRegisteredDefinedRef.ref]
-	mov rbx, [newLastRegisteredDefinedRef.refRegistryAddr]
+	mov rdx, [ref]
+	mov rbx, [refRegistryAddr]
 	add rbx, RefRegistry.definedList
 	mov rcx, [rbx]
 	call [newLastItem]
@@ -274,7 +278,7 @@ refRegistry.newLastRegisteredDefinedRef:
 
 
 
-	mov rax, 0;[newLastRegisteredDefinedRef.parsedLetters]
+	mov rax, 0;[parsedLetters]
 
 
 
@@ -293,36 +297,38 @@ refRegistry.newLastRegisteredDefinedRef:
 	pop rbp
 
 	retn 0
+end namespace
 
 
 
 ; Existing Ref returned when exists, 0 when non-existent, 1 when defined match
 ; Takes Ref.ref not ref address as second param
-refRegistry.getRegisteredRef:
+getRegisteredRef:
+namespace getRegisteredRef
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*10);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label getRegisteredRef.heapAddress qword at rbp-8  
-	label getRegisteredRef.handleAllocatedMemory qword at rbp-16
-	label getRegisteredRef.list qword at rbp-24 
-	label getRegisteredRef.definedList qword at rbp-32
-	label getRegisteredRef.matches qword at rbp-40
-	label getRegisteredRef.refRegistryAddr qword at rbp-48
-	label getRegisteredRef.nextRef qword at rbp-56
-	label getRegisteredRef.ref qword at rbp-64
-	label getRegisteredRef.lettersIndex qword at rbp-72
-	label getRegisteredRef.repIndex qword at rbp-80
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label list qword at rbp-24 
+	label definedList qword at rbp-32
+	label matches qword at rbp-40
+	label refRegistryAddr qword at rbp-48
+	label nextRef qword at rbp-56
+	label ref qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label repIndex qword at rbp-80
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [getRegisteredRef.refRegistryAddr], rcx
-	mov [getRegisteredRef.ref], rdx	
-	mov [getRegisteredRef.repIndex], r8
+	mov [refRegistryAddr], rcx
+	mov [ref], rdx	
+	mov [repIndex], r8
 
 
 	and rsp, -32
@@ -339,42 +345,42 @@ refRegistry.getRegisteredRef:
 
 
 	mov rcx, 0
-	mov [getRegisteredRef.nextRef], rcx		; Begin as 0
+	mov [nextRef], rcx		; Begin as 0
 
 
-	mov rbx, [getRegisteredRef.refRegistryAddr]
+	mov rbx, [refRegistryAddr]
 	add rbx, RefRegistry.list
 	mov r8, [rbx]
-	mov [getRegisteredRef.list], r8
+	mov [list], r8
 
-	mov rbx, [getRegisteredRef.refRegistryAddr]
+	mov rbx, [refRegistryAddr]
 	add rbx, RefRegistry.definedList
 	mov r8, [rbx]
-	mov [getRegisteredRef.definedList], r8
+	mov [definedList], r8
 	
 	sub rsp, 8*8
-	mov rcx, [getRegisteredRef.list]
+	mov rcx, [list]
 	call [resetIndex]
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rcx, [getRegisteredRef.definedList]
+	mov rcx, [definedList]
 	call [resetIndex]
 	add rsp, 8*8
 
 
-	.nextItem:
-	mov rbx, [getRegisteredRef.list]
+	nextItem:
+	mov rbx, [list]
 	mov rdx, rbx
 	add rbx, List.index
 	add rdx, List.itemsCount
 	mov rcx, [rbx]
 	mov r8, [rdx]
 	cmp rcx, r8
-	jnl getRegisteredRef.endList
+	jnl endList
 
 	mov rcx, 0
-	mov [getRegisteredRef.nextRef], rcx		; Begin as 0
+	mov [nextRef], rcx		; Begin as 0
 
 
 	sub rsp, 8*8
@@ -383,64 +389,64 @@ refRegistry.getRegisteredRef:
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rcx, [getRegisteredRef.list]
+	mov rcx, [list]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [getRegisteredRef.nextRef], rax
+	mov [nextRef], rax
 
 	sub rsp, 8*8
-	mov rbx, [getRegisteredRef.nextRef]
+	mov rbx, [nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
 	add rsp, 8*8
 
 	sub rsp, 8*8
-	mov rdx, [getRegisteredRef.ref]
-	mov rbx, [getRegisteredRef.nextRef]
+	mov rdx, [ref]
+	mov rbx, [nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	call [lettersSameExact]
 	add rsp, 8*8
 	cmp rax, 0
-	je getRegisteredRef.nextItem
+	je nextItem
 
-	mov rax, [getRegisteredRef.nextRef]
+	mov rax, [nextRef]
 
 
-	mov rbx, [getRegisteredRef.nextRef]	
+	mov rbx, [nextRef]	
 	add rbx, Ref.flags
 	mov rdx, [rbx]
 	cmp rdx, 100b					;REF_DEFINED
-	jne getRegisteredRef.end			; Found, already exists
+	jne completed			; Found, already exists
 
 
-	mov rbx, [getRegisteredRef.nextRef]
+	mov rbx, [nextRef]
 	add rbx, Ref.repIndex
 	mov rdx, [rbx]
-	mov rcx, [getRegisteredRef.repIndex]
+	mov rcx, [repIndex]
 	cmp rcx, rdx
-	jne getRegisteredRef.nonExistentDefinedRef	; New defined ref
+	jne nonExistentDefinedRef	; New defined ref
 
 
-	jmp getRegisteredRef.end			; Found, already exists
+	jmp completed			; Found, already exists
 
 
 
-	.endList:
+	endList:
 
-	.nextDefinedItem:
-	mov rbx, [getRegisteredRef.definedList]
+	nextDefinedItem:
+	mov rbx, [definedList]
 	mov rdx, rbx
 	add rbx, List.index
 	add rdx, List.itemsCount
 	mov rcx, [rbx]
 	mov r8, [rdx]
 	cmp rcx, r8
-	jnl getRegisteredRef.end
+	jnl completed
 
 	mov rcx, 0
-	mov [getRegisteredRef.nextRef], rcx		; Begin as 0
+	mov [nextRef], rcx		; Begin as 0
 
 
 	sub rsp, 8*8
@@ -450,14 +456,14 @@ refRegistry.getRegisteredRef:
 
 
 	sub rsp, 8*8
-	mov rcx, [getRegisteredRef.definedList]
+	mov rcx, [definedList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [getRegisteredRef.nextRef], rax
+	mov [nextRef], rax
 
 
 	sub rsp, 8*8
-	mov rbx, [getRegisteredRef.nextRef]
+	mov rbx, [nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	;call [debugLettersMsg]
@@ -465,14 +471,14 @@ refRegistry.getRegisteredRef:
 
 
 	sub rsp, 8*8
-	mov rdx, [getRegisteredRef.ref]
-	mov rbx, [getRegisteredRef.nextRef]
+	mov rdx, [ref]
+	mov rbx, [nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	call [lettersSameExact]
 	add rsp, 8*8	
 	cmp rax, 0
-	je getRegisteredRef.nextDefinedItem
+	je nextDefinedItem
 
 
 
@@ -482,17 +488,17 @@ refRegistry.getRegisteredRef:
 
 	; return ref instead of 1?
 	; how are we determining processed versus not?
-	.nonExistentDefinedRef:
+	nonExistentDefinedRef:
 	mov rax, 1b
-	mov [getRegisteredRef.nextRef], rax			; 1 when defined
+	mov [nextRef], rax			; 1 when defined
 
 	
 
 
 
-	mov rax, [getRegisteredRef.nextRef]
+	mov rax, [nextRef]
 
-	.end:
+	completed:
 
 
 
@@ -511,34 +517,35 @@ refRegistry.getRegisteredRef:
 	pop rbp
 
 	retn 0
-
+end namespace
 
 ; used when we need the defined ref's flags
-refRegistry.getRegisteredDefinedRef:
+getRegisteredDefinedRef:
+namespace getRegisteredDefinedRef
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*10);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label getRegisteredDefinedRef.heapAddress qword at rbp-8  
-	label getRegisteredDefinedRef.handleAllocatedMemory qword at rbp-16
-	label getRegisteredDefinedRef.list qword at rbp-24 
-	label getRegisteredDefinedRef.definedList qword at rbp-32
-	label getRegisteredDefinedRef.matches qword at rbp-40
-	label getRegisteredDefinedRef.refRegistryAddr qword at rbp-48
-	label getRegisteredDefinedRef.nextRef qword at rbp-56
-	label getRegisteredDefinedRef.ref qword at rbp-64
-	label getRegisteredDefinedRef.lettersIndex qword at rbp-72
-	label getRegisteredDefinedRef.repIndex qword at rbp-80
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label list qword at rbp-24 
+	label definedList qword at rbp-32
+	label matches qword at rbp-40
+	label refRegistryAddr qword at rbp-48
+	label nextRef qword at rbp-56
+	label ref qword at rbp-64
+	label lettersIndex qword at rbp-72
+	label repIndex qword at rbp-80
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [getRegisteredDefinedRef.refRegistryAddr], rcx
-	mov [getRegisteredDefinedRef.ref], rdx	
-	mov [getRegisteredDefinedRef.repIndex], r8
+	mov [refRegistryAddr], rcx
+	mov [ref], rdx	
+	mov [repIndex], r8
 
 
 	and rsp, -32
@@ -555,62 +562,62 @@ refRegistry.getRegisteredDefinedRef:
 
 
 	mov rcx, 0
-	mov [getRegisteredDefinedRef.nextRef], rcx		; Begin as 0
+	mov [nextRef], rcx		; Begin as 0
 
 
 
-	mov rbx, [getRegisteredDefinedRef.refRegistryAddr]
+	mov rbx, [refRegistryAddr]
 	add rbx, RefRegistry.definedList
 	mov r8, [rbx]
-	mov [getRegisteredDefinedRef.definedList], r8
+	mov [definedList], r8
 
 	sub rsp, 8*8
-	mov rcx, [getRegisteredDefinedRef.definedList]
+	mov rcx, [definedList]
 	call [resetIndex]
 	add rsp, 8*8
 
 
 
 
-	.nextDefinedItem:
-	mov rbx, [getRegisteredDefinedRef.definedList]
+	nextDefinedItem:
+	mov rbx, [definedList]
 	mov rdx, rbx
 	add rbx, List.index
 	add rdx, List.itemsCount
 	mov rcx, [rbx]
 	mov r8, [rdx]
 	cmp rcx, r8
-	jnl getRegisteredDefinedRef.end
+	jnl completed
 
 	sub rsp, 8*8
-	mov rcx, [getRegisteredDefinedRef.definedList]
+	mov rcx, [definedList]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [getRegisteredDefinedRef.nextRef], rax
+	mov [nextRef], rax
 
 	sub rsp, 8*8
-	mov rdx, [getRegisteredDefinedRef.ref]
-	mov rbx, [getRegisteredDefinedRef.nextRef]
+	mov rdx, [ref]
+	mov rbx, [nextRef]
 	add rbx, Ref.ref
 	mov rcx, [rbx]
 	call [lettersSameExact]
 	add rsp, 8*8	
 	cmp rax, 0
-	je getRegisteredDefinedRef.nextDefinedItem
+	je nextDefinedItem
 
 
-	mov rax, [getRegisteredDefinedRef.nextRef]
-	mov [getRegisteredDefinedRef.nextRef], rax			; lettersSameExact returns 1 when defined
+	mov rax, [nextRef]
+	mov [nextRef], rax			; lettersSameExact returns 1 when defined
 
 	
 
 
 
 
-	;.end:
+	;.completed:
 
-	mov rax, [getRegisteredDefinedRef.nextRef]
-	.end:;dbg
+	mov rax, [nextRef]
+	completed:;dbg
 
 
 	add rsp, 8	
@@ -628,33 +635,33 @@ refRegistry.getRegisteredDefinedRef:
 	pop rbp
 
 	retn 0
+end namespace
 
 
-
-
-refRegistry.unprocessedRefsCount:
+unprocessedRefsCount:
+namespace unprocessedRefsCount
 	push rbp 
 	mov rbp, rsp 
 	sub rsp, (8*10);+(8*6)
 
 	;mov rcx, [rbp+8] 
 	;mov rdx, [rbp+12] 
-	label unprocessedRefsCount.heapAddress qword at rbp-8  
-	label unprocessedRefsCount.handleAllocatedMemory qword at rbp-16
-	label unprocessedRefsCount.list qword at rbp-24 
-	label unprocessedRefsCount.definedList qword at rbp-32
-	label unprocessedRefsCount.matches qword at rbp-40
-	label unprocessedRefsCount.refRegistryAddr qword at rbp-48
-	label unprocessedRefsCount.nextRef qword at rbp-56
-	label unprocessedRefsCount.ref qword at rbp-64
-	label unprocessedRefsCount.count qword at rbp-72
-	label unprocessedRefsCount.repIndex qword at rbp-80
+	label heapAddress qword at rbp-8  
+	label handleAllocatedMemory qword at rbp-16
+	label list qword at rbp-24 
+	label definedList qword at rbp-32
+	label matches qword at rbp-40
+	label refRegistryAddr qword at rbp-48
+	label nextRef qword at rbp-56
+	label ref qword at rbp-64
+	label count qword at rbp-72
+	label repIndex qword at rbp-80
 	;virtual at rbp-64
 	;	.list List
 	;end virtual	
 
 
-	mov [unprocessedRefsCount.refRegistryAddr], rcx
+	mov [refRegistryAddr], rcx
 
 	and rsp, -32
 	push rbx 
@@ -670,66 +677,66 @@ refRegistry.unprocessedRefsCount:
 
 
 	mov rcx, 0
-	mov [unprocessedRefsCount.count], rcx		; Begin as 0
+	mov [count], rcx		; Begin as 0
 
 
 
-	mov rbx, [unprocessedRefsCount.refRegistryAddr]
+	mov rbx, [refRegistryAddr]
 	add rbx, RefRegistry.list
 	mov r8, [rbx]
-	mov [unprocessedRefsCount.list], r8
+	mov [list], r8
 
 	sub rsp, 8*8
-	mov rcx, [unprocessedRefsCount.list]
+	mov rcx, [list]
 	call [resetIndex]
 	add rsp, 8*8
 
 
 
 
-	.nextItem:
-	mov rbx, [unprocessedRefsCount.list]
+	nextItem:
+	mov rbx, [list]
 	mov rdx, rbx
 	add rbx, List.index
 	add rdx, List.itemsCount
 	mov rcx, [rbx]
 	mov r8, [rdx]
 	cmp rcx, r8
-	jnl unprocessedRefsCount.endItems
+	jnl endItems
 
 	sub rsp, 8*8
-	mov rcx, [unprocessedRefsCount.list]
+	mov rcx, [list]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [unprocessedRefsCount.nextRef], rax
+	mov [nextRef], rax
 
 
-	mov r10, [unprocessedRefsCount.nextRef]
+	mov r10, [nextRef]
 	add r10, Ref.unprocessed
 	mov r11, [r10]
 	cmp r11, 0
-	jne unprocessedRefsCount.nextItem
+	jne nextItem
 	
-	mov rcx, [unprocessedRefsCount.count]
+	mov rcx, [count]
 	add rcx, 1b
-	mov [unprocessedRefsCount.count], rcx
+	mov [count], rcx
 
 
-	jmp unprocessedRefsCount.nextItem
+	jmp nextItem
 	
-	.endItems:
+	endItems:
 
 	sub rsp, 8*8
-	mov rcx, [unprocessedRefsCount.list]
+	mov rcx, [list]
 	call [resetIndex]
 	add rsp, 8*8
 
 
 
 
-	.end:
+	completed:
 
-	mov rax, [unprocessedRefsCount.count]
+	mov rax, [count]
 
 
 	add rsp, 8	
@@ -747,7 +754,7 @@ refRegistry.unprocessedRefsCount:
 	pop rbp
 
 	retn 0
-
+end namespace
 ;
 ;
 

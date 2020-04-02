@@ -9,14 +9,16 @@ EXPR_NUMBER = 30h
 EXPR_STRING = 22h
 EXPR_FLOAT = 2Eh
 
-EXPR_SYMBOL = 10h
-EXPR_OPERATOR = 11h
-EXPR_AREA_ADDRESS = 12h
+EXPR_SYMBOL_VALUE = 10h
+EXPR_AREA_ADDRESS = 11h
+EXPR_OPERATOR = 20h
+EXPR_SYMBOL = 40h
 
 EXPR_MISSING_ARGUMENT = 29h
 EXPR_MISSING_PARENTHESIS = 28h
 
 EXPRF_VALUE_IN_WORKSPACE = 100h
+EXPRF_CALM_LITERAL = 200h
 
 convert_number:
 ; in:
@@ -311,17 +313,16 @@ convert_number_back:
 ; note:
 ;  the number is treated as unsigned
 ;  returned string is in temporary storage and should be copied out of it immediately
-	mov	[divisor],10
 	mov	edi,[value_workspace.memory_start]
 	add	edi,[value_position]
 	mov	ecx,[edx]
-	inc	ecx
+	add	ecx,2
 	shl	ecx,2
 	mov	esi,edx
 	mov	edx,value_workspace
 	call	reserve_workspace
 	lodsd
-	lea	ebx,[edi+4+eax*4]
+	lea	ebx,[edi+4+(eax+1)*4]
 	mov	edx,edi
 	mov	ecx,eax
 	shr	ecx,2
@@ -331,8 +332,10 @@ convert_number_back:
 	rep	movsb
 	xchg	eax,ecx
 	stosd
+	jecxz	highest_dword_offset_ok
 	dec	ecx
 	and	ecx,not 11b
+    highest_dword_offset_ok:
 	mov	esi,edx
 	mov	edi,ebx
 	push	edi
@@ -340,7 +343,7 @@ convert_number_back:
 	xor	edx,edx
     divide_highest_dwords:
 	mov	eax,[esi+ecx]
-	div	[divisor]
+	call	div10
 	test	eax,eax
 	jnz	more_digits_to_come
 	sub	ecx,4
@@ -367,13 +370,39 @@ convert_number_back:
 	sub	ebx,4
 	jc	store_digit
 	mov	eax,[esi+ebx]
-	div	[divisor]
+	call	div10
 	jmp	divide_remaining_dwords
     store_digit:
 	add	dl,'0'
 	dec	edi
 	mov	[edi],dl
 	jmp	obtain_digit
+    div10:
+       ; cmp	 edx,10
+       ; jae	 internal_error
+	push	ebx ecx
+	push	eax
+	mov	ebx,eax
+	mov	ecx,edx
+	shld	edx,eax,2
+	sub	ebx,edx
+	sbb	ecx,0
+	mov	eax,ebx
+	mov	ebx,1999999Ah
+	mul	ebx
+	mov	eax,ecx
+	imul	eax,ebx
+	add	eax,edx
+	pop	edx
+	imul	ecx,eax,10
+	sub	edx,ecx
+	cmp	edx,10
+	jb	div10_done
+	sub	edx,10
+	inc	eax
+      div10_done:
+	pop	ecx ebx
+	retn
 
 fit_value:
 ; in:
@@ -578,6 +607,7 @@ get_numeric_constant_value:
 ; out:
 ;  esi = pointer advanced past the processed part of line
 ;  edx - 32-bit length followed by numeric data, null when expression gave no result
+;  edi - ExpressionTerm, null when expression gave no result
 	call	get_expression_value
 	jc	empty_numeric_constant
 	call	forbid_variable_terms
@@ -585,6 +615,7 @@ get_numeric_constant_value:
 	retn
     empty_numeric_constant:
 	xor	edx,edx
+	xor	edi,edi
 	retn
 
 get_expression_value:
@@ -613,14 +644,21 @@ convert_terms_to_numeric_value:
 ;  esi - value in VALTYPE_NUMERIC format
 ;  ecx = length of value
 ; note: the returned value is placed in assembly workspace
-	mov	ebx,edi
-	mov	edi,[assembly_workspace.memory_start]
-      copy_numeric_term_values:
-	xchg	ebx,edi
-	call	get_numeric_term_value
-	xchg	ebx,edi
-	mov	esi,edx
 	mov	edx,assembly_workspace
+    convert_terms_to_numeric_value_in_workspace:
+    ; in:
+    ;  edx - Workspace
+    ;  edi - list of ExpressionTerm elements as returned by get_expression_value
+    ; out:
+    ;  esi - value in VALTYPE_NUMERIC format (same [edx+Workspace.memory_start])
+    ;  ecx = length of value
+    ; preserves: edx
+	mov	ebx,[edx+Workspace.memory_start]
+      copy_numeric_term_values:
+	mov	esi,edx
+	call	get_numeric_term_value
+	xchg	esi,edx
+	xchg	ebx,edi
 	mov	ecx,[esi]
 	add	ecx,8
 	call	reserve_workspace
@@ -640,11 +678,12 @@ convert_terms_to_numeric_value:
 	test	eax,eax
 	jz	next_numeric_term
 	stosd
+	xchg	ebx,edi
 	jmp	copy_numeric_term_values
       numeric_term_values_copied:
 	xor	eax,eax
 	stosd
-	mov	esi,[assembly_workspace.memory_start]
+	mov	esi,[edx+Workspace.memory_start]
 	mov	ecx,edi
 	sub	ecx,esi
 	retn
@@ -697,6 +736,78 @@ update_predicted_shift:
 	sar	eax,8
 	retn
 
+get_area_value:
+; in:
+;  edi - command sequence created by parse_expression
+; out:
+;  cf set if expression does not yield a valid and accessible VALTYPE_AREA value
+;  when cf = 0:
+;   edx - ValueDefinition
+; preserves: esi
+	cmp	byte [edi],EXPR_SYMBOL_VALUE
+	jne	no_plain_area_symbol
+	cmp	dword [edi+3*4],0
+	jne	no_plain_area_symbol
+	mov	edx,[edi+2*4]
+	test	edx,edx
+	jz	no_plain_area_symbol
+	cmp	[edx+ValueDefinition.type],VALTYPE_AREA
+	jne	no_plain_area_symbol
+	mov	ebx,[edi+4]
+	call	mark_symbol_as_used
+	clc
+	retn
+      no_plain_area_symbol:
+	push	esi
+	mov	esi,edi
+	mov	edi,[calculation_workspace.memory_start]
+	call	calculate_parsed_expression
+	jc	invalid_area_expression
+	call	pop_terms
+	jc	invalid_area_expression
+	mov	eax,edi
+	xor	esi,esi
+      extract_variable_term:
+	add	eax,sizeof.ExpressionTerm
+	cmp	[eax+ExpressionTerm.attributes],0
+	je	variable_term_extracted
+	cmp	[eax+ExpressionTerm.metadata],0
+	je	extract_variable_term
+	test	esi,esi
+	jnz	invalid_area_expression
+	mov	esi,eax
+	jmp	extract_variable_term
+      variable_term_extracted:
+	test	esi,esi
+	jz	invalid_area_expression
+	call	get_term_value
+	xor	ecx,ecx
+	mov	edi,ecx
+	call	fit_value
+	jc	invalid_area_expression
+	mov	edi,esi
+	call	get_term_value
+	mov	ecx,1
+	mov	edi,value
+	call	fit_value
+	jc	invalid_area_expression
+	cmp	byte [value],1
+	jne	invalid_area_expression
+	mov	ebx,[esi+ExpressionTerm.metadata]
+	mov	edx,[ebx+SymbolTree_Leaf.definition]
+	test	edx,edx
+	jz	invalid_area_expression
+	cmp	[edx+ValueDefinition.type],VALTYPE_AREA
+	jne	invalid_area_expression
+	pop	esi
+	clc
+	retn
+      invalid_area_expression:
+	pop	esi
+      invalid_area_symbol:
+	stc
+	retn
+
 get_constituent_value:
 ; same as get_processed_value
 ; note: after any expression evaluation functions have been used, only this function should be used to retrieve constituents of line
@@ -739,7 +850,6 @@ parse_expression:
 ;  esi = pointer advanced past the processed part of line
 ;  edi = pointer advanced past the created sequence in expression workspace
 ;  ecx = number of parentheses opened in the beginning of expression that did not get closed (zero when [leave_opening_parentheses] was zero)
-;  [expression_position] = offset of parsed expression within expression workspace
 	mov	[expression_end],edi
 	sub	edi,[expression_workspace.memory_start]
 	mov	[expression_position],edi
@@ -751,7 +861,7 @@ parse_expression:
 	mov	edi,[expression_end]
 	mov	edx,expression_workspace
 	mov	ecx,[operator_stack_position]
-	sub	ecx,[operator_stack]
+	sub	ecx,[operator_stack_base]
 	add	ecx,16
 	call	reserve_workspace
 	mov	[expression_end],edi
@@ -799,7 +909,7 @@ parse_expression:
     store_expression_symbol:
 	cmp	[operator_argument_expected],0
 	je	terminate_expression
-	mov	eax,EXPR_SYMBOL
+	mov	eax,EXPR_SYMBOL_VALUE
 	stosd
 	mov	eax,ebx
 	stosd
@@ -992,6 +1102,9 @@ calculate_parsed_expression:
 ;  esi = pointer moved past the processed sequence
 ;  edi - top of the updated stack
 	mov	[expression_end],esi
+	mov	eax,edi
+	sub	eax,[calculation_workspace.memory_start]
+	mov	[calculation_position],eax
 	cmp	dword [esi],0
 	je	invalid_expression
     calculation_loop:
@@ -1005,8 +1118,10 @@ calculate_parsed_expression:
 	je	push_literal
 	cmp	al,EXPR_FLOAT
 	je	push_literal
+	cmp	al,EXPR_SYMBOL_VALUE
+	je	push_symbol_value
 	cmp	al,EXPR_SYMBOL
-	je	push_symbol
+	je	push_symbol_current_value
 	cmp	al,EXPR_AREA_ADDRESS
 	je	push_area_address
 	test	eax,eax
@@ -1023,10 +1138,15 @@ calculate_parsed_expression:
 	mov	ecx,2*sizeof.ExpressionTerm
 	call	reserve_workspace
 	lodsd
+	test	ebx,EXPRF_CALM_LITERAL
+	jnz	calm_literal_value
 	test	ebx,EXPRF_VALUE_IN_WORKSPACE
 	jnz	valid_literal_value
 	test	eax,eax
-	jz	invalid_number_in_expression
+	jnz	valid_literal_value
+	jmp	invalid_number_in_expression
+    calm_literal_value:
+	add	eax,[calm_literals]
     valid_literal_value:
 	mov	[edi+ExpressionTerm.attributes],ebx
 	mov	[edi+ExpressionTerm.value],eax
@@ -1036,7 +1156,43 @@ calculate_parsed_expression:
 	add	edi,2*sizeof.ExpressionTerm
 	mov	[expression_end],esi
 	jmp	calculation_loop
-    push_symbol:
+    push_symbol_current_value:
+    ; occurring only in CALM expressions, entire expression workspace should be free to use
+	lodsd
+	test	eax,eax
+	jz	invalid_identifier_in_expression
+	mov	ebx,eax
+	mov	[expression_end],esi
+	call	use_available_value
+	jc	undefined_symbol_in_expression
+	mov	al,[edx+ValueDefinition.type]
+	cmp	al,VALTYPE_SYMBOLIC
+	jne	identify_value_to_push
+	push	esi edi
+	call	clear_line_embeddings
+	and	[embedded_context],0
+	xor	esi,esi
+	xor	ecx,ecx
+	call	embed_symbolic_value
+	mov	edi,[expression_workspace.memory_start]
+	and	[leave_opening_parentheses],0
+	call	parse_expression
+	pop	edi
+	call	get_constituent_value
+	jnc	invalid_subexpression
+	mov	esi,[expression_workspace.memory_start]
+	push	[calculation_position]
+	call	calculate_parsed_expression
+	pop	[calculation_position]
+	jc	invalid_subexpression
+	pop	[expression_end]
+	jmp	calculation_loop
+    invalid_subexpression:
+	pop	[expression_end]
+	mov	edx,_invalid_expression
+	call	register_error
+	jmp	unknown_result
+    push_symbol_value:
 	lodsd
 	test	eax,eax
 	jz	invalid_identifier_in_expression
@@ -1048,9 +1204,12 @@ calculate_parsed_expression:
 	test	edx,edx
 	jz	undefined_symbol_in_expression
 	mov	al,[edx+ValueDefinition.type]
+    identify_value_to_push:
 	cmp	al,VALTYPE_NUMERIC
 	je	push_numeric_symbol
 	cmp	al,VALTYPE_ELEMENT
+	je	push_element
+	cmp	al,VALTYPE_AREA
 	je	push_element
 	cmp	al,VALTYPE_STRING
 	je	push_string
@@ -1192,9 +1351,10 @@ calculate_parsed_expression:
 	jmp	area_address_value
     base_address_value:
 	mov	eax,[current_area]
-      area_address_value:
+    area_address_value:
 	mov	ebx,[eax+ValueDefinition.value]
 	add	ebx,sizeof.AreaHeader
+    push_numeric_value:
 	mov	edx,calculation_workspace
 	mov	ecx,sizeof.ExpressionTerm
 	call	reserve_workspace
@@ -1216,7 +1376,7 @@ calculate_parsed_expression:
 	mov	ecx,[eax+ValueDefinition.value_length]
 	sub	ecx,[ebx+AreaHeader.base_address_length]
 	sub	ecx,sizeof.AreaHeader
-	and	esi,[ebx+AreaHeader.uninitialized_data_length]
+	and	esi,[ebx+AreaHeader.uninitialized_length]
 	add	ecx,esi
 	add	ebx,sizeof.AreaHeader
 	mov	esi,temporary_value
@@ -1269,9 +1429,7 @@ calculate_parsed_expression:
 	retn
     current_position_value:
 	call	prepare_to_push_computed_value
-	call	get_output_length
-	add	eax,dword [uninitialized_data_length]
-	adc	edx,dword [uninitialized_data_length+4]
+	call	get_output_position
       push_output_position:
 	mov	edi,[value_workspace.memory_start]
 	add	edi,[value_position]
@@ -1323,6 +1481,15 @@ calculate_parsed_expression:
 	call	reserve_workspace
 	push	edi
 	call	get_file_source_entry
+	jmp	push_file_name_value
+    main_file_name_value:
+	mov	edx,calculation_workspace
+	mov	ecx,2*sizeof.ExpressionTerm
+	call	reserve_workspace
+	push	edi
+	mov	ebx,[source_context]
+	lea	ebx,[ebx+sizeof.SourceContext]
+      push_file_name_value:
 	mov	esi,[ebx+SourceEntry.name]
 	xor	ecx,ecx
 	cmp	[ebx+SourceEntry.type],SOURCE_FILE
@@ -1375,73 +1542,29 @@ calculate_parsed_expression:
 	call	register_error
 	stc
 	retn
+    undefined_symbol_in_expression:
+	cmp	[next_pass_needed],0
+	jne	unknown_result
+	mov	edx,_undefined_symbol
+	call	register_error_with_symbol_name
+	jmp	unknown_result
     invalid_identifier_in_expression:
 	mov	edx,_invalid_identifier
-	call	register_error
-	jmp	unknown_result
+	jmp	error_causing_unknown_result
     invalid_number_in_expression:
 	mov	edx,_invalid_number
-	call	register_error
-	jmp	unknown_result
+	jmp	error_causing_unknown_result
     invalid_symbol_in_expression:
 	mov	edx,_invalid_symbol
+    error_causing_unknown_result:
 	call	register_error
-	jmp	unknown_result
-    undefined_symbol_in_expression:
-	mov	ebx,[ebx+SymbolTree_Leaf.branch]
-	mov	esi,_undefined_symbol
-	push	edi
-	mov	edi,esi
-	xor	al,al
-	or	ecx,-1
-	repne	scasb
-	mov	[message_end],edi
-	mov	edx,value_workspace
-	mov	edi,[edx+Workspace.memory_start]
-	add	edi,[value_position]
-	mov	ecx,[message_end]
-	sub	ecx,esi
-	call	reserve_workspace
-	add	edi,4
-      format_symbol_error:
-	lodsb
-	test	al,al
-	jz	symbol_error_formatted
-	cmp	al,'%'
-	je	insert_symbol_name
-	stosb
-	jmp	format_symbol_error
-      insert_symbol_name:
-	mov	al,[ebx+SymbolTree_Foliage.name_kind]
-	cmp	al,NAME_ABSTRACT
-	je	format_symbol_error
-	cmp	al,NAME_SYNTHETIC
-	je	format_symbol_error
-	mov	ecx,[ebx+SymbolTree_Foliage.name_length]
-	add	ecx,[message_end]
-	sub	ecx,esi
-	call	reserve_workspace
-	mov	eax,esi
-	mov	esi,[ebx+SymbolTree_Foliage.name_data]
-	mov	ecx,[ebx+SymbolTree_Foliage.name_length]
-	rep	movsb
-	mov	esi,eax
-	cmp	[ebx+SymbolTree_Foliage.name_kind],NAME_CASEINSENSITIVE
-	jne	format_symbol_error
-	mov	al,'?'
-	stosb
-	jmp	format_symbol_error
-      symbol_error_formatted:
-	mov	edx,[edx+Workspace.memory_start]
-	add	edx,[value_position]
-	sub	edi,edx
-	sub	edi,4
-	mov	[edx],edi
-	call	register_volatile_error
-	pop	edi
     unknown_result:
-	call	pop_terms
-	jnc	unknown_result_terms_ready
+	mov	eax,edi
+	mov	edi,[calculation_position]
+	add	edi,[calculation_workspace.memory_start]
+	cmp	edi,eax
+	jb	unknown_result_terms_ready
+	mov	edi,eax
 	mov	edx,calculation_workspace
 	mov	ecx,2*sizeof.ExpressionTerm
 	call	reserve_workspace
@@ -1463,17 +1586,16 @@ calculate_parsed_expression:
 	je	skip_dword
 	cmp	al,EXPR_FLOAT
 	je	skip_dword
-	cmp	al,EXPR_SYMBOL
+	cmp	al,EXPR_SYMBOL_VALUE
 	je	skip_two_dwords
 	test	eax,eax
 	jnz	invalid_expression
        ; clc
 	retn
+    skip_two_dwords:
+	add	esi,4
     skip_dword:
 	add	esi,4
-	jmp	skip_expression
-    skip_two_dwords:
-	add	esi,8
 	jmp	skip_expression
 
 pop_terms:
@@ -1497,6 +1619,10 @@ pop_terms:
 	clc
 	retn
       nothing_to_pop:
+	and	[edi+ExpressionTerm.metadata],0
+	and	[edi+sizeof.ExpressionTerm+ExpressionTerm.attributes],0
+	mov	[edi+ExpressionTerm.attributes],EXPR_NUMBER
+	mov	[edi+ExpressionTerm.value],zero_value
 	stc
 	retn
 
@@ -2310,13 +2436,19 @@ extract_element:
       no_such_term:
 	stc
 	retn
+    replace_with_area_metadata:
+	mov	edx,area_metadata
+	mov	eax,EXPR_STRING
+	jmp	replace_with_simple_constant
     replace_with_constant_unit:
 	mov	edx,singular_value
-	jmp	replace_with_simple_constant
+	jmp	replace_with_simple_number
     replace_with_zero:
 	mov	edx,zero_value
+    replace_with_simple_number:
+	mov	eax,EXPR_NUMBER
     replace_with_simple_constant:
-	mov	[edi+ExpressionTerm.attributes],EXPR_NUMBER
+	mov	[edi+ExpressionTerm.attributes],eax
 	mov	[edi+ExpressionTerm.value],edx
 	xor	eax,eax
 	mov	[edi+ExpressionTerm.metadata],eax
@@ -2342,13 +2474,16 @@ extract_metadata_reverse:
 extract_metadata:
 	call	get_indexed_term
 	jc	replace_with_zero
-	mov	edx,[ebx+ExpressionTerm.metadata]
+	mov	ebx,[ebx+ExpressionTerm.metadata]
+	test	ebx,ebx
+	jz	replace_with_zero
+	test	ecx,ecx
+	jz	push_numeric_value
+	mov	edx,[ebx+SymbolTree_Leaf.definition]
 	test	edx,edx
 	jz	replace_with_zero
-	jecxz	replace_with_simple_constant
-	mov	edx,[edx+SymbolTree_Leaf.definition]
-	test	edx,edx
-	jz	replace_with_zero
+	cmp	[edx+ValueDefinition.type],VALTYPE_AREA
+	je	replace_with_area_metadata
 	cmp	[edx+ValueDefinition.type],VALTYPE_ELEMENT
 	jne	replace_with_zero
 	mov	ecx,[edx+ValueDefinition.value_length]
@@ -2357,10 +2492,10 @@ extract_metadata:
 
 extract_size:
 	call	pop_terms
-	mov	edx,[edi+ExpressionTerm.metadata]
-	test	edx,edx
+	mov	ebx,[edi+ExpressionTerm.metadata]
+	test	ebx,ebx
 	jz	replace_with_zero
-	jmp	replace_with_simple_constant
+	jmp	push_numeric_value
 
 get_term_value:
 ; in: edi - ExpressionTerm
@@ -4018,6 +4153,8 @@ reverse_term_value_bytes:
 	mov	[edi+ExpressionTerm.attributes],EXPR_STRING + EXPRF_VALUE_IN_WORKSPACE
 	mov	esi,[value_position]
 	mov	[edi+ExpressionTerm.value],esi
+	lea	eax,[esi+4+ebx]
+	mov	[value_position],eax
 	add	esi,[value_workspace.memory_start]
 	mov	[esi],ebx
 	xor	ecx,ecx

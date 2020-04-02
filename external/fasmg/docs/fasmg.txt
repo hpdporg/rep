@@ -10,36 +10,17 @@ encode instructions of any processor, however it has the ability to
 become an assembler for any CPU architecture. It has a macroinstruction
 language that is substantially improved compared to the one provided by
 flat assembler 1 and it allows to easily implement instruction encoders
-in form of customizable macroinstructions. This approach has a great
-flexibility at the cost of performance.
-  If it happened that very fast assembly comparable to flat assembler 1
-was required and the performance drawback of macroinstructions was not
-acceptable, it would be possible to address the issue by building
-a custom assembler based on this engine, and the complete source code
-is available to anyone who would like to try it. But the focus of this
-package is on the use of flat assembler g in its pure form.
+in form of customizable macroinstructions.
   The source code of this tool can be compiled with flat assembler 1,
 but it is also possible to use flat assembler g itself to compile it.
 The source contains clauses that include different header files depending
-on the assembler used. When flat assembler g compiles itself, it uses the
-macroinstructions that come with the supplied example programs, since they
-implement x86 instructions and formats with a syntax compatible with
-flat assembler 1.
-  The macroinstructions that process the syntax of x86 instructions are
-complex and take a long time to assemble, but incidentally the time it 
-takes for flat assembler g to compile itself on an ordinary modern machine
-is comparable to the time that an early version of flat assembler 1 needed
-to assemble itself a decade and a half earlier on a computer that was then
-similarly mediocre. This can be seen as an interesting demonstration of
-how the software may be getting slower at the same rate as the hardware
-becomes faster.
+on the assembler used. When flat assembler g compiles itself, it uses
+the provided set of headers that implement x86 instructions and formats
+with a syntax mostly compatible with flat assembler 1.
   The example programs for x86 architecture that come in this package are
-the selected samples that originally came with flat assembler 1, with an
-addition of the sets of the macroinstructions that implement instruction
-encoders and output formatters required to assemble them just like the
-original flat assembler did. While they are not complete, they are intended
-to encourage the creation of further sets of macroinstructions that would
-provide more instructions and output formats.
+the selected samples that originally came with flat assembler 1 and they
+use sets of headers that implement instruction encoders and output formatters
+required to assemble them just like the original flat assembler did.
   To demonstrate how the instruction sets of different architectures
 may be implemented, there are some example programs for the microcontrollers,
 8051 and AVR. They have been kept simple and therefore they do not provide
@@ -112,7 +93,7 @@ depends on the value of an address labeled as "start", and this
 in turn depends on the length of the output of all the instructions
 that precede it, including the said jump. This creates a loop of
 dependencies and the assembler needs to find a solution that
-fulfills all the contraints created by the source text. This would
+fulfills all the constraints created by the source text. This would
 not be possible if assembler was just an imperative interpreter.
 Its language is thus in some aspects declarative.
   Finding a solution for such circular dependencies may resemble
@@ -213,6 +194,33 @@ that can then be recognized and parsed:
         INC (HL)
         INC (IX+2)
 
+This approach has a trait that may not always be desirable:
+it allows to use an expression like "[:0:]" directly in an argument.
+But it is possible to prevent exploiting the syntax in such way
+by using a prefix in the "match" construction:
+
+        REG.A? equ [:111b:]
+        REG.B? equ [:000b:]
+        REG.C? equ [:001b:]
+        REG.D? equ [:010b:]
+        REG.E? equ [:011b:]
+        REG.H? equ [:100b:]
+        REG.L? equ [:101b:]
+
+        macro INC? argument
+                match [:r:], REG.argument
+                        db 100b + r shl 3
+                else match (=HL?), argument
+                        db 34h
+                else match (=IX?+d), argument
+                        db 0DDh,34h,d
+                else match (=IY?+d), argument
+                        db 0FDh,34h,d
+                else
+                        err "incorrect argument"
+                end match
+        end macro
+
   In case of an argument structured like "(IX+d)" it could sometimes
 be desired to allow other algebraically equivalent forms of the
 expression, like "(d+IX)" or "(c+IX+d)". Instead of parsing every
@@ -227,7 +235,7 @@ a variable term in a polynomial.
         element IY? 
 
         macro INC? argument
-                match [:r:], argument
+                match [:r:], REG.argument
                         db 100b + r shl 3
                 else match (a), argument
                         if a eq HL
@@ -258,11 +266,14 @@ may contain any text and when such value is placed into an expression,
 it may induce erratic behavior. For example if "INC (1|0)" was processed,
 it would turn the "a eq HL" expression into "1|0 eq HL" and this logical
 expression is correct and true even though the argument was malformed.
-To prevent this from happening, a local variable may be used as a proxy
-holding the value of an argument:
+Such unfortunate side-effect is a consequence of macroinstructions
+operating on a simple principle of text substitution (and the best way
+to avoid such problems is to use CALM instead). Here, to prevent it
+from happening, a local variable may be used as a proxy holding the value
+of an argument:
 
         macro INC? argument
-                match [:r:], argument
+                match [:r:], REG.argument
                         db 100b + r shl 3
                 else match (a), argument
                         local value
@@ -380,6 +391,7 @@ modifier to pass the complete contents of the arguments to "match":
 
 This approach also allows to handle other, more difficult cases, like when
 the arguments may contain commas or are delimited in different ways.
+
 
 
 How are the labels processed?
@@ -585,8 +597,109 @@ in its entirety somewhere in the output:
 The "load" reads the whole table into a single string, then "dw" writes it
 into output (padded to multiple of a word, but in this case the string never
 requires such padding).
+  For more complex types of relocations additional modifier may need to be
+employed. For example, if upper and lower portions of an address needed to be
+stored in separate places (for example across two instructions) and relocated
+separately, necessary modifiers could be implemented as follows:
+
+        element MOD.HIGH
+        element MOD.LOW
+
+        HIGH? equ MOD.HIGH +
+        LOW? equ MOD.LOW +
+
+        macro BYTE? value
+                if value relativeto MOD.HIGH + CODE
+                        ; register HIGH relocation
+                        db (value - MOD.HIGH - CODE) shr 8
+                else if value relativeto MOD.LOW + CODE
+                        ; register LOW relocation
+                        db (value - MOD.LOW - CODE) and 0FFh
+                else if value relativeto MOD.HIGH
+                        db (value - MOD.HIGH) shr 8
+                else if value relativeto MOD.LOW
+                        db (value - MOD.LOW) and 0FFh
+                else
+                        db value
+                end if
+        end macro 
+
+The commands that would register relocation have been omitted for clarity,
+in this case not only offset within code but some additional information would
+need to registered in appropriate structures. With such preparation, relocatable
+units in code might be generated like:
+
+        BYTE HIGH address
+        BYTE LOW address
+
+Such approach allows to easily enable syntax with modifiers in any instruction
+that internally uses "byte" macroinstruction when generating code.
 
  
+
+How can multiple sections of file be generated in parallel?
+
+This assembly engine has a single main output that has to be generated
+sequentially. This may seem problematic when the file needs to contains
+distinct sections for code and data, but the contents of these sections is
+to be collected from interleaved pieces that may be spread across multiple
+source files. However, there are some relatively simple methods that allow
+to do it, all based in one way or the other on forward-referencing capabilities
+of the assembler.
+  A natural approach is to define contents of auxiliary section in "virtual"
+block and copy it to appropriate position in the output with a single
+operation. When a "virtual" block is labeled, it can be re-opened multiple
+times to append more data to it.
+
+                include '8086.inc'
+                org     100h
+                jmp     CodeSection
+
+        DataSection:
+
+                virtual
+                        Data::
+                end virtual
+
+                postpone
+                        virtual Data
+                                load Data.OctetString : $ - $$ from $$
+                        end virtual
+                end postpone
+
+                db Data.OctetString
+
+        CodeSection:
+
+                virtual Data
+                        Hello db "Hello!",24h
+                end virtual
+
+                mov     ah,9
+                mov     dx,Hello
+                int     21h
+
+                virtual Data
+                        ExitCode db 37h
+                end virtual
+
+                mov     ah,4Ch
+                mov     al,[ExitCode]
+                int     21h
+
+This leads to a relatively simple syntax even without help of additional
+macros.
+  Another method could be to put the pieces of the section into macros and
+execute them all at the required position in source. A disadvantage of such
+approach is that tracing errors in definitions might become a bit cumbersome.
+  The techniques that allow to easily append to a section generated in
+parallel can also be very useful to generate data structures like relocation
+tables. Instead of "store" commands used earlier when demonstrating
+the concept, regular data directives could be used inside a re-opened
+"virtual" block to create relocation records.
+
+
+
 What options are there to parse other kinds of syntax?
 
 In some cases a command that assembler needs to parse may begin with
@@ -615,7 +728,7 @@ The lines that contain either ".CODE" or ".DATA" text are processed here
 in such a way, that they invoke the global macroinstruction with
 corresponding name, while all other intercepted lines are executed without
 changes. This method allows to filter out any special syntax and let
-the assembler process the regular instructions as usual. 
+the assembler process the regular instructions as usual.
   Sometimes unconventional syntax is expected only in a specific area
 of source text, like inside a block with defined boundaries. The
 parsing macroinstruction should then be applied only in this place,
@@ -652,3 +765,338 @@ directives controlling the flow of the assembly, like "if" or "repeat", and
 they can still be used freely inside such a block. This would change if
 the declaration was in the form "macro ?! line&". Such a variant would
 intercept every line with no exception.
+  Another option to catch special commands might be to use "struc ?"
+to intercept only lines that do not start with a known instruction 
+(the initial symbol is then treated as label). Since this one only tests
+unknown commands, it should cause less overhead on the assembly:
+
+        struc (head) ? tail&
+                match .=CODE?, head
+                        CODE tail
+                else
+                        head tail
+                end match
+        end struc
+
+  All these approaches hide a subtle trap. A label defined with ":" may be
+followed by another instruction in the same line. If that next instruction
+(which here becomes hidden in the "tail" parameter) is a control directive
+like "if", putting it inside the "else" clause is going to cause broken nesting
+of control blocks. A possible solution is to somehow invoke "tail" contents
+outside of "match" block. One way could be to call a special macro:
+
+        struc (head) ? tail&
+                local invoker
+                match .=CODE?, head
+                        macro invoker
+                                CODE tail
+                        end macro
+                else
+                        macro invoker
+                                head tail
+                        end macro
+                end match
+                invoker
+        end struc
+
+A simpler option is to call the original line directly and when override
+is needed, cause it to be ignored with help of another line interceptor
+(disposing of itself immediately after):
+
+        struc (head) ? tail&
+                match .=CODE?, head
+                        CODE tail
+                        macro ? line&
+                                purge ?
+                        end macro
+                end match
+                head tail
+        end struc
+
+However, a much better way of avoiding this kinds of pitfalls is to use
+CALM instructions instead of standard macros. There it is possible to
+process arguments and assemble the original or modified line without
+use of any control directives. CALM instructions also offer a much better
+performance, which might be especially important in case of interceptors
+that get called for nearly every line in source text.
+
+
+
+How to define an instruction sharing a name with one of the core directives?
+
+  It may happen that a language can be in general easily implemented with
+macros, but it needs to include a command with the same name as one of
+the directives of assembler. While it is possible to override any
+instruction with a macro, macros themself may require an access to
+the original directive. To allow the same name call a different instruction
+depending on the context, the implemented language may be interpreted
+within a namespace that contains overriding macro, while all the macros
+requiring access to original directive would have to temporarily switch
+to another namespace where it has not have been overridden. This would 
+require every such macro to pack its contents in a "namespace" block.
+  But there is another trick, related to how texts of macro parameters
+or symbolic variables preserve the context under which the symbols within
+them should be interpreted (this includes the base namespace and
+the parent label for symbols starting with dot). 
+  Unlike the two mentioned occurences, the text of a macro normally does
+not carry such extra information, but if a macro is constructed in such way
+that it contains text that was once carried within a parameter to another
+macro or within a symbolic variable, then this text retains the information
+about context even when it becomes a part of a newly defined macro.
+For example:
+
+        macro definitions end?
+                namespace embedded
+                struc LABEL? size
+                        match , size
+                                .:
+                        else
+                                label . : size
+                        end match
+                end struc
+                macro E#ND? name
+                        end namespace
+                        match any, name
+                                ENTRYPOINT := name
+                        end match
+                        macro ?! line&
+                        end macro
+                end macro
+        end macro
+
+        definitions end
+
+        start LABEL
+        END start
+
+The parameter given to "definitions" macro may appear to do nothing, as it
+replaces every instance of "end" with exactly the same word - but the text
+that comes from the parameter is equipped with additional information about
+context, and this attribute is then preserved when the text becomes a part
+of a new macro. Thanks to that, macro "LABEL" can be used in a namespace
+where "end" instruction has taken a different meaning, but the instances
+of "end" within its body still refer to the symbol in the outer namespace.
+  In this example the parameter has been made case-insensitive, and thus
+it would replace even the "END" in "macro" statement that is supposed to
+define a symbol in "embedded" namespace. For this reason the identifier
+has been split with a concatenation operator to prevent it from being
+recognized as parameter. This would not be necessary if the parameter
+was case-sensitive (as more usual).
+  The same effect can be achieved through use of symbolic variables instead
+of macro parameters, with help of "match" to extract the text of a symbolic
+variable:
+
+        define link end
+        match end, link
+                namespace embedded
+                struc LABEL? size
+                        match , size
+                                .:
+                        else
+                                label . : size
+                        end match
+                end struc
+                macro END? name
+                        end namespace
+                        match any, name
+                                ENTRYPOINT := name
+                        end match
+                        macro ?! line&
+                        end macro
+                end macro
+        end match
+
+        start LABEL
+        END start
+
+This would not work without passing the text through symbolic variable,
+because parameters defined by control directives like "match" do not
+add context information to the text unless it was already there.
+  CALM instructions allow for another approach to this kind of problems.
+If a customized instruction set is defined entirely in form of CALM,
+they may not even need an access to original control directives.
+However, if CALM instruction needs to assemble a directive that might not
+be accessible, the symbolic variable passed to "assemble" should be
+defined with appropriate context for the instruction symbol.
+
+
+
+How to convert a macroinstruction to CALM?
+
+A classic macroinstruction consists of lines of text that are preprocessed
+(by replacing names of parameters with their corresponding values) every time
+the instruction is called and these preprocessed lines are passed to assembly.
+For example this macroinstruction generates just a single line to be assembled,
+and it does it by replacing "number" with the text given by the only argument
+to the instruction:
+
+        macro octet value*
+                db value
+        end macro
+
+A CALM instruction can be viewed as customized preprocessor, which needs to
+be written in a special language. It is able to use various commands to
+process the arguments and generate lines to be assembled. On the basic
+level, it is also able to simulate what standard preprocessor does - with
+help of "arrange" command. After preprocessing the line, it also needs to
+explicitly pass it to the assembly with an "assemble" command:
+
+        calminstruction octet value*
+                arrange value, =db value
+                assemble value
+        end calminstruction
+
+This gives the same result as the original macroinstruction, as it performs
+the same kind of preprocessing. However, unlike the text of macroinstruction
+a pattern given to "arrange" needs to explicitly state which name tokens are
+to be replaced with their values and which ones (prepended with "=") should
+be left untouched. The tokens that are copied from the pattern are stripped of
+any context information, just like the text of macroinstruction is normally not
+carrying any (while the values that came from arguments retain the recognition
+context in which the instruction was started).
+  This is the most straightforward method of conversion and a simple sequence
+of "arrange" and "assemble" commands could be made to generate the same lines as
+by the original macroinstruction. But there is one exception - when a "local"
+command is executed by macroinstruction, it creates a preprocessed parameter
+with a special value that points to a symbol in the namespace unique to given
+instance of the instruction.
+
+        macro pointer
+                local next
+                dd next
+            next:
+        end macro
+
+In case of CALM there is no such namespace available, the local namespace of
+a CALM instruction is shared among all its instances. Therefore, if a new unique
+symbol is needed every time the instruction is called, it has to be constructed
+manually. An obvious method might be to append a unique number to the name:
+
+        global_uid = 0
+
+        calminstruction pointer
+                compute global_uid, global_uid + 1
+                local command
+                arrange command, =dd =next#global_uid
+                assemble command
+                arrange command, =next#global_uid:
+                assemble command
+        end calminstruction
+
+Here "arrange" is given a variable that has a numeric value and it has to
+replace it with a text. This works only when the value is a plan non-negative
+number, in such case "arrange" converts it to a text token that contains decimal
+representation of that number. The lines passed to assembly are therefore
+going to contains identifiers like "next#1".
+  While incrementation of the global counter could be done by preparing
+a standard assembly command like "global_uid = global_uid + 1" with "arrange"
+and passing it to assembly, "compute" command allows to do it directly in the
+CALM processor. Moreover, it is then not affected by anything that alters
+the context of assembly. If the instruction was defined as unconditional and
+used inside a skipped IF block, the "compute" would still perform its task,
+because execution of CALM commands is - just like standard preprocessing - done
+independently from the main flow of the assembly. Also, references to
+the "global_uid" always point to the same symbol - the one that was in scope
+when the CALM instruction was defined and compiled. Therefore incrementing
+the value with "compute" is more reliable and predictable.
+  In a similar manner, the assembly of line defining the label can be replaced
+with a "publish" command. Here the value of the label (which should be equal
+to the address after the line containing "dd" is assembled) needs to be computed
+first, because "publish" only performs the assignment of a value to the symbol:
+
+        global_uid = 0
+
+        calminstruction pointer
+                compute global_uid, global_uid + 1
+                local symbol, command
+                arrange symbol, =next#global_uid
+                arrange command, =dd symbol
+                assemble command
+                local address
+                compute address, $
+                publish symbol:, address
+        end calminstruction 
+
+Because the CALM instruction itself is conditional, the "publish" inside is
+effectively conditional, too. Therefore it works correctly as a replacement
+for the assembly of line with a label.
+  While a global counter has several advantages, it can be interfered with,
+so sometimes use of a local counter might be preferable. However, the local
+namespace of CALM instruction is not normally not accessible from outside, so
+it is a bit harder to give an initial value to such counter. One way could be
+to check whether the counter has already been initialized with some value using
+"take" command:
+
+        calminstruction pointer
+                local id
+                take id, id
+                jyes increment
+                compute id, 0
+            increment:
+                compute id, id + 1
+                local symbol, command
+                arrange symbol, =next#id
+                arrange command, =dd symbol
+                assemble command
+                local address
+                compute address, $
+                publish symbol:, address
+        end calminstruction 
+
+But this adds commands that are executed every time the instruction is called.
+A better solution makes use of the ability to define custom instructions
+processed during the definition of CALM instruction:
+
+        calminstruction calminstruction?.init? var*, val:0
+                compute val, val
+                publish var, val
+        end calminstruction
+
+        calminstruction pointer
+                local id
+                init id, 0
+                compute id, id + 1
+                local symbol, command
+                arrange symbol, =next#id
+                arrange command, =dd symbol
+                assemble command
+                local address
+                compute address, $
+                publish symbol:, address
+        end calminstruction 
+
+The custom statement "init" is called at the time when the CALM instruction is
+defined (it does not generate any commands to be executed by the defined
+instruction - it would itself have to use "assemble" commands to generate
+statements to be compiled). It is given the name of variable from the local
+scope of the CALM instruction, and it uses "publish" to assign an initial
+numeric value to that variable.
+  To initialize local variable with a symbolic value, even simpler custom
+instruction would suffice:
+
+        calminstruction calminstruction?.initsym? var*, val&
+                publish var, val
+        end calminstruction
+
+The text of "val" argument carries the recognition context of the definition
+of CALM instruction that contains the "initsym" statement, therefore it allows
+to prepare a text for "assemble" containing references to local symbols:
+
+        calminstruction be32? value
+                local command
+                initsym command, dd value
+                compute value, value bswap 4
+                assemble command
+        end calminstruction 
+
+Again, after this intruction is compiled, it contains just two actual commands,
+"compute" and "assemble", and the value of local symbol "command" is a text
+that is interpreted in the same local context and refers to the same symbol
+"value" as the "compute" does.
+  This example also demonstrates another advantage of CALM over standard
+macroinstructions: its strict semantics prevent various kinds of unwanted
+behavior that is allowed by a simple substitution of text. The text of "value"
+is going to be evaluated by "compute" as a numeric sub-expression, signalling
+an error on any unexpected syntax. Therefore it should be favorable to process
+arguments entirely through CALM commands and only use "assemble" for final
+simple statements.

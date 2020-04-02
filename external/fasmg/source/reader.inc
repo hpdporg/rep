@@ -44,7 +44,6 @@ read_source:
 	inc	ecx
 	mov	[source_text_length],ecx
 	call	malloc
-	jc	error_reading_file
 	mov	[source_text],eax
 	mov	edx,eax
 	mov	ecx,[source_text_length]
@@ -119,9 +118,8 @@ tokenize_source:
 ;  [tokenization_buffer_length] = length of tokenized source
 	mov	ecx,[source_text_length]
 	shl	ecx,1
-	add	ecx,14
+	add	ecx,18
 	call	malloc_growable
-	jc	out_of_memory
 	mov	[tokenization_buffer],eax
 	mov	[tokenization_buffer_length],ecx
 	add	eax,ecx
@@ -135,7 +133,7 @@ tokenize_source:
 	mov	eax,[buffer_end_offset]
 	add	eax,esi
 	sub	eax,edi
-	cmp	eax,14
+	cmp	eax,18
 	jae	tokenization_buffer_reserve_ok
 	mov	ecx,esi
 	sub	ecx,[source_text]
@@ -143,10 +141,9 @@ tokenize_source:
 	mul	[tokenization_buffer_length]
 	div	ecx
 	mov	ecx,eax
-	add	ecx,14
+	add	ecx,18
 	mov	eax,[tokenization_buffer]
 	call	realloc
-	jc	out_of_memory
 	sub	edi,[tokenization_buffer]
 	add	edi,eax
 	mov	[tokenization_buffer],eax
@@ -230,7 +227,9 @@ tokenize_source:
 	add	edi,ebx
 	mov	[edi],ecx
 	mov	[edi+4],edx
-	add	edi,8
+	xor	ecx,ecx
+	mov	[edi+8],ecx
+	add	edi,12
 	cmp	ah,20h
 	jne	character_token
     control_character:
@@ -248,26 +247,12 @@ tokenize_source:
 	je	cr
 	cmp	al,0Ah
 	je	lf
-	cmp	al,3Bh
-	jne	end_of_file
-    skip_comment:
-	lodsb
-	cmp	al,0Dh
-	je	cr
-	cmp	al,0Ah
-	je	lf
-	cmp	al,1Ah
-	je	end_of_file
-	test	al,al
-	jnz	skip_comment
-    end_of_file:
 	xor	al,al
 	stosb
 	mov	ecx,edi
 	mov	eax,[tokenization_buffer]
 	sub	ecx,eax
 	call	realloc
-	jc	out_of_memory
 	mov	[tokenization_buffer],eax
 	mov	[tokenization_buffer_length],ecx
 	retn
@@ -311,7 +296,6 @@ get_file_data:
 	push	edi
 	mov	ecx,sizeof.FileData
 	call	malloc_fixed
-	jc	out_of_memory
 	mov	edi,eax
 	xor	eax,eax
 	mov	edx,eax
@@ -430,7 +414,6 @@ read_file_data:
 	push	ecx
 	add	ecx,sizeof.FileCache
 	call	malloc_fixed
-	jc	out_of_memory
 	mov	ebx,eax
 	mov	eax,[file_cache_pointer]
 	mov	edx,ebx
