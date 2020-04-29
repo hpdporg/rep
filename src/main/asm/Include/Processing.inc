@@ -1,1 +1,8 @@
 include '../Processing/Processing.inc'
+include '../Processing/ProcessDefinedRefs.inc'
+include '../Processing/ProcessDefinedRefs/ProcessReplaceLettersList.inc'
+include '../Processing/ProcessDefinedRefs/ProcessStoreFile.inc'
+include '../Processing/ProcessDefinedRefs/ProcessRestoreFile.inc'
+include '../Processing/ProcessDefinedRefs/ProcessRetrieveFile.inc'
+include '../Processing/ProcessRefItem.inc'
+include '../Processing/ProcessItem.inc'

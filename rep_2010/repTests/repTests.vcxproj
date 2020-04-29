@@ -101,7 +101,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\external\googletest_2010\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\external\googletest_2010\include;$(SolutionDir)..\external\datap_2010\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -118,9 +118,10 @@
     <ClCompile Include="..\..\src\test\cpp\ParsingRepFromFileTest.cpp" />
     <ClCompile Include="..\..\src\test\cpp\ParsingRepFromFileTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\ParsingTests.cpp" />
-    <ClCompile Include="..\..\src\test\cpp\ProcessingDefinedRefTests.cpp" />
-    <ClCompile Include="..\..\src\test\cpp\ProcessingRefValueTests.cpp" />
-    <ClCompile Include="..\..\src\test\cpp\ProcessingTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\Processing\ProcessingDefinedRefTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\Processing\ProcessingProcessItemTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\Processing\ProcessingRefValueTests.cpp" />
+    <ClCompile Include="..\..\src\test\cpp\Processing\ProcessingTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RefTests.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RunCyclesParsingProcessingTest.cpp" />
     <ClCompile Include="..\..\src\test\cpp\RunCyclesParsingProcessingTests.cpp" />
@@ -128,13 +129,14 @@
     <ClCompile Include="..\..\src\test\cpp\RunCyclesTests.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\test\cpp\AsmIncludes.h" />
     <ClInclude Include="..\..\src\test\cpp\ParsingRepFromFileTests.h" />
     <ClInclude Include="..\..\src\test\cpp\ParsingTests.h" />
-    <ClInclude Include="..\..\src\test\cpp\ProcessingDefinedRefTests.h" />
-    <ClInclude Include="..\..\src\test\cpp\ProcessingRefValueTests.h" />
-    <ClInclude Include="..\..\src\test\cpp\ProcessingTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\Processing\ProcessingDefinedRefTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\Processing\ProcessingProcessItemTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\Processing\ProcessingRefValueTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\Processing\ProcessingTests.h" />
     <ClInclude Include="..\..\src\test\cpp\RefTests.h" />
+    <ClInclude Include="..\..\src\test\cpp\Rep.h" />
     <ClInclude Include="..\..\src\test\cpp\RunCyclesTests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
