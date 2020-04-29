@@ -30,19 +30,10 @@
     <ClCompile Include="..\..\src\test\cpp\RefTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\test\cpp\ProcessingTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\test\cpp\ParsingRepFromFileTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\test\cpp\ParsingRepFromFileTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\test\cpp\ProcessingRefValueTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\test\cpp\ProcessingDefinedRefTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\test\cpp\RunCyclesParsingProcessingTests.cpp">
@@ -51,11 +42,20 @@
     <ClCompile Include="..\..\src\test\cpp\RunCyclesParsingProcessingTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\test\cpp\Processing\ProcessingDefinedRefTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\test\cpp\Processing\ProcessingProcessItemTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\test\cpp\Processing\ProcessingRefValueTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\test\cpp\Processing\ProcessingTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\test\cpp\AsmIncludes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\test\cpp\ParsingTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -65,16 +65,22 @@
     <ClInclude Include="..\..\src\test\cpp\RefTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test\cpp\ProcessingTests.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\test\cpp\ParsingRepFromFileTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test\cpp\ProcessingRefValueTests.h">
+    <ClInclude Include="..\..\src\test\cpp\Processing\ProcessingProcessItemTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\test\cpp\ProcessingDefinedRefTests.h">
+    <ClInclude Include="..\..\src\test\cpp\Processing\ProcessingRefValueTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\test\cpp\Processing\ProcessingTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\test\cpp\Processing\ProcessingDefinedRefTests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\test\cpp\Rep.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

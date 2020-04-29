@@ -698,83 +698,14 @@ namespace loadRefRegistry
 	mov [refRegistryAddr], rdx
 	
 
-	sub rsp, 8*8
-	call ref.new
-	add rsp, 8*8
-	mov [newRef], rax
-
-	mov rbx, [newRef]
-	add rbx, Ref.ref
-	mov r9, storeFileDefinedRefLetters		; Ref ref
-	mov [rbx], r9
-
-	mov rbx, [newRef]
-	add rbx, Ref.paramCount				; Param count
-	mov r9, 10b
-	mov [rbx], r9
-
-	mov rbx, [newRef]
-	add rbx, Ref.definedRefFlags			; definedRefFlags
-	mov r9, 1b								; DEFINED_REF_STORE_FILE
-	mov [rbx], r9
 
 	sub rsp, 8*8
-	mov rdx, [newRef]
 	mov rcx, [refRegistryAddr]
-	call refRegistry.newLastRegisteredDefinedRef
+	call processing.loadProcItemDefinedRefs
 	add rsp, 8*8
 
-	sub rsp, 8*8
-	call ref.new
-	add rsp, 8*8
-	mov [newRef], rax
 
-	mov rbx, [newRef]
-	add rbx, Ref.ref
-	mov r9, restoreFileDefinedRefLetters		; Ref ref
-	mov [rbx], r9
 
-	mov rbx, [newRef]
-	add rbx, Ref.paramCount				; Param count
-	mov r9, 10b
-	mov [rbx], r9
-
-	mov rbx, [newRef]
-	add rbx, Ref.definedRefFlags			; definedRefFlags
-	mov r9, 100000b							; DEFINED_REF_RESTORE_FILE
-	mov [rbx], r9
-
-	sub rsp, 8*8
-	mov rdx, [newRef]
-	mov rcx, [refRegistryAddr]
-	call refRegistry.newLastRegisteredDefinedRef
-	add rsp, 8*8
-
-	sub rsp, 8*8
-	call ref.new
-	add rsp, 8*8
-	mov [newRef], rax
-
-	mov rbx, [newRef]
-	add rbx, Ref.ref
-	mov r9, retrieveFileDefinedRefLetters		; Ref ref
-	mov [rbx], r9
-
-	mov rbx, [newRef]
-	add rbx, Ref.paramCount				; Param count
-	mov r9, 10b							; DEFINED_REF_RETRIEVE_FILE
-	mov [rbx], r9
-
-	mov rbx, [newRef]
-	add rbx, Ref.definedRefFlags			; definedRefFlags
-	mov r9, 10b
-	mov [rbx], r9
-
-	sub rsp, 8*8
-	mov rdx, [newRef]
-	mov rcx, [refRegistryAddr]
-	call refRegistry.newLastRegisteredDefinedRef
-	add rsp, 8*8
 
 	sub rsp, 8*8
 	call ref.new
@@ -828,31 +759,6 @@ namespace loadRefRegistry
 	call refRegistry.newLastRegisteredDefinedRef
 	add rsp, 8*8
 
-	sub rsp, 8*8
-	call ref.new
-	add rsp, 8*8
-	mov [newRef], rax
-
-	mov rbx, [newRef]
-	add rbx, Ref.ref
-	mov r9, replaceLettersListDefinedRefLetters	; Ref ref
-	mov [rbx], r9
-
-	mov rbx, [newRef]
-	add rbx, Ref.paramCount				; Param count
-	mov r9, 11b
-	mov [rbx], r9
-
-	mov rbx, [newRef]
-	add rbx, Ref.definedRefFlags			; definedRefFlags
-	mov r9, 1000b
-	mov [rbx], r9
-
-	sub rsp, 8*8
-	mov rdx, [newRef]
-	mov rcx, [refRegistryAddr]
-	call refRegistry.newLastRegisteredDefinedRef
-	add rsp, 8*8
 
 	sub rsp, 8*8
 	call ref.new
