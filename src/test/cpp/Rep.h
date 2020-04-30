@@ -31,8 +31,12 @@ typedef enum DefinedRefFlags {
 	DEFINED_REF_RETRIEVE_FILE = 2,
 	DEFINED_REF_LETTERS = 4,
 	DEFINED_REF_REPLACE_LETTERS_LIST = 8,
-	DEFINED_REF_SEPARATOR = 16
+	DEFINED_REF_SEPARATOR = 16,
+	DEFINED_REF_RETRIEVE_FILE_FLOW = 32,
+	DEFINED_REF_STORE_FILE_LIST = 64
 } DefinedRefFlags;
+
+
 
 typedef struct Ref{
 	char* ref;
@@ -44,6 +48,7 @@ typedef struct Ref{
 	List* listAlloc;
 	_int64 definedRefFlags;
 	List* list;
+	Flow* flowAlloc;
 } Ref;
 
 typedef struct ProcessItem {
