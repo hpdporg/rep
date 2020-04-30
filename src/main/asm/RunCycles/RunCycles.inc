@@ -39,6 +39,9 @@ section '.data' data readable writeable align 16
 	lettersDefinedRefLetters db 'letters',0
 	lettersSpaceDefinedRefLetters db ' ',0				; Shorthand when defining letters, just ' ' space token
 	replaceLettersListDefinedRefLetters db 'replaceLettersList',0
+	retrieveFileFlowRefLetters db 'retrieveFileFlow',0
+	storeFileListRefLetters db 'storeFileList',0
+	replaceLettersFlowDefinedRefLetters db 'replaceLettersFlow',0
 	separatorDefinedRefLetters db 'separator',0
 
 

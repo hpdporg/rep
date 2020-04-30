@@ -15,6 +15,7 @@ section '.data' data readable writeable align 16
 		.listAlloc dq 0		; List alloc. Used by Lists
 		.definedRefFlags dq 0	; Defined Refs may use flags
 		.list dq 0		; Values, Refs list, Params
+		.flowAlloc dq 0		; Flow ref
 	end struc
 
 
@@ -49,7 +50,9 @@ section '.data' data readable writeable align 16
 	; DEFINED_REF_REPLACE_LETTERS_LIST	1000b			3	; 
 	; DEFINED_REF_SEPARATOR			10000b			4	; 
 	; DEFINED_REF_RESTORE_FILE		100000b			5	; 
-
+	; DEFINED_REF_RETRIEVE_FILE_FLOW	1000000b		6	; 
+	; DEFINED_REF_STORE_FILE_LIST		10000000b		7	; 
+	; DEFINED_REF_REPLACE_LETTERS_FLOW	100000000b		8	; 
 
 	
 
@@ -95,7 +98,7 @@ namespace new
 	
 
 	mov rcx, 0
-	add rcx, Ref.list
+	add rcx, Ref.flowAlloc
 	add rcx, 1000b
 
 	sub rsp, 8*4
@@ -145,6 +148,10 @@ namespace new
 	sub rsp, 8*8
 	call [newList]
 	add rsp, 8*8
+	mov [rbx], rax
+	mov rbx, [handleAllocatedMemory]
+	add rbx, Ref.flowAlloc
+	mov rax, 0
 	mov [rbx], rax
 	
 

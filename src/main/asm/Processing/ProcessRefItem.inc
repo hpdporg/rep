@@ -227,6 +227,30 @@ namespace processRefItem
 	call processReplaceLettersList			
 	add rsp, 8*8
 
+	sub rsp, 8*8
+	mov r9, [definedRefFlags]
+	mov r8, [refRegistryAddr]
+	mov rdx, [item]
+	mov rcx, [parsingAddr]
+	call processRetrieveFileFlow		
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov r9, [definedRefFlags]
+	mov r8, [refRegistryAddr]
+	mov rdx, [item]
+	mov rcx, [parsingAddr]
+	call processStoreFileList		
+	add rsp, 8*8
+
+	sub rsp, 8*8
+	mov r9, [definedRefFlags]
+	mov r8, [refRegistryAddr]
+	mov rdx, [item]
+	mov rcx, [parsingAddr]
+	call processReplaceLettersFlow		
+	add rsp, 8*8
+
 
 	sub rsp, 8*8
 	mov rcx, [item]
