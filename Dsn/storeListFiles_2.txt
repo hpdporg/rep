@@ -1,0 +1,21 @@
+
+
+
+
+
+
+appending	val1	REPLACE_BLOCK	val2
+
+
+
+
+replacelettersflow	blocksList
+
+
+storeListFiles	fileNames	list
+
+
+
+
+
+Eventually find way so REPLACE_BLOCK does not have to be written explicitly. This will allow out of order and duplicated replace_blocks

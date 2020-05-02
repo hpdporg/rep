@@ -19,7 +19,7 @@ TEST(ProcessingProcessItemTest, RetrievesProcessItemList) {
 		
 	}
 	
-	EXPECT_EQ(10, procList->itemsCount);
+	EXPECT_EQ(12, procList->itemsCount);
 
 
 
@@ -32,5 +32,5 @@ TEST(ProcessingProcessItemTest, RefsInRefRegistryFromProcessItems) {
 
 	loadProcItemDefinedRefs(refRegistry);
 	fprintf(stdout, "List item count %d\n", refRegistry->definedList->itemsCount);
-	EXPECT_EQ(7, refRegistry->definedList->itemsCount);
+	EXPECT_EQ(9, refRegistry->definedList->itemsCount);
 }
