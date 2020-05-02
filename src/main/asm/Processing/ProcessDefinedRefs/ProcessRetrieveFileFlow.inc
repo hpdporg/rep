@@ -188,7 +188,7 @@ namespace processRetrieveFileFlow
 	mov rdx, [nextRef]
 	add rdx, Ref.flags
 	mov r9, [rdx]
-	bts r9, 3		; REF_FLOW		1000b			3	; 
+	bts r9, 4		; REF_FLOW		10000b			4	; 
 	mov [rdx], r9
 
 

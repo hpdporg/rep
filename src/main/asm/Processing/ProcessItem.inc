@@ -28,9 +28,11 @@ section '.data' data readable writeable align 16
 	dq restoreFileDefinedRefLetters,100b,100000b,10b,10b,10b
 	dq retrieveFileDefinedRefLetters,100b,10b,10b,10b,1b
 	dq replaceLettersListDefinedRefLetters,100b,1000b,11b,1b,100b
-	dq retrieveFileFlowRefLetters,100b,1000000b,11b,10b,11b
-	dq storeFileListRefLetters,100b,10000000b,10b,10b,10b
+	dq retrieveFileFlowDefinedRefLetters,100b,1000000b,11b,10b,11b
+	dq storeFileListDefinedRefLetters,100b,10000000b,10b,10b,10b
 	dq replaceLettersFlowDefinedRefLetters,100b,100000000b,11b,1b,100b
+	dq storeListFilesDefinedRefLetters,100b,1000000000b,10b,10b,10b
+	dq retrieveFileListDefinedRefLetters,100b,10000000000b,10b,10b,1b
 	; End defined refs
 	dq 0,1,100b,1b,1b,10b	; Letters
 	dq 0,1,0,1b,100b,1b	; Appending

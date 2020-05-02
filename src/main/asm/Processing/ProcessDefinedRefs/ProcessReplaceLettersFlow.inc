@@ -82,7 +82,7 @@ namespace processReplaceLettersFlow
 	mov rcx, [item]
 	call getUnprocessedRegisteredParams
 	add rsp, 8*8
-	cmp rax, 10b
+	cmp rax, 1
 	jnle completed				; Separator, replaceLettersList definedref can be unprocessed? This definedRef depends on param registeredRefs being processed, not just the param
 
 
@@ -124,13 +124,40 @@ namespace processReplaceLettersFlow
 	mov rcx, [list]
 	call [getNextItem]
 	add rsp, 8*8
-	mov [nextRef], rax	; letters
+	mov [nextRef], rax	; letters or list
+
+	mov rbx, [nextRef]
+	add rbx, Ref.flags
+	mov rdx, [rbx]
+	mov rcx, 10b					; REF_LIST
+	and rcx, rdx
+	cmp rcx, 10b
+	je listLetters
+
+
+
 
 	sub rsp, 8*8
 	mov rcx, [nextRef]
 	call getRefLettersAlloc
 	add rsp, 8*8
 	mov [param1], rax	; letters
+
+	jmp getFlowParam
+	listLetters:
+
+	mov r8, [nextRef]
+	add r8, Ref.valueAlloc
+	mov rcx, [r8]
+	sub rsp, 8*8
+	call [listAsLetters]
+	add rsp, 8*8
+	mov [param1], rax	; letters
+
+
+	getFlowParam:
+
+
 
 
 	sub rsp, 8*8

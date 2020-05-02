@@ -37,7 +37,7 @@ section '.data' data readable writeable align 16
 	; REF_LIST		10b			1	; 
 	; REF_DEFINED		100b			2	; 
 	; REF_FILTER		1000b			3	; 
-	; REF_FLOW		1000b			3	; 
+	; REF_FLOW		10000b			4	; 
 
 
 

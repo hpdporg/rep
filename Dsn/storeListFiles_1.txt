@@ -1,0 +1,23 @@
+files
+	blocksList1
+	blocksList2
+	blocksList3
+
+
+blocksList
+	block1
+	block2
+	block3
+
+
+block1
+	val1
+	flowval1
+	val2
+
+block2
+	flowval2
+
+block3
+	val3
+	flowval3
