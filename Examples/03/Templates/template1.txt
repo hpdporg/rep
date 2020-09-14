@@ -1,0 +1,6 @@
+Entry text========= REPLACE_BLOCK
+
+  Catalog entry REPLACE_BLOCK
+	This entry containsREPLACE_BLOCK
+
+-------------------------------------------------

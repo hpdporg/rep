@@ -1,0 +1,23 @@
+
+
+retrieveFile	templateFileName	templateText
+
+table1
+	col1	 	defaultVal4	
+	col2	 	defaultVal5	
+	col3	 	defaultVal6	
+
+comma	 	,	
+
+
+retrieveFileFlow	inputFileName	table1	comma
+
+
+replaceRef	 	REPLACE_BLOCK	
+
+
+generatedText	replaceLettersFlow	templateText	table1	REPLACE_BLOCK
+
+
+storeFileList	generatedFile	generatedText
+
